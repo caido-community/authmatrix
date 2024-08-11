@@ -4,5 +4,5 @@
     "lib": ["DOM", "ESNext"],
     "types": ["@caido/sdk-backend"]
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts", "./src/**/*.vue"]
 }

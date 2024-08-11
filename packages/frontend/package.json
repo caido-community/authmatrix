@@ -9,10 +9,12 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@caido/sdk-frontend": "0.39.0"
+    "@caido/sdk-frontend": "0.39.0",
+    "vue": "3.4.37"
   },
   "devDependencies": {
     "@caido/sdk-backend": "0.39.0",
+    "@vitejs/plugin-vue": "5.1.2",
     "starterkit-plugin-backend": "workspace:*"
   }
 }
