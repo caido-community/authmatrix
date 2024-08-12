@@ -2,11 +2,14 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["DOM", "ESNext"],
-    "types": ["@caido/sdk-backend"]
+    "types": ["@caido/sdk-backend"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["./src/**/*.ts", "./src/**/*.vue"],
   "vueCompilerOptions": {
     "plugins": ["@vue/language-plugin-pug"]
   }
-
 }

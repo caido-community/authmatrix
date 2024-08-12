@@ -20,6 +20,11 @@ export const init = (sdk: CaidoSDK) => {
   });
 
   const root = document.createElement("div");
+  Object.assign(root.style, {
+    height: "100%",
+    width: "100%",
+  });
+
   app.mount(root);
 
   sdk.navigation.addPage("/autorize", {
