@@ -11,7 +11,6 @@ type CaidoSDK = Caido<API>;
 export const init = (sdk: CaidoSDK) => {
 
   const app = createApp(App);
-
   const root = document.createElement("div");
   app.mount(root);
 
@@ -19,4 +18,3 @@ export const init = (sdk: CaidoSDK) => {
     body: root
   });
 }
-

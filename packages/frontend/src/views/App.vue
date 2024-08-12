@@ -11,8 +11,8 @@ onMounted(() => {
 
 </script>
 
-<template>
-  <div id="app">
-    <h1>Hello from VueJS {{ counter }}</h1>
-  </div>
+<template lang="pug">
+.autorize-app
+  h1 Hello, Vue 3!
+  p Counter: {{ counter }}
 </template>
