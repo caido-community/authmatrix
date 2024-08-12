@@ -6,11 +6,12 @@
   "license": "CC0-1.0",
   "type": "module",
   "scripts": {
+    "dev": "vite --config ./vite.dev.config.ts",
     "build": "vite build"
   },
   "dependencies": {
     "@caido/sdk-frontend": "0.39.0",
-    "primevue": "^4.0.4",
+    "primevue": "4.0.4",
     "vue": "3.4.37",
     "@caido/primevue": "link:../../../../Caido/ui-kit/packages/primevue"
   },
