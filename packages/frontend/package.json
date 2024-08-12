@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@caido/sdk-frontend": "0.39.0",
-    "vue": "3.4.37"
+    "primevue": "^4.0.4",
+    "vue": "3.4.37",
+    "@caido/primevue": "link:../../../../Caido/ui-kit/packages/primevue"
   },
   "devDependencies": {
     "@caido/sdk-backend": "0.39.0",
