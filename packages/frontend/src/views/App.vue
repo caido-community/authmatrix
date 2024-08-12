@@ -1,29 +1,35 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { ResultShow, ResultTable, UserList, UserShow, Navigation } from "@/components";
-import Splitter from 'primevue/splitter';
-import SplitterPanel from 'primevue/splitterpanel';
+import Dashboard from './Dashboard.vue';
+import Configuration from './Configuration.vue';
+import MenuBar from 'primevue/menubar';
 
-const counter = ref(0);
+const page = ref<"Dashboard" | "Configuration">("Dashboard");
+const items = [
+  {
+    label: "Dashboard",
+    command: () => page.value = "Dashboard"
+  },
+  {
+    label: "Configuration",
+    command: () => page.value = "Configuration"
+  },
+];
 
-onMounted(() => {
-  setInterval(() => {
-    counter.value += 1;
-  }, 1000);
+const component = computed(() => {
+  if (page.value === "Dashboard") {
+    return Dashboard;
+  } else {
+    return Configuration;
+  }
 });
-
 </script>
 
 <template lang="pug">
 .autorize-app
-  Navigation
-  Splitter(:style="{ height: '100%' }" layout="vertical")
-    SplitterPanel(:size="50" :style="{ overflow: 'auto' }")
-      ResultTable
-
-    SplitterPanel(:size="50" :style="{ overflow: 'auto' }")
-      ResultShow
-
+  MenuBar(:model="items")
+  component(:is="component")
 </template>
 
 <style>
@@ -32,6 +38,6 @@ onMounted(() => {
 
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 </style>

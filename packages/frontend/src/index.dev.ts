@@ -1,18 +1,4 @@
-import PrimeVue from "primevue/config";
-import { CaidoDark } from "@caido/primevue";
+import {defineApp} from "./app";
 
-import "./styles/style.css";
-import {createApp} from "vue";
-
-import App from "./views/App.vue";
-
-
-const app = createApp(App);
-app.use(PrimeVue, {
-  theme: {
-    preset: CaidoDark
-  },
-});
-
+const app = defineApp();
 app.mount("#app");
-

@@ -1,23 +1,13 @@
 import type { Caido } from "@caido/sdk-frontend";
 import type { API } from "starterkit-plugin-backend";
-import PrimeVue from "primevue/config";
-import { CaidoDark } from "@caido/primevue";
 
-import "./styles/style.css";
-import {createApp} from "vue";
-
-import App from "./views/App.vue";
+import {defineApp} from "./app";
 
 type CaidoSDK = Caido<API>;
 
 export const init = (sdk: CaidoSDK) => {
 
-  const app = createApp(App);
-  app.use(PrimeVue, {
-    theme: {
-      preset: CaidoDark
-    },
-  });
+  const app = defineApp();
 
   const root = document.createElement("div");
   Object.assign(root.style, {
