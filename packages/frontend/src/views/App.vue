@@ -28,7 +28,7 @@ const component = computed(() => {
 
 <template lang="pug">
 .autorize-app
-  MenuBar(:model="items")
+  MenuBar(:model="items" :style="{ boxShadow: 'var(--autorize-box-shadow-surface)' }")
   component(:is="component")
 </template>
 

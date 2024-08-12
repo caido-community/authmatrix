@@ -7,10 +7,10 @@ import SplitterPanel from 'primevue/splitterpanel';
 <template lang="pug">
 .autorize-dashboard
   Splitter(:style="{ height: '100%' }" layout="vertical")
-    SplitterPanel(:size="50" :style="{ overflow: 'auto' }")
+    SplitterPanel(:size="50" :style="{ overflow: 'auto', boxShadow: 'var(--autorize-box-shadow-surface)' }")
       ResultTable
 
-    SplitterPanel(:size="50" :style="{ overflow: 'auto' }")
+    SplitterPanel(:size="50" :style="{ overflow: 'auto', boxShadow: 'var(--autorize-box-shadow-surface)' }")
       ResultShow
 </template>
 
