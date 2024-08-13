@@ -33,18 +33,9 @@ const component = computed(() => {
 });
 </script>
 
-<template lang="pug">
-.autorize-app
-  MenuBar(:model="items")
-  component(:is="component")
+<template>
+  <div id="plugin--autorize" class="h-full flex flex-col gap-1">
+    <MenuBar :model="items" />
+    <component :is="component" />
+  </div>
 </template>
-
-<style>
-.autorize-app {
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-</style>

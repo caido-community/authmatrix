@@ -4,8 +4,6 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Panel from 'primevue/panel';
-import Fieldset from 'primevue/fieldset';
 </script>
 
 <template>

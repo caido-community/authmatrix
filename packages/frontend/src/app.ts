@@ -14,8 +14,11 @@ export const defineApp = () => {
     theme: {
       preset: CaidoDark,
       options: {
-        prefix: "autorize"
-      }
+        prefix: "autorize",
+        cssLayer: {
+          name: "autorize",
+        }
+      },
     },
     pt: {
       menubar: {

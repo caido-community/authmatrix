@@ -1,10 +1,11 @@
 import type { Config } from 'tailwindcss'
 
 export default {
-  content: [],
   theme: {
     extend: {},
   },
-  purge: ['./index.html', './src/**/*.{vue,ts}'],
-  plugins: [],
+  content: ['./index.html', './src/**/*.{vue,ts}'],
+
+  // Disable preflight to avoid conflicts when loaded in Caido
+  preflight: false,
 } satisfies Config
