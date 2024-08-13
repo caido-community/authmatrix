@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { ResultShow, ResultTable } from "@/components/dashboard";
+import { RoleList, UserList } from "@/components/users-roles";
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 </script>
 
 <template lang="pug">
-.autorize-dashboard
-  Splitter(:style="{ height: '100%' }" layout="vertical")
-    SplitterPanel(:size="50")
-      ResultTable
+.autorize-users-roles
+  Splitter(:style="{ height: '100%' }")
+    SplitterPanel(:size="66")
+      UserList
 
-    SplitterPanel(:size="50")
-      ResultShow
+    SplitterPanel(:size="34" :min-size="34")
+      RoleList
 </template>
 
 <style>
-.autorize-dashboard {
+.autorize-users-roles {
   height: 100%;
 
   display: flex;

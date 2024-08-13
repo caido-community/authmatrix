@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { ResultShow, ResultTable, UserList, UserShow, Navigation } from "@/components";
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 </script>
 
 <template lang="pug">
-.autorize-configuration
-  div user
+.autorize-settings
+  Splitter(:style="{ height: '100%' }" layout="vertical")
+    SplitterPanel(:size="50")
+      ResultTable
+
+    SplitterPanel(:size="50")
+      ResultShow
 </template>
 
 <style>
-.autorize-configuration {
+.autorize-settings {
   height: 100%;
 
   display: flex;
