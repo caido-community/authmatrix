@@ -4,57 +4,26 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import {ref} from 'vue';
 
-const users = [
-  {
-    name: 'Admin',
-    description: 'Admin role',
-  },
-  {
-    name: 'User',
-    description: 'User role',
-  },
-];
-
-const columns = [
-  { field: 'name', header: 'Name' },
-  { field: 'description', header: 'Description' },
-];
-
-const selection = ref();
 </script>
 
-<template lang="pug">
-.autorize-user-show
-  Card(:style="{ height: '100%' }")
-    template(#title)
-      .autorize-user-show__title
-        h1 Update User
-        .autorize-user-show__actions
-          Button(label="Save")
+<template>
+  <div class="h-full">
+    <Card style="height: 100%">
+      <template #title>
+        <div class="flex justify-between items-center">
+          <h1 class="font-bold">Update user</h1>
+          <div>
+            <Button label="Update" />
+          </div>
+        </div>
+      </template>
 
-    template(#content)
-      label(for="name") Name
-      InputText(id="name" label="Name")
+      <template #content>
+        <div class="flex flex-col space-y-4">
+          <label for="name" class="text-sm font-bold">Name</label>
+          <InputText id="name" label="Name" autocomplete="false" />
+        </div>
+      </template>
+    </Card>
+  </div>
 </template>
-
-<style>
-.autorize-user-show {
-  height: 100%;
-}
-
-.autorize-user-show__title {
-  width: 100%;
-
-  font-size: 1.5rem;
-  font-weight: bold;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  h1 {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-}
-</style>

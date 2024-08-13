@@ -10,16 +10,17 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@caido/primevue": "link:../../../../Caido/ui-kit/packages/primevue",
     "@caido/sdk-frontend": "0.39.0",
     "primevue": "4.0.4",
-    "vue": "3.4.37",
-    "@caido/primevue": "link:../../../../Caido/ui-kit/packages/primevue"
+    "vue": "3.4.37"
   },
   "devDependencies": {
     "@caido/sdk-backend": "0.39.0",
     "@vitejs/plugin-vue": "5.1.2",
     "@vue/language-plugin-pug": "2.0.29",
     "pug": "3.0.3",
-    "starterkit-plugin-backend": "workspace:*"
+    "starterkit-plugin-backend": "workspace:*",
+    "tailwindcss": "3.4.9"
   }
 }
