@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RoleList, UserList } from "@/components/users-roles";
+import { RoleList, UserList, UserShow } from "@/components/users-roles";
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 </script>
@@ -8,7 +8,12 @@ import SplitterPanel from 'primevue/splitterpanel';
 .autorize-users-roles
   Splitter(:style="{ height: '100%' }")
     SplitterPanel(:size="66")
-      UserList
+      Splitter(:style="{ height: '100%' }" layout="vertical")
+        SplitterPanel(:size="50")
+          UserList
+
+        SplitterPanel(:size="50")
+          UserShow
 
     SplitterPanel(:size="34" :min-size="34")
       RoleList

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import Card from 'primevue/card';
-import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
-import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
 import {ref} from 'vue';
 
 const users = [
@@ -25,33 +24,25 @@ const selection = ref();
 </script>
 
 <template lang="pug">
-.autorize-user-list
+.autorize-user-show
   Card(:style="{ height: '100%' }")
     template(#title)
-      .autorize-user-list__title
-        h1 User list
-        .autorize-user-list__actions
-          Button(label="+ Add User")
+      .autorize-user-show__title
+        h1 Update User
+        .autorize-user-show__actions
+          Button(label="Save")
 
     template(#content)
-      DataTable(
-        :value="users"
-        v-model:selection="selection"
-        data-key="name"
-        striped-rows
-        scrollable
-        scroll-height="flex"
-        size="small"
-        selection-mode="single")
-        Column(v-for="column in columns" :key="column.field" :field="column.field" :header="column.header")
+      label(for="name") Name
+      InputText(id="name" label="Name")
 </template>
 
 <style>
-.autorize-user-list {
+.autorize-user-show {
   height: 100%;
 }
 
-.autorize-user-list__title {
+.autorize-user-show__title {
   width: 100%;
 
   font-size: 1.5rem;
