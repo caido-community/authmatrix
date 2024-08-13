@@ -32,6 +32,13 @@ export const defineApp = () => {
             boxShadow: 'var(--autorize-box-shadow-surface)'
           }
         }
+      },
+      column: {
+        headerCell: {
+          style: {
+            borderBottomWidth: '0.25rem'
+          }
+        }
       }
     }
   });

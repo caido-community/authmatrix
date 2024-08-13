@@ -29,7 +29,7 @@ const selection = ref();
   Card(:style="{ height: '100%' }")
     template(#title)
       .autorize-user-list__title
-        h1 User list
+        h1 User List
         .autorize-user-list__actions
           Button(label="+ Add User")
 

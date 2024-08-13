@@ -30,7 +30,7 @@ const editingRows = ref([]);
   Card(:style="{ height: '100%' }")
     template(#title)
       .autorize-role-list__title
-        h1 Role list
+        h1 Role List
         .autorize-role-list__actions
           Button(label="+ Add role")
 
