@@ -48,6 +48,9 @@ importers:
       '@vitejs/plugin-vue':
         specifier: 5.1.2
         version: 5.1.2(vite@5.2.7)(vue@3.4.37(typescript@5.4.3))
+      postcss-prefixwrap:
+        specifier: 1.51.0
+        version: 1.51.0(postcss@8.4.41)
       starterkit-plugin-backend:
         specifier: workspace:*
         version: link:../backend
@@ -712,6 +715,11 @@ packages:
     engines: {node: '>=12.0'}
     peerDependencies:
       postcss: ^8.2.14
+
+  postcss-prefixwrap@1.51.0:
+    resolution: {integrity: sha512-PuP4md5zFSY921dUcLShwSLv2YyyDec0dK9/puXl/lu7ZNvJ1U59+ZEFRMS67xwfNg5nIIlPXnAycPJlhA/Isw==}
+    peerDependencies:
+      postcss: '*'
 
   postcss-selector-parser@6.1.2:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
@@ -1461,6 +1469,10 @@ snapshots:
     dependencies:
       postcss: 8.4.41
       postcss-selector-parser: 6.1.2
+
+  postcss-prefixwrap@1.51.0(postcss@8.4.41):
+    dependencies:
+      postcss: 8.4.41
 
   postcss-selector-parser@6.1.2:
     dependencies:

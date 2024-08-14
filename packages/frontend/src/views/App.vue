@@ -34,8 +34,16 @@ const component = computed(() => {
 </script>
 
 <template>
-  <div id="plugin--autorize" class="h-full flex flex-col gap-1">
-    <MenuBar :model="items" />
-    <component :is="component" />
+  <div id="plugin--autorize">
+    <div class="h-full flex flex-col gap-1">
+      <MenuBar :model="items" />
+      <component :is="component" />
+    </div>
   </div>
 </template>
+
+<style scoped>
+#plugin--autorize {
+  height: 100%;
+}
+</style>
