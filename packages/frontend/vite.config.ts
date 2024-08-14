@@ -1,26 +1,14 @@
-import { defineConfig } from "vite";
 import { resolve } from "path";
-import vue from "@vitejs/plugin-vue";
-import tailwindcss from "tailwindcss";
-import prefixwrap from "postcss-prefixwrap";
+import {mergeConfig} from "vite";
 
-export default defineConfig({
-  plugins: [
-    vue(),
-  ],
-  resolve: {
-    alias: [
-      {
-        find: "@",
-        replacement: resolve(__dirname, "src"),
-      },
-    ],
-  },
+import baseConfig from "./vite.config.base";
+
+export default mergeConfig(baseConfig, {
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "plugin-template-frontend",
-      fileName: (format) => "script.js",
+      fileName: () => "script.js",
       formats: ["es"],
     },
     outDir: "../../dist/frontend",
@@ -30,13 +18,6 @@ export default defineConfig({
       },
     },
   },
-  css: {
-    postcss: {
-      plugins: [
-        tailwindcss(),
-        prefixwrap("#plugin--autorize"),
-      ],
-    }
-  },
   define: { 'process.env.NODE_ENV': '"production"' }
 });
+
