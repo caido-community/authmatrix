@@ -18,8 +18,6 @@
   "devDependencies": {
     "@caido/sdk-backend": "0.39.0",
     "@vitejs/plugin-vue": "5.1.2",
-    "@vue/language-plugin-pug": "2.0.29",
-    "pug": "3.0.3",
     "starterkit-plugin-backend": "workspace:*",
     "tailwindcss": "3.4.9"
   }

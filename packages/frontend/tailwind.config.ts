@@ -7,5 +7,5 @@ export default {
   content: ['./index.html', './src/**/*.{vue,ts}'],
 
   // Disable preflight to avoid conflicts when loaded in Caido
-  preflight: false,
+  //preflight: false,
 } satisfies Config

@@ -1,24 +1,20 @@
 <script setup lang="ts">
+import {ResultShow, ResultTable} from '@/components/dashboard';
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 </script>
 
-<template lang="pug">
-.autorize-settings
-  Splitter(:style="{ height: '100%' }" layout="vertical")
-    SplitterPanel(:size="50")
-      ResultTable
+<template>
+  <div class="h-full flex flex-col gap-1">
+    <Splitter class="h-full" layout="vertical">
+      <SplitterPanel :size="50">
+        <ResultTable />
+      </SplitterPanel>
 
-    SplitterPanel(:size="50")
-      ResultShow
+      <SplitterPanel :size="50">
+        <ResultShow />
+      </SplitterPanel>
+    </Splitter>
+  </div>
 </template>
 
-<style>
-.autorize-settings {
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-</style>

@@ -2,16 +2,15 @@
 import Card from 'primevue/card';
 </script>
 
-<template lang="pug">
-.autorize-result-show
-  Card(:style="{ height: '100%' }")
-    template(#title) Result show
-    template(#content)
-      p Result show content
+<template>
+  <div class="h-full">
+    <Card class="h-full">
+      <template #title>
+        Result show
+      </template>
+      <template #content>
+        <p>Result show content</p>
+      </template>
+    </Card>
+  </div>
 </template>
-
-<style>
-.autorize-result-show {
-  height: 100%;
-}
-</style>

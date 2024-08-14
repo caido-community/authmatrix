@@ -24,46 +24,37 @@ const columns = [
 const selection = ref();
 </script>
 
-<template lang="pug">
-.autorize-user-list
-  Card(:style="{ height: '100%' }")
-    template(#title)
-      .autorize-user-list__title
-        h1 User List
-        .autorize-user-list__actions
-          Button(label="+ Add User")
 
-    template(#content)
-      DataTable(
-        :value="users"
-        v-model:selection="selection"
-        data-key="name"
-        striped-rows
-        scrollable
-        scroll-height="flex"
-        size="small"
-        selection-mode="single")
-        Column(v-for="column in columns" :key="column.field" :field="column.field" :header="column.header")
+<template>
+  <div class="h-full">
+    <Card class="h-full">
+      <template #title>
+        <div class="flex justify-between items-center w-full text-xl font-bold">
+          <h1>User List</h1>
+          <Button label="+ Add User" />
+        </div>
+      </template>
+
+      <template #content>
+        <DataTable
+          :value="users"
+          v-model:selection="selection"
+          data-key="name"
+          striped-rows
+          scrollable
+          scroll-height="flex"
+          size="small"
+          selection-mode="single"
+          class="w-full"
+        >
+          <Column
+            v-for="column in columns"
+            :key="column.field"
+            :field="column.field"
+            :header="column.header"
+          />
+        </DataTable>
+      </template>
+    </Card>
+  </div>
 </template>
-
-<style>
-.autorize-user-list {
-  height: 100%;
-}
-
-.autorize-user-list__title {
-  width: 100%;
-
-  font-size: 1.5rem;
-  font-weight: bold;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  h1 {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-}
-</style>
