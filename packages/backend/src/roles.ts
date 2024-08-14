@@ -8,7 +8,7 @@ export const getRoles = (sdk: SDK): Role[] => {
 }
 
 export const addRole = (_sdk: SDK, name: string) => {
-  const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
+  const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
 
   const role: Role = {
     id,
