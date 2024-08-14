@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { RoleList, UserList, UserShow } from "@/components/users-roles";
+import {useRoleStore} from "@/stores/roles";
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
+import {computed} from "vue";
+
+const store = useRoleStore();
+const state = computed(() => store.getState());
 </script>
 
 <template>
@@ -13,7 +18,7 @@ import SplitterPanel from 'primevue/splitterpanel';
             <UserList />
           </SplitterPanel>
           <SplitterPanel size="50">
-            <RoleList />
+            <RoleList v-if="state.type === 'Success'" :state="state" />
           </SplitterPanel>
         </Splitter>
       </SplitterPanel>

@@ -7,7 +7,7 @@ type CaidoSDK = Caido<API>;
 
 export const init = (sdk: CaidoSDK) => {
 
-  const app = defineApp();
+  const app = defineApp(sdk);
 
   const root = document.createElement("div");
   Object.assign(root.style, {

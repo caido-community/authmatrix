@@ -1,4 +1,4 @@
-import {createApp} from "vue";
+import { createApp } from "vue";
 import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
 
@@ -10,10 +10,17 @@ import "@fortawesome/fontawesome-free/css/regular.min.css";
 import "@fortawesome/fontawesome-free/css/solid.min.css";
 import "./styles/style.css";
 
-export const defineApp = () => {
+import {API} from "backend";
+import {Caido} from "@caido/sdk-frontend";
+import {SDKPlugin} from "./plugins/sdk";
+import {createPinia} from "pinia";
+
+export const defineApp = (sdk: Caido<API>) => {
 
   const app = createApp(App);
-  app.directive("tooltip", Tooltip);
+
+  const pinia = createPinia();
+  app.use(pinia);
 
   app.use(PrimeVue, {
     theme: {
@@ -51,5 +58,8 @@ export const defineApp = () => {
     }
   });
 
+  app.use(SDKPlugin, sdk);
+
+  app.directive("tooltip", Tooltip);
   return app;
 }

@@ -1,17 +1,16 @@
-import { Body } from "caido:utils";
 import { SDK, DefineAPI } from "caido:plugin";
-
-function generateNumber(sdk: SDK, min: number, max: number): number {
-  sdk.console.log(new Body("test")); // Example from utils
-
-  // Generate random number between min and max
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
+import { getRoles, addRole, updateRole, deleteRole } from "./roles";
 
 export type API = DefineAPI<{
-  generateNumber: typeof generateNumber;
+  getRoles: typeof getRoles;
+  addRole: typeof addRole;
+  updateRole: typeof updateRole;
+  deleteRole: typeof deleteRole;
 }>;
 
 export function init(sdk: SDK) {
-  sdk.api.register("generateNumber", generateNumber);
+  sdk.api.register("getRoles", getRoles);
+  sdk.api.register("addRole", addRole);
+  sdk.api.register("updateRole", updateRole);
+  sdk.api.register("deleteRole", deleteRole);
 }

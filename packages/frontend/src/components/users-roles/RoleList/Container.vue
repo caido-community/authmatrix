@@ -5,17 +5,12 @@ import Button from 'primevue/button';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import {ref} from 'vue';
+import {RoleState} from '@/types/roles';
+import {useRoleStore} from '@/stores/roles';
 
-const roles = [
-  {
-    name: 'Admin',
-    description: 'Admin role',
-  },
-  {
-    name: 'User',
-    description: 'User role',
-  },
-];
+const props = defineProps<{
+  state: RoleState & { type: 'Success' };
+}>();
 
 const columns = [
   { field: 'name', header: 'Name' },
@@ -23,21 +18,27 @@ const columns = [
 ];
 
 const editingRows = ref([]);
+
+const store = useRoleStore();
+const addRole = () => {
+  store.addRole("New role");
+};
 </script>
 
 <template>
+  | {{ state }}
   <div class="h-full">
     <Card class="h-full">
       <template #title>
         <div class="w-100 flex justify-between items-center">
           <h1>Role List</h1>
-          <Button label="+ Add role" />
+          <Button label="+ Add role" @click="addRole" />
         </div>
       </template>
 
       <template #content>
         <DataTable
-          :value="roles"
+          :value="props.state.roles"
           v-model:editing-rows="editingRows"
           striped-rows
           scrollable

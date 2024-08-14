@@ -22,6 +22,10 @@ importers:
         version: 5.2.7
 
   packages/backend:
+    dependencies:
+      shared:
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@caido/sdk-backend':
         specifier: 0.39.0
@@ -38,9 +42,15 @@ importers:
       '@fortawesome/fontawesome-free':
         specifier: 6.6.0
         version: 6.6.0
+      pinia:
+        specifier: 2.2.1
+        version: 2.2.1(typescript@5.4.3)(vue@3.4.37(typescript@5.4.3))
       primevue:
         specifier: 4.0.4
         version: 4.0.4(vue@3.4.37(typescript@5.4.3))
+      shared:
+        specifier: workspace:*
+        version: link:../shared
       vue:
         specifier: 3.4.37
         version: 3.4.37(typescript@5.4.3)
@@ -60,6 +70,12 @@ importers:
       tailwindcss:
         specifier: 3.4.9
         version: 3.4.9
+
+  packages/shared:
+    dependencies:
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
 
 packages:
 
@@ -393,6 +409,9 @@ packages:
   '@vue/compiler-ssr@3.4.37':
     resolution: {integrity: sha512-TyAgYBWrHlFrt4qpdACh8e9Ms6C/AZQ6A6xLJaWrCL8GCX5DxMzxyeFAEMfU/VFr4tylHm+a2NpfJpcd7+20XA==}
 
+  '@vue/devtools-api@6.6.3':
+    resolution: {integrity: sha512-0MiMsFma/HqA6g3KLKn+AGpL1kgKhFWszC9U29NfpWK5LE7bjeXxySWJrOJ77hBz+TBrBQ7o4QJqbPbqbs8rJw==}
+
   '@vue/reactivity@3.4.37':
     resolution: {integrity: sha512-UmdKXGx0BZ5kkxPqQr3PK3tElz6adTey4307NzZ3whZu19i5VavYal7u2FfOmAzlcDVgE8+X0HZ2LxLb/jgbYw==}
 
@@ -689,6 +708,18 @@ packages:
     resolution: {integrity: sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==}
     engines: {node: '>=0.10.0'}
 
+  pinia@2.2.1:
+    resolution: {integrity: sha512-ltEU3xwiz5ojVMizdP93AHi84Rtfz0+yKd8ud75hr9LVyWX2alxp7vLbY1kFm7MXFmHHr/9B08Xf8Jj6IHTEiQ==}
+    peerDependencies:
+      '@vue/composition-api': ^1.4.0
+      typescript: '>=4.4.4'
+      vue: ^2.6.14 || ^3.3.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+      typescript:
+        optional: true
+
   pirates@4.0.6:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
@@ -895,6 +926,17 @@ packages:
       terser:
         optional: true
 
+  vue-demi@0.14.10:
+    resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
+    engines: {node: '>=12'}
+    hasBin: true
+    peerDependencies:
+      '@vue/composition-api': ^1.0.0-rc.1
+      vue: ^3.0.0-0 || ^2.6.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+
   vue@3.4.37:
     resolution: {integrity: sha512-3vXvNfkKTBsSJ7JP+LyR7GBuwQuckbWvuwAid3xbqK9ppsKt/DUvfqgZ48fgOLEfpy1IacL5f8QhUVl77RaI7A==}
     peerDependencies:
@@ -920,6 +962,9 @@ packages:
     resolution: {integrity: sha512-2wWLbGbYDiSqqIKoPjar3MPgB94ErzCtrNE1FdqGuaO0pi2JGjmE8aW8TDZwzU7vuxcGRdL/4gPQwQ7hD5AMSw==}
     engines: {node: '>= 14'}
     hasBin: true
+
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
 snapshots:
 
@@ -1162,6 +1207,8 @@ snapshots:
     dependencies:
       '@vue/compiler-dom': 3.4.37
       '@vue/shared': 3.4.37
+
+  '@vue/devtools-api@6.6.3': {}
 
   '@vue/reactivity@3.4.37':
     dependencies:
@@ -1453,6 +1500,14 @@ snapshots:
 
   pify@2.3.0: {}
 
+  pinia@2.2.1(typescript@5.4.3)(vue@3.4.37(typescript@5.4.3)):
+    dependencies:
+      '@vue/devtools-api': 6.6.3
+      vue: 3.4.37(typescript@5.4.3)
+      vue-demi: 0.14.10(vue@3.4.37(typescript@5.4.3))
+    optionalDependencies:
+      typescript: 5.4.3
+
   pirates@4.0.6: {}
 
   postcss-import@15.1.0(postcss@8.4.41):
@@ -1674,6 +1729,10 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
+  vue-demi@0.14.10(vue@3.4.37(typescript@5.4.3)):
+    dependencies:
+      vue: 3.4.37(typescript@5.4.3)
+
   vue@3.4.37(typescript@5.4.3):
     dependencies:
       '@vue/compiler-dom': 3.4.37
@@ -1701,3 +1760,5 @@ snapshots:
       strip-ansi: 7.1.0
 
   yaml@2.5.0: {}
+
+  zod@3.23.8: {}

@@ -4,6 +4,8 @@ import Dashboard from './Dashboard.vue';
 import Settings from './Settings.vue';
 import UsersRoles from './UsersRoles.vue';
 import MenuBar from 'primevue/menubar';
+import {useRoleStore} from '@/stores/roles';
+import {onMounted} from 'vue';
 
 const page = ref<"Dashboard" | "User & Roles" | "Settings">("Dashboard");
 const items = [
@@ -31,6 +33,13 @@ const component = computed(() => {
       return Settings;
   }
 });
+
+const roleStore = useRoleStore();
+
+onMounted(() => {
+  roleStore.initialize();
+});
+
 </script>
 
 <template>
