@@ -36,9 +36,9 @@ const onRowEditSave = (role: Role, fields: Omit<Role, "id">) => {
 
 <template>
   <div class="h-full">
-    <Card class="h-full">
+    <Card class="h-full" :pt="{ body: { style: { height: '100%' } }, content: { style: { flex: 1, minHeight: 0 } } }">
       <template #title>
-        <div class="w-100 flex justify-between items-center">
+        <div class="flex justify-between items-center">
           <h1>Role List</h1>
           <Button label="+ Add role" @click="onAddRole" />
         </div>
@@ -55,6 +55,13 @@ const onRowEditSave = (role: Role, fields: Omit<Role, "id">) => {
           edit-mode="row"
           @row-edit-save="({ data, newData }) => onRowEditSave(data, newData)"
         >
+          <template #empty>
+            <div class="flex flex-col items-center p-8 w-full">
+              <p class="text-gray-400">No roles configured.</p>
+              <p class="text-gray-400">Click on the button above to add a new role.</p>
+            </div>
+          </template>
+
           <Column
             v-for="column in columns"
             :key="column.field"

@@ -21,6 +21,26 @@ const backend: API = {
     }
   },
   deleteRole: (id) => {
+  },
+  getUsers: () => {
+    return [];
+  },
+  addUser: (name) => {
+    return {
+      id: Math.random().toString(),
+      name,
+      roles: [],
+      cookies: [],
+      headers: []
+    }
+  },
+  updateUser: (id, fields) => {
+    return {
+      id,
+      ...fields
+    }
+  },
+  deleteUser: (id) => {
   }
 }
 
