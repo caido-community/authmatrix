@@ -1,7 +1,7 @@
 import type { Caido } from "@caido/sdk-frontend";
-import type { API } from "starterkit-plugin-backend";
+import type { API } from "backend";
 
-import {defineApp} from "./app";
+import { defineApp } from "./app";
 
 type CaidoSDK = Caido<API>;
 

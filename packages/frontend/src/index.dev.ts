@@ -1,4 +1,4 @@
-import {defineApp} from "./app";
+import { defineApp } from "./app";
 
 const app = defineApp();
 app.mount("#app");

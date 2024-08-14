@@ -51,12 +51,12 @@ importers:
       '@vitejs/plugin-vue':
         specifier: 5.1.2
         version: 5.1.2(vite@5.2.7)(vue@3.4.37(typescript@5.4.3))
+      backend:
+        specifier: workspace:*
+        version: link:../backend
       postcss-prefixwrap:
         specifier: 1.51.0
         version: 1.51.0(postcss@8.4.41)
-      starterkit-plugin-backend:
-        specifier: workspace:*
-        version: link:../backend
       tailwindcss:
         specifier: 3.4.9
         version: 3.4.9

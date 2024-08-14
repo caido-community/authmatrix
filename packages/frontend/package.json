@@ -1,5 +1,5 @@
 {
-  "name": "starterkit-plugin-frontend",
+  "name": "frontend",
   "version": "0.1.0",
   "description": "StarterKit plugin for Caido",
   "author": "Caido Labs Inc. <dev@caido.io>",
@@ -17,10 +17,10 @@
     "vue": "3.4.37"
   },
   "devDependencies": {
+    "backend": "workspace:*",
     "@caido/sdk-backend": "0.39.0",
     "@vitejs/plugin-vue": "5.1.2",
     "postcss-prefixwrap": "1.51.0",
-    "starterkit-plugin-backend": "workspace:*",
     "tailwindcss": "3.4.9"
   }
 }
