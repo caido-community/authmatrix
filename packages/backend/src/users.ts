@@ -14,8 +14,7 @@ export const addUser = (sdk: SDK, name: string) => {
     id,
     name,
     roles: [],
-    cookies: [],
-    headers: []
+    attributes: []
   }
 
   users.push(user);

@@ -13,6 +13,7 @@
     "@caido/primevue": "link:../../../../Caido/ui-kit/packages/primevue",
     "@caido/sdk-frontend": "0.39.0",
     "@fortawesome/fontawesome-free": "6.6.0",
+    "@vueuse/core": "10.11.1",
     "pinia": "2.2.1",
     "primevue": "4.0.4",
     "shared": "workspace:*",

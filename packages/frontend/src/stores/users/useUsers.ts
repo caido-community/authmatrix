@@ -1,6 +1,7 @@
 import {useSDK} from "@/plugins/sdk";
 import {Context} from "./types";
 import {User} from "shared";
+import {computed} from "vue";
 
 export const useUsers = (context: Context) => {
 
@@ -46,9 +47,15 @@ export const useUsers = (context: Context) => {
     }
   }
 
+  const userSelection = computed({
+    get: () => context.selection,
+    set: (newSelection) => context.selection = newSelection
+  });
+
   return {
     addUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    userSelection
   }
 }

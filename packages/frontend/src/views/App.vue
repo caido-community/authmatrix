@@ -49,7 +49,9 @@ onMounted(() => {
   <div id="plugin--autorize">
     <div class="h-full flex flex-col gap-1">
       <MenuBar :model="items" />
-      <component :is="component" />
+      <div class="flex-1 min-h-0">
+        <component :is="component" />
+      </div>
     </div>
   </div>
 </template>

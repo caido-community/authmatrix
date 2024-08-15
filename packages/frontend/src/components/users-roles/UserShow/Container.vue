@@ -2,70 +2,54 @@
 import Card from 'primevue/card';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import { useCloned } from "@vueuse/core";
+import {User} from 'shared';
+import {computed} from 'vue';
+import {useUserStore} from '@/stores/users';
+
+import AttributeTable from './AttributeTable.vue';
+
+const props = defineProps<{
+  user: User
+}>();
+
+const { cloned, sync } = useCloned(() => props.user);
+
+const isDirty = computed(() => {
+  return JSON.stringify(props.user) !== JSON.stringify(cloned.value);
+});
+
+const userStore = useUserStore();
+const onSaveClick = () => {
+  userStore.updateUser(props.user.id, cloned.value);
+};
+
+const onResetClick = () => {
+  sync();
+};
 </script>
 
 <template>
-  <div class="h-full flex flex-col gap-1">
-    <Card class="h-full" :pt="{ body: { class: 'flex flex-col flex-1' }, content: { class: 'flex flex-col flex-1' } } ">
-      <template #title>
-        <div class="flex justify-between items-center">
-          <h1 class="font-bold">User</h1>
-          <div>
-            <Button label="Save" />
-          </div>
+  <Card class="h-full" :pt="{ body: { class: 'h-full' }, content: { class: 'flex-1 min-h-0' } } ">
+    <template #title>
+      <div class="flex justify-between items-center">
+        <h1 class="font-bold">User</h1>
+        <div>
+          <Button v-if="isDirty" text icon="fas fa-rotate-left" @click="onResetClick" />
+          <Button label="Save" @click="onSaveClick" />
         </div>
-      </template>
+      </div>
+    </template>
 
-      <template #content>
-        <div class="flex flex-col flex-1 gap-8">
-          <div class="flex flex-col gap-2">
-            <label for="name" class="text-sm">Name</label>
-            <InputText id="name" label="Name" autocomplete="off" />
-          </div>
-
-          <div class="flex justify-between items-center">
-            <h1 class="font-bold">Cookies</h1>
-            <div>
-              <Button label="+ Add cookie" size="small" />
-            </div>
-          </div>
-
-          <div class="flex-1">
-            <DataTable :value="[]" scrollable scroll-height="flex" striped-rows>
-              <Column field="name" header="Name" />
-              <Column field="value" header="Value" />
-              <template #empty>
-                <div class="flex flex-col items-center justify-center my-8">
-                  <p class="text-gray-400">No cookies configured. </p>
-                  <p class="text-gray-400">Add cookies to include in requests for this user.</p>
-                </div>
-              </template>
-            </DataTable>
-          </div>
-
-          <div class="flex justify-between items-center">
-            <h1 class="font-bold">Headers</h1>
-            <div>
-              <Button label="+ Add header" size="small" />
-            </div>
-          </div>
-
-          <div class="flex-1">
-            <DataTable :value="[]" scrollable scroll-height="flex" striped-rows>
-              <Column field="name" header="Name" />
-              <Column field="value" header="Value" />
-              <template #empty>
-                <div class="flex flex-col items-center justify-center my-8">
-                  <p class="text-gray-400">No headers configured. </p>
-                  <p class="text-gray-400">Add headers to include in requests for this user.</p>
-                </div>
-              </template>
-            </DataTable>
-          </div>
+    <template #content>
+      <div class="flex flex-col h-full gap-8 min-h-0">
+        <div class="flex flex-col gap-2">
+          <label for="name" class="text-sm">Name</label>
+          <InputText id="name" label="Name" v-model="cloned.name" autocomplete="off" />
         </div>
-      </template>
-    </Card>
-  </div>
+
+        <AttributeTable v-model:user="cloned" />
+      </div>
+    </template>
+  </Card>
 </template>

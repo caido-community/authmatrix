@@ -14,26 +14,22 @@ const userState = computed(() => userStore.getState());
 </script>
 
 <template>
-  <div class="h-full">
-    <Splitter class="h-full">
-      <SplitterPanel size="50">
-        <Splitter class="h-full" layout="vertical">
-          <SplitterPanel size="50">
-            <UserList
-            v-if="roleState.type === 'Success' && userState.type === 'Success'"
-            :state="userState"
-            :role-state="roleState" />
+  <div class="h-full flex gap-1">
+    <div class="h-full w-1/2 flex flex-col gap-1">
+      <div class="h-1/2">
+        <UserList
+        v-if="roleState.type === 'Success' && userState.type === 'Success'"
+        v-model:selection="userStore.userSelection"
+        :state="userState"
+        :role-state="roleState" />
+      </div>
+      <div class="h-1/2">
+        <RoleList v-if="roleState.type === 'Success'" :state="roleState" />
+      </div>
+    </div>
 
-          </SplitterPanel>
-          <SplitterPanel size="50">
-            <RoleList v-if="roleState.type === 'Success'" :state="roleState" />
-          </SplitterPanel>
-        </Splitter>
-      </SplitterPanel>
-
-      <SplitterPanel size="50" min-size="34">
-        <UserShow />
-      </SplitterPanel>
-    </Splitter>
+    <div class="h-full w-1/2">
+      <UserShow v-if="userStore.userSelection" :user="userStore.userSelection"/>
+    </div>
   </div>
 </template>

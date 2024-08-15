@@ -6,7 +6,8 @@ import {Context} from "./types";
 
 export const useUserStore = defineStore("stores.users", () => {
   const context: Context = reactive({
-    state: { type: "Idle" }
+    state: { type: "Idle" },
+    selection: null
   });
 
   return {

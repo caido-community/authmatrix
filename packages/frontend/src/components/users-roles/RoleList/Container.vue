@@ -35,63 +35,61 @@ const onRowEditSave = (role: Role, fields: Omit<Role, "id">) => {
 </script>
 
 <template>
-  <div class="h-full">
-    <Card class="h-full" :pt="{ body: { style: { height: '100%' } }, content: { style: { flex: 1, minHeight: 0 } } }">
-      <template #title>
-        <div class="flex justify-between items-center">
-          <h1>Role List</h1>
-          <Button label="+ Add role" @click="onAddRole" />
-        </div>
-      </template>
+  <Card class="h-full" :pt="{ body: { class: 'h-full' }, content: { class: 'flex-1 min-h-0' } } ">
+    <template #title>
+      <div class="flex justify-between items-center">
+        <h1>Role List</h1>
+        <Button label="+ Add role" @click="onAddRole" />
+      </div>
+    </template>
 
-      <template #content>
-        <DataTable
-          :value="props.state.roles"
-          v-model:editing-rows="editingRows"
-          striped-rows
-          scrollable
-          scroll-height="flex"
-          size="small"
-          edit-mode="row"
-          @row-edit-save="({ data, newData }) => onRowEditSave(data, newData)"
+    <template #content>
+      <DataTable
+        :value="props.state.roles"
+        v-model:editing-rows="editingRows"
+        striped-rows
+        scrollable
+        scroll-height="flex"
+        size="small"
+        edit-mode="row"
+        @row-edit-save="({ data, newData }) => onRowEditSave(data, newData)"
+      >
+        <template #empty>
+          <div class="flex flex-col items-center p-8 w-full">
+            <p class="text-gray-400">No roles configured.</p>
+            <p class="text-gray-400">Click on the button above to add a new role.</p>
+          </div>
+        </template>
+
+        <Column
+          v-for="column in columns"
+          :key="column.field"
+          :field="column.field"
+          :header="column.header"
         >
-          <template #empty>
-            <div class="flex flex-col items-center p-8 w-full">
-              <p class="text-gray-400">No roles configured.</p>
-              <p class="text-gray-400">Click on the button above to add a new role.</p>
+          <template #editor="{ data, field }">
+            <InputText v-model="data[field]" autofocus fluid />
+          </template>
+        </Column>
+
+        <Column :row-editor="true">
+          <template #body="{ data, editorInitCallback }">
+            <div class="flex gap-2 justify-end">
+              <Button icon="fas fa-pencil" size="small" text @click="editorInitCallback" />
+              <Button icon="fas fa-trash"  size="small" text severity="danger" @click="onDeleteRole(data)" />
             </div>
           </template>
 
-          <Column
-            v-for="column in columns"
-            :key="column.field"
-            :field="column.field"
-            :header="column.header"
-          >
-            <template #editor="{ data, field }">
-              <InputText v-model="data[field]" autofocus fluid />
-            </template>
-          </Column>
-
-          <Column :row-editor="true">
-            <template #body="{ data, editorInitCallback }">
-              <div class="flex gap-2 justify-end">
-                <Button icon="fas fa-pencil" outlined @click="editorInitCallback" />
-                <Button icon="fas fa-trash" outlined severity="danger" @click="onDeleteRole(data)" />
-              </div>
-            </template>
-
-            <template #editor="{ data, editorSaveCallback, editorCancelCallback }">
-              <div class="flex gap-2 justify-end">
-                <Button icon="fas fa-check" outlined @click="editorSaveCallback" />
-                <Button icon="fas fa-times" outlined @click="editorCancelCallback" />
-                <Button icon="fas fa-trash" outlined severity="danger" @click="onDeleteRole(data)" />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
-      </template>
-    </Card>
-  </div>
+          <template #editor="{ data, editorSaveCallback, editorCancelCallback }">
+            <div class="flex gap-2 justify-end">
+              <Button icon="fas fa-check" size="small" text @click="editorSaveCallback" />
+              <Button icon="fas fa-times" size="small" text @click="editorCancelCallback" />
+              <Button icon="fas fa-trash" size="small" text severity="danger" @click="onDeleteRole(data)" />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+    </template>
+  </Card>
 </template>
 

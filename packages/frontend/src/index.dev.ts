@@ -30,8 +30,7 @@ const backend: API = {
       id: Math.random().toString(),
       name,
       roles: [],
-      cookies: [],
-      headers: []
+      attributes: []
     }
   },
   updateUser: (id, fields) => {
