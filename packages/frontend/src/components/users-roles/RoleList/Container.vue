@@ -18,8 +18,6 @@ const columns = [
   { field: 'description', header: 'Description' },
 ];
 
-const editingRows = ref([]);
-
 const store = useRoleStore();
 const onAddRole = () => {
   store.addRole("New role");
@@ -29,9 +27,13 @@ const onDeleteRole = (role: Role) => {
   store.deleteRole(role.id);
 };
 
-const onRowEditSave = (role: Role, fields: Omit<Role, "id">) => {
-  store.updateRole(role.id, fields);
+const onRoleUpdate = (role: Role, field: keyof Role, value: string) => {
+  store.updateRole(role.id, {
+    ...role,
+    [field]: value,
+  });
 };
+
 </script>
 
 <template>
@@ -46,13 +48,13 @@ const onRowEditSave = (role: Role, fields: Omit<Role, "id">) => {
     <template #content>
       <DataTable
         :value="props.state.roles"
-        v-model:editing-rows="editingRows"
         striped-rows
         scrollable
         scroll-height="flex"
         size="small"
-        edit-mode="row"
-        @row-edit-save="({ data, newData }) => onRowEditSave(data, newData)"
+        edit-mode="cell"
+        @cell-edit-complete="({ data, field, newValue }) => onRoleUpdate(data, field, newValue)"
+
       >
         <template #empty>
           <div class="flex flex-col items-center p-8 w-full">
@@ -72,19 +74,10 @@ const onRowEditSave = (role: Role, fields: Omit<Role, "id">) => {
           </template>
         </Column>
 
-        <Column :row-editor="true">
-          <template #body="{ data, editorInitCallback }">
-            <div class="flex gap-2 justify-end">
-              <Button icon="fas fa-pencil" size="small" text @click="editorInitCallback" />
+        <Column>
+          <template #body="{ data }">
+            <div class="flex justify-end">
               <Button icon="fas fa-trash"  size="small" text severity="danger" @click="onDeleteRole(data)" />
-            </div>
-          </template>
-
-          <template #editor="{ data, editorSaveCallback, editorCancelCallback }">
-            <div class="flex gap-2 justify-end">
-              <Button icon="fas fa-check" size="small" text @click="editorSaveCallback" />
-              <Button icon="fas fa-times" size="small" text @click="editorCancelCallback" />
-              <Button icon="fas fa-trash" size="small" text severity="danger" @click="onDeleteRole(data)" />
             </div>
           </template>
         </Column>

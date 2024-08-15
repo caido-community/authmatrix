@@ -9,9 +9,13 @@ import InputText from 'primevue/inputtext';
 
 const user = defineModel<User>("user", { required: true });
 
-const onAddCookie = () => {
+const onAddAttribute = () => {
   const id = generateID();
   user.value.attributes.push({ id, name: 'My attribute', value: 'My value', kind: 'Cookie' });
+};
+
+const onRemoveAttribute = (attribute: UserAttribute) => {
+  user.value.attributes = user.value.attributes.filter((attr) => attr.id !== attribute.id);
 };
 
 const onAttributeUpdate = (attribute: UserAttribute, field: keyof UserAttribute, value: string) => {
@@ -36,7 +40,7 @@ const onAttributeUpdate = (attribute: UserAttribute, field: keyof UserAttribute,
     <div class="flex justify-between items-center">
       <h1 class="font-bold">Attributes</h1>
       <div>
-        <Button label="+ Add attribute" size="small" @click="onAddCookie" />
+        <Button label="+ Add attribute" size="small" @click="onAddAttribute" />
       </div>
     </div>
 
@@ -68,9 +72,9 @@ const onAttributeUpdate = (attribute: UserAttribute, field: keyof UserAttribute,
         </Column>
 
         <Column>
-          <template>
+          <template #body="{ data }">
             <div class="flex justify-end">
-              <Button severity="danger" text size="small" icon="fas fa-trash" />
+              <Button severity="danger" text size="small" icon="fas fa-trash" @click="() => onRemoveAttribute(data)" />
             </div>
           </template>
         </Column>

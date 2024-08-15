@@ -34,7 +34,7 @@ const onResetClick = () => {
   <Card class="h-full" :pt="{ body: { class: 'h-full' }, content: { class: 'flex-1 min-h-0' } } ">
     <template #title>
       <div class="flex justify-between items-center">
-        <h1 class="font-bold">User</h1>
+        <h1 class="font-bold">{{ user.name }}</h1>
         <div>
           <Button v-if="isDirty" text icon="fas fa-rotate-left" @click="onResetClick" />
           <Button label="Save" :disabled="!isDirty" @click="onSaveClick" />

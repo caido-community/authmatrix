@@ -8,23 +8,37 @@ import {RoleState} from '@/types/roles';
 import Checkbox from 'primevue/checkbox';
 import {UserState} from '@/types/users';
 import {useUserStore} from '@/stores/users';
-import {User} from 'shared';
+import {Role, User} from 'shared';
 
-const props = defineProps<{
+defineProps<{
   state: UserState & { type: 'Success' };
   roleState: RoleState & { type: "Success" }
 }>();
 
 const selection = defineModel<User | null>("selection", { required: true });
 
-const roles = computed(() => {
-  return props.roleState.roles.map((role) => {
-    return { field: role.name, header: role.name };
-  })
-});
-
+const getRoleValue = (user: User, role: Role) => {
+  return user.roles.some((r) => r.id === role.id);
+};
 
 const store = useUserStore();
+const toggleRole = (user: User, role: Role) => {
+  const isEnabled = user.roles.some((r) => r.id === role.id);
+
+  if (isEnabled) {
+    store.updateUser(user.id, {
+      ...user,
+      roles: user.roles.filter((r) => r.id !== role.id),
+    });
+  } else {
+    store.updateUser(user.id, {
+      ...user,
+      roles: [...user.roles, role]
+    });
+  }
+};
+
+
 
 const onAddUser = () => {
   store.addUser("New user");
@@ -65,13 +79,12 @@ const onDeleteUser = (user: User) => {
         </template>
         <Column field="name" header="Name" />
         <Column
-          v-for="role in roles"
-          :key="role.field"
-          :field="role.field"
-          :header="role.header"
+          v-for="role in roleState.roles"
+          :key="role.id"
+          :header="role.name"
         >
-          <template #body>
-            <Checkbox :model-value="true" />
+          <template #body="{ data }">
+            <Checkbox :model-value="getRoleValue(data, role)" binary @change="() => toggleRole(data, role)" />
           </template>
         </Column>
 
