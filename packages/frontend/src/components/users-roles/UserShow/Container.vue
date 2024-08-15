@@ -4,7 +4,7 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import { useCloned } from "@vueuse/core";
 import {User} from 'shared';
-import {computed} from 'vue';
+import {computed, toRefs} from 'vue';
 import {useUserStore} from '@/stores/users';
 
 import AttributeTable from './AttributeTable.vue';
@@ -13,7 +13,8 @@ const props = defineProps<{
   user: User
 }>();
 
-const { cloned, sync } = useCloned(() => props.user);
+const { user } = toRefs(props);
+const { cloned, sync } = useCloned(user);
 
 const isDirty = computed(() => {
   return JSON.stringify(props.user) !== JSON.stringify(cloned.value);
@@ -36,7 +37,7 @@ const onResetClick = () => {
         <h1 class="font-bold">User</h1>
         <div>
           <Button v-if="isDirty" text icon="fas fa-rotate-left" @click="onResetClick" />
-          <Button label="Save" @click="onSaveClick" />
+          <Button label="Save" :disabled="!isDirty" @click="onSaveClick" />
         </div>
       </div>
     </template>

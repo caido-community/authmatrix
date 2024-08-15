@@ -2,7 +2,7 @@
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import {User} from 'shared';
+import {User, UserAttribute} from 'shared';
 import {generateID} from '@/utils';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
@@ -12,6 +12,22 @@ const user = defineModel<User>("user", { required: true });
 const onAddCookie = () => {
   const id = generateID();
   user.value.attributes.push({ id, name: 'My attribute', value: 'My value', kind: 'Cookie' });
+};
+
+const onAttributeUpdate = (attribute: UserAttribute, field: keyof UserAttribute, value: string) => {
+  const newAttribute = {
+    ...attribute,
+    [field]: value,
+  }
+
+  user.value.attributes = user.value.attributes.map((attr) => {
+    if (attr.id === attribute.id) {
+      return newAttribute;
+    }
+
+    return attr;
+  });
+
 };
 </script>
 
@@ -25,7 +41,14 @@ const onAddCookie = () => {
     </div>
 
     <div class="min-h-0">
-      <DataTable :value="user.attributes" edit-mode="cell" scrollable scroll-height="flex" striped-rows>
+      <DataTable
+        :value="user.attributes"
+        edit-mode="cell"
+        scrollable
+        scroll-height="flex"
+        striped-rows
+        @cell-edit-complete="({ data, field, newValue }) => onAttributeUpdate(data, field, newValue)"
+        >
         <Column field="name" header="Name">
           <template #editor="{data}">
             <InputText v-model="data.name" />

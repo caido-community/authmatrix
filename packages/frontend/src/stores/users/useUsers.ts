@@ -27,6 +27,10 @@ export const useUsers = (context: Context) => {
           type: "Success",
           users: newUsers
         }
+
+        if (context.selection?.id === id) {
+          context.selection = newUser;
+        }
       }
     } else {
       sdk.window.showToast("Failed to update role", {
@@ -43,6 +47,10 @@ export const useUsers = (context: Context) => {
       context.state = {
         type: "Success",
         users: newUsers
+      }
+
+      if (context.selection?.id === id) {
+        context.selection = null;
       }
     }
   }

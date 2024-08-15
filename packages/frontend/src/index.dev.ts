@@ -1,5 +1,6 @@
 import {API} from "backend";
 import { defineApp } from "./app";
+import {clone} from "./utils";
 
 // This is a mock backend for the SDK
 // This is only for development purposes
@@ -15,10 +16,10 @@ const backend: API = {
     }
   },
   updateRole: (id, fields) => {
-    return {
+    return clone({
       id,
       ...fields
-    }
+    })
   },
   deleteRole: (id) => {
   },
@@ -34,10 +35,10 @@ const backend: API = {
     }
   },
   updateUser: (id, fields) => {
-    return {
+    return clone({
       id,
       ...fields
-    }
+    })
   },
   deleteUser: (id) => {
   }
