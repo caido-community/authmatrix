@@ -6,6 +6,7 @@ import MenuBar from 'primevue/menubar';
 import {useRoleStore} from '@/stores/roles';
 import {onMounted} from 'vue';
 import {useUserStore} from '@/stores/users';
+import {useRequestStore} from '@/stores/requests';
 
 const page = ref<"Dashboard" | "User & Roles" | "Settings">("Dashboard");
 const items = [
@@ -30,10 +31,12 @@ const component = computed(() => {
 
 const roleStore = useRoleStore();
 const userStore = useUserStore();
+const requestStore = useRequestStore();
 
 onMounted(() => {
   roleStore.initialize();
   userStore.initialize();
+  requestStore.initialize();
 });
 
 </script>

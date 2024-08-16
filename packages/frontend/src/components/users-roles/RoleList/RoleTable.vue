@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Card from 'primevue/card';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Column from 'primevue/column';

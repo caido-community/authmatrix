@@ -9,54 +9,47 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import {UserState} from '@/types/users';
 import {RoleState} from '@/types/roles';
-import {Role, User} from 'shared';
-import {useUserStore} from '@/stores/users';
+import {BaseRequest, Role, User} from 'shared';
+import {useRequestStore} from '@/stores/requests';
+import {RequestState} from '@/types/requests';
 
-const props = defineProps<{
+defineProps<{
+  state: RequestState & { type: 'Success' },
   userState: UserState & { type: "Success" }
   roleState: RoleState & { type: "Success" }
 }>();
 
-const getRoleValue = (user: User, role: Role) => {
-  return user.roles.some((r) => r.id === role.id);
+const getRoleValue = (request: BaseRequest, role: Role) => {
+  return request.roleIds.some((roleId) => roleId === role.id);
 };
 
-const store = useUserStore();
-const toggleRole = (user: User, role: Role) => {
-  const isEnabled = user.roles.some((r) => r.id === role.id);
-
-  if (isEnabled) {
-    store.updateUser(user.id, {
-      ...user,
-      roles: user.roles.filter((r) => r.id !== role.id),
-    });
-  } else {
-    store.updateUser(user.id, {
-      ...user,
-      roles: [...user.roles, role]
-    });
-  }
+const getUserValue = (request: BaseRequest, user: User) => {
+  return request.userIds.some((userId) => userId === user.id);
 };
 
+const store = useRequestStore();
+const toggleRole = (request: BaseRequest, role: Role) => {
+  store.toggleRequestRole(request.id, role.id);
+};
 
-const columns = [
-  { field: 'id', header: 'ID' },
-  { field: 'host', header: 'Host' },
-  { field: 'path', header: 'Path' },
-]
+const toggleUser = (request: BaseRequest, user: User) => {
+  store.toggleRequestUser(request.id, user.id);
+};
 
-const items = Array.from({ length: 20 }).map((_, index) => ({
-  id: index + 1,
-  host: "localhost",
-  path: "/path",
-}));
+const deleteRequest = (request: BaseRequest) => {
+  store.deleteRequest(request.id);
+};
+
+const devAddRequest = () => {
+  store.addRequest();
+}
 </script>
 
 <template>
   <div class="h-full">
     <Card
       class="h-full"
-      :pt="{ body: { style: { height: '100%', padding: '0.5rem' } }, content: { style: { height: '100%' } } }">
+      :pt="{ body: { class: 'flex-1 min-h-0' }, content: { class: 'h-full' } }">
 
       <template #header>
         <div class="px-4 pt-4 flex justify-between gap-8">
@@ -67,8 +60,9 @@ const items = Array.from({ length: 20 }).map((_, index) => ({
             </IconField>
           </div>
 
+
           <div class="flex items-center gap-4">
-            <!-- Capture requests automatically -->
+            <Button label="+ [DEV] Add request" @click="devAddRequest" />
             <div
               class="flex gap-2"
               v-tooltip="'Automatically add each intercepted request to the testing queue for analysis.'">
@@ -88,27 +82,47 @@ const items = Array.from({ length: 20 }).map((_, index) => ({
 
       <template #content>
         <DataTable
-          :value="items"
+          :value="state.requests"
           striped-rows
           scrollable
           scroll-height="flex"
           size="small"
         >
-          <Column
-            v-for="column in columns"
-            :key="column.field"
-            :field="column.field"
-            :header="column.header"
-            :pt="{ bodyCell: { style: { padding: '0 0.5rem', lineHeight: '21px' } } }"
-          />
-
-          <Column
-            v-for="role in roleState.roles"
-            :key="role.id"
-            :header="role.name"
-          >
+          <Column field="id" header="ID"/>
+          <Column field="host" header="Host">
             <template #body="{ data }">
-              <Checkbox :model-value="getRoleValue(data, role)" binary @change="() => toggleRole(data, role)" />
+              {{ data.host }}:{{ data.port }}
+            </template>
+          </Column>
+
+          <Column field="method" header="Method"/>
+
+          <Column field="path" header="Path"/>
+          <Column v-for="role in roleState.roles" key="id" :header="role.name">
+            <template #body="{ data }">
+              <Checkbox
+                v-tooltip="'Check this box if this role should have access to this resource.'"
+                :model-value="getRoleValue(data, role)"
+                binary
+                @change="() => toggleRole(data, role)" />
+            </template>
+          </Column>
+
+          <Column v-for="user of userState.users" :key="user.id" :header="user.name">
+            <template #body="{ data }">
+              <Checkbox
+                v-tooltip="'Check this box if this user should have access to this resource.'"
+                :model-value="getUserValue(data, user)"
+                binary
+                @change="() => toggleUser(data, user)" />
+            </template>
+          </Column>
+
+          <Column>
+            <template #body="{ data }">
+              <div class="flex justify-end">
+                <Button icon="fas fa-trash" text severity="danger" size="small" @click="() => deleteRequest(data)" />
+              </div>
             </template>
           </Column>
 

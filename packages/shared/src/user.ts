@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { roleSchema } from './role';
 
 const attributesSchema = z.object({
   id: z.string(),
@@ -13,7 +12,7 @@ export type UserAttribute = z.infer<typeof attributesSchema>;
 const userSchema = z.object({
   id: z.string(),
   name: z.string(),
-  roles: z.array(roleSchema),
+  roles: z.array(z.string()),
   attributes: z.array(attributesSchema),
 });
 

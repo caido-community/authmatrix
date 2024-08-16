@@ -14,22 +14,22 @@ defineProps<{
 }>();
 
 const getRoleValue = (user: User, role: Role) => {
-  return user.roles.some((r) => r.id === role.id);
+  return user.roles.some((roleId) => roleId === role.id);
 };
 
 const store = useUserStore();
 const toggleRole = (user: User, role: Role) => {
-  const isEnabled = user.roles.some((r) => r.id === role.id);
+  const isEnabled = user.roles.some((roleId) => roleId === role.id);
 
   if (isEnabled) {
     store.updateUser(user.id, {
       ...user,
-      roles: user.roles.filter((r) => r.id !== role.id),
+      roles: user.roles.filter((roleId) => roleId !== role.id),
     });
   } else {
     store.updateUser(user.id, {
       ...user,
-      roles: [...user.roles, role]
+      roles: [...user.roles, role.id]
     });
   }
 };
