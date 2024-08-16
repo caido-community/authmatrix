@@ -37,8 +37,8 @@ importers:
   packages/frontend:
     dependencies:
       '@caido/primevue':
-        specifier: link:../../../../Caido/ui-kit/packages/primevue
-        version: link:../../../../Caido/ui-kit/packages/primevue
+        specifier: 0.0.1
+        version: 0.0.1
       '@caido/sdk-frontend':
         specifier: 0.39.0
         version: 0.39.0
@@ -164,6 +164,9 @@ packages:
 
   '@caido/plugin-manifest@0.1.3':
     resolution: {integrity: sha512-6PK/mIz2vIImgNFmc34Smiz86ifE+B962xz7uR4MPMxRaRlMlgfL8IvPkbpJyRaXb0mDDVqGzMB82HddpyGQSw==}
+
+  '@caido/primevue@0.0.1':
+    resolution: {integrity: sha512-Lsb7eNzzd4wqzX0l6HK6muWh0Udh27jtimU+Cxyp0AxNKaALz3Rghhcf4+qRThmE//QVlOIwyh+TdzQeXyQGFg==}
 
   '@caido/sdk-backend@0.39.0':
     resolution: {integrity: sha512-SIoC7TBfXhRgU6i1n3OWWMoJUL8IoprB4KMp+Bgq0gPczn8nYioofXLUpYht8W9pHBiMvY6jlcEqYS7ZLimxVg==}
@@ -367,6 +370,10 @@ packages:
 
   '@primevue/icons@4.0.4':
     resolution: {integrity: sha512-eHOuO5jIv/qb3mpo3m1qpDKJxw/B8ZFpAcsKxV4uWhAXkxWo/afmykGO38PVabKc3SSai8bq1zFVXPA1w0cg9g==}
+    engines: {node: '>=12.11.0'}
+
+  '@primevue/themes@4.0.4':
+    resolution: {integrity: sha512-eknRgSo1KQY+r7LEtb/jERhVHq4/Vlu5BKBQ8/Sc/G3DBDHaeJTDqYHWWoTxdaTJkXbC2pJMKFaJ/Vs7LuoIOw==}
     engines: {node: '>=12.11.0'}
 
   '@rollup/rollup-android-arm-eabi@4.16.4':
@@ -1147,6 +1154,10 @@ snapshots:
     dependencies:
       ajv: 8.16.0
 
+  '@caido/primevue@0.0.1':
+    dependencies:
+      '@primevue/themes': 4.0.4
+
   '@caido/sdk-backend@0.39.0': {}
 
   '@caido/sdk-frontend@0.39.0': {}
@@ -1281,6 +1292,10 @@ snapshots:
       '@primevue/core': 4.0.4(vue@3.4.37(typescript@5.4.3))
     transitivePeerDependencies:
       - vue
+
+  '@primevue/themes@4.0.4':
+    dependencies:
+      '@primeuix/styled': 0.0.5
 
   '@rollup/rollup-android-arm-eabi@4.16.4':
     optional: true
