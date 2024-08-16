@@ -2,8 +2,6 @@
 import { RoleList, UserList, UserShow } from "@/components/users-roles";
 import {useRoleStore} from "@/stores/roles";
 import {useUserStore} from "@/stores/users";
-import Splitter from 'primevue/splitter';
-import SplitterPanel from 'primevue/splitterpanel';
 import {computed} from "vue";
 
 const roleStore = useRoleStore();

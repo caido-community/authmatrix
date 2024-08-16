@@ -2,12 +2,42 @@
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import Card from 'primevue/card';
-import SelectButton from 'primevue/selectbutton';
 import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import InputText from 'primevue/inputtext';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+import {UserState} from '@/types/users';
+import {RoleState} from '@/types/roles';
+import {Role, User} from 'shared';
+import {useUserStore} from '@/stores/users';
+
+const props = defineProps<{
+  userState: UserState & { type: "Success" }
+  roleState: RoleState & { type: "Success" }
+}>();
+
+const getRoleValue = (user: User, role: Role) => {
+  return user.roles.some((r) => r.id === role.id);
+};
+
+const store = useUserStore();
+const toggleRole = (user: User, role: Role) => {
+  const isEnabled = user.roles.some((r) => r.id === role.id);
+
+  if (isEnabled) {
+    store.updateUser(user.id, {
+      ...user,
+      roles: user.roles.filter((r) => r.id !== role.id),
+    });
+  } else {
+    store.updateUser(user.id, {
+      ...user,
+      roles: [...user.roles, role]
+    });
+  }
+};
+
 
 const columns = [
   { field: 'id', header: 'ID' },
@@ -71,6 +101,17 @@ const items = Array.from({ length: 20 }).map((_, index) => ({
             :header="column.header"
             :pt="{ bodyCell: { style: { padding: '0 0.5rem', lineHeight: '21px' } } }"
           />
+
+          <Column
+            v-for="role in roleState.roles"
+            :key="role.id"
+            :header="role.name"
+          >
+            <template #body="{ data }">
+              <Checkbox :model-value="getRoleValue(data, role)" binary @change="() => toggleRole(data, role)" />
+            </template>
+          </Column>
+
         </DataTable>
       </template>
     </Card>

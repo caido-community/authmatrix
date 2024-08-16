@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import Dashboard from './Dashboard.vue';
-import Settings from './Settings.vue';
 import UsersRoles from './UsersRoles.vue';
 import MenuBar from 'primevue/menubar';
 import {useRoleStore} from '@/stores/roles';
@@ -18,10 +17,6 @@ const items = [
     label: "Users & Roles",
     command: () => page.value = "User & Roles"
   },
-  {
-    label: "Settings",
-    command: () => page.value = "Settings"
-  },
 ];
 
 const component = computed(() => {
@@ -30,8 +25,6 @@ const component = computed(() => {
       return Dashboard;
     case "User & Roles":
       return UsersRoles;
-    case "Settings":
-      return Settings;
   }
 });
 
@@ -48,7 +41,7 @@ onMounted(() => {
 <template>
   <div id="plugin--autorize">
     <div class="h-full flex flex-col gap-1">
-      <MenuBar :model="items" />
+      <MenuBar :model="items" breakpoint="320px" />
       <div class="flex-1 min-h-0">
         <component :is="component" />
       </div>

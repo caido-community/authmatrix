@@ -7,13 +7,15 @@ export const useUsers = (context: Context) => {
 
   const sdk = useSDK();
   const addUser = async (name: string) => {
-    const result = await sdk.backend.addUser(name);
+    const newUser = await sdk.backend.addUser(name);
 
     if (context.state.type === "Success") {
       context.state = {
         type: "Success",
-        users: [...context.state.users, result]
+        users: [...context.state.users, newUser]
       }
+
+      context.selection = newUser;
     }
   }
 
