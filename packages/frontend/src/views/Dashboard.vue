@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ResultShow, ResultTable } from "@/components/dashboard";
-import {useRequestStore} from "@/stores/requests";
-import {useRoleStore} from "@/stores/roles";
-import {useUserStore} from "@/stores/users";
-import Splitter from 'primevue/splitter';
-import SplitterPanel from 'primevue/splitterpanel';
-import {computed} from "vue";
+import { useRequestStore } from "@/stores/requests";
+import { useRoleStore } from "@/stores/roles";
+import { useUserStore } from "@/stores/users";
+import Splitter from "primevue/splitter";
+import SplitterPanel from "primevue/splitterpanel";
+import { computed } from "vue";
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();

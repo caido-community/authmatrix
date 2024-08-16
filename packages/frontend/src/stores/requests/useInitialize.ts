@@ -1,28 +1,26 @@
-import {useSDK} from "@/plugins/sdk";
-import {Context} from "./types";
+import { useSDK } from "@/plugins/sdk";
+import type { Context } from "./types";
 
 export const useInitialize = (context: Context) => {
+	const sdk = useSDK();
 
-  const sdk = useSDK();
+	const initialize = async () => {
+		switch (context.state.type) {
+			case "Idle":
+			case "Error":
+			case "Success":
+				context.state = { type: "Loading" };
+				context.state = { type: "Success", requests: [] };
+				break;
+			case "Loading":
+				break;
+		}
+	};
 
-  const initialize = async () => {
+	const getState = () => context.state;
 
-    switch (context.state.type) {
-        case "Idle":
-        case "Error":
-        case "Success":
-          context.state = { type: "Loading" }
-          context.state = { type: "Success", requests: [] }
-          break
-        case "Loading":
-          break
-    }
-  }
-
-  const getState = () => context.state
-
-  return {
-    getState,
-    initialize
-  }
-}
+	return {
+		getState,
+		initialize,
+	};
+};

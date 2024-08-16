@@ -1,32 +1,36 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import Dashboard from './Dashboard.vue';
-import UsersRoles from './UsersRoles.vue';
-import MenuBar from 'primevue/menubar';
-import {useRoleStore} from '@/stores/roles';
-import {onMounted} from 'vue';
-import {useUserStore} from '@/stores/users';
-import {useRequestStore} from '@/stores/requests';
+import { useRequestStore } from "@/stores/requests";
+import { useRoleStore } from "@/stores/roles";
+import { useUserStore } from "@/stores/users";
+import MenuBar from "primevue/menubar";
+import { computed, ref } from "vue";
+import { onMounted } from "vue";
+import Dashboard from "./Dashboard.vue";
+import UsersRoles from "./UsersRoles.vue";
 
 const page = ref<"Dashboard" | "User & Roles" | "Settings">("Dashboard");
 const items = [
-  {
-    label: "Dashboard",
-    command: () => page.value = "Dashboard"
-  },
-  {
-    label: "Users & Roles",
-    command: () => page.value = "User & Roles"
-  },
+	{
+		label: "Dashboard",
+		command: () => {
+			page.value = "Dashboard";
+		},
+	},
+	{
+		label: "Users & Roles",
+		command: () => {
+			page.value = "User & Roles";
+		},
+	},
 ];
 
 const component = computed(() => {
-  switch (page.value) {
-    case "Dashboard":
-      return Dashboard;
-    case "User & Roles":
-      return UsersRoles;
-  }
+	switch (page.value) {
+		case "Dashboard":
+			return Dashboard;
+		case "User & Roles":
+			return UsersRoles;
+	}
 });
 
 const roleStore = useRoleStore();
@@ -34,11 +38,10 @@ const userStore = useUserStore();
 const requestStore = useRequestStore();
 
 onMounted(() => {
-  roleStore.initialize();
-  userStore.initialize();
-  requestStore.initialize();
+	roleStore.initialize();
+	userStore.initialize();
+	requestStore.initialize();
 });
-
 </script>
 
 <template>

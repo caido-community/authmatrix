@@ -1,24 +1,23 @@
 <script setup lang="ts">
-import Card from 'primevue/card';
-import Button from 'primevue/button';
-import {RoleState} from '@/types/roles';
-import {UserState} from '@/types/users';
-import {useUserStore} from '@/stores/users';
-import {User} from 'shared';
-import UserTable from './UserTable.vue';
+import { useUserStore } from "@/stores/users";
+import { RoleState } from "@/types/roles";
+import { UserState } from "@/types/users";
+import Button from "primevue/button";
+import Card from "primevue/card";
+import { User } from "shared";
+import UserTable from "./UserTable.vue";
 
 defineProps<{
-  state: UserState & { type: 'Success' };
-  roleState: RoleState & { type: "Success" }
+	state: UserState & { type: "Success" };
+	roleState: RoleState & { type: "Success" };
 }>();
 
 const selection = defineModel<User | null>("selection", { required: true });
 
 const store = useUserStore();
 const onAddUser = () => {
-  store.addUser("New user");
+	store.addUser("New user");
 };
-
 </script>
 
 

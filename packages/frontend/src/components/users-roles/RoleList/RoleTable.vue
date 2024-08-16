@@ -1,33 +1,32 @@
 <script setup lang="ts">
-import DataTable from 'primevue/datatable';
-import Button from 'primevue/button';
-import Column from 'primevue/column';
-import InputText from 'primevue/inputtext';
-import {RoleState} from '@/types/roles';
-import {useRoleStore} from '@/stores/roles';
-import {Role} from 'shared';
+import { useRoleStore } from "@/stores/roles";
+import { RoleState } from "@/types/roles";
+import Button from "primevue/button";
+import Column from "primevue/column";
+import DataTable from "primevue/datatable";
+import InputText from "primevue/inputtext";
+import { Role } from "shared";
 
 const props = defineProps<{
-  state: RoleState & { type: 'Success' };
+	state: RoleState & { type: "Success" };
 }>();
 
 const columns = [
-  { field: 'name', header: 'Name' },
-  { field: 'description', header: 'Description' },
+	{ field: "name", header: "Name" },
+	{ field: "description", header: "Description" },
 ];
 
 const store = useRoleStore();
 const onDeleteRole = (role: Role) => {
-  store.deleteRole(role.id);
+	store.deleteRole(role.id);
 };
 
 const onRoleUpdate = (role: Role, field: keyof Role, value: string) => {
-  store.updateRole(role.id, {
-    ...role,
-    [field]: value,
-  });
+	store.updateRole(role.id, {
+		...role,
+		[field]: value,
+	});
 };
-
 </script>
 
 <template>

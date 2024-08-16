@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { RoleList, UserList, UserShow } from "@/components/users-roles";
-import {useRoleStore} from "@/stores/roles";
-import {useUserStore} from "@/stores/users";
-import {computed} from "vue";
+import { useRoleStore } from "@/stores/roles";
+import { useUserStore } from "@/stores/users";
+import { computed } from "vue";
 
 const roleStore = useRoleStore();
 const userStore = useUserStore();

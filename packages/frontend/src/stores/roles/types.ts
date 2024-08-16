@@ -1,5 +1,5 @@
-import {RoleState} from "@/types/roles"
+import type { RoleState } from "@/types/roles";
 
 export type Context = {
-  state: RoleState
-}
+	state: RoleState;
+};

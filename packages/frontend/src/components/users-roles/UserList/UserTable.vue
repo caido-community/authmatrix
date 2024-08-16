@@ -1,41 +1,41 @@
 <script setup lang="ts">
-import DataTable from 'primevue/datatable';
-import Button from 'primevue/button';
-import Column from 'primevue/column';
-import {RoleState} from '@/types/roles';
-import Checkbox from 'primevue/checkbox';
-import {UserState} from '@/types/users';
-import {useUserStore} from '@/stores/users';
-import {Role, User} from 'shared';
+import { useUserStore } from "@/stores/users";
+import { RoleState } from "@/types/roles";
+import { UserState } from "@/types/users";
+import Button from "primevue/button";
+import Checkbox from "primevue/checkbox";
+import Column from "primevue/column";
+import DataTable from "primevue/datatable";
+import { Role, User } from "shared";
 
 defineProps<{
-  state: UserState & { type: 'Success' };
-  roleState: RoleState & { type: "Success" }
+	state: UserState & { type: "Success" };
+	roleState: RoleState & { type: "Success" };
 }>();
 
 const getRoleValue = (user: User, role: Role) => {
-  return user.roles.some((roleId) => roleId === role.id);
+	return user.roles.some((roleId) => roleId === role.id);
 };
 
 const store = useUserStore();
 const toggleRole = (user: User, role: Role) => {
-  const isEnabled = user.roles.some((roleId) => roleId === role.id);
+	const isEnabled = user.roles.some((roleId) => roleId === role.id);
 
-  if (isEnabled) {
-    store.updateUser(user.id, {
-      ...user,
-      roles: user.roles.filter((roleId) => roleId !== role.id),
-    });
-  } else {
-    store.updateUser(user.id, {
-      ...user,
-      roles: [...user.roles, role.id]
-    });
-  }
+	if (isEnabled) {
+		store.updateUser(user.id, {
+			...user,
+			roles: user.roles.filter((roleId) => roleId !== role.id),
+		});
+	} else {
+		store.updateUser(user.id, {
+			...user,
+			roles: [...user.roles, role.id],
+		});
+	}
 };
 
 const onDeleteUser = (user: User) => {
-  store.deleteUser(user.id);
+	store.deleteUser(user.id);
 };
 </script>
 

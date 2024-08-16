@@ -1,37 +1,47 @@
 <script setup lang="ts">
-import Button from 'primevue/button';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import {User, UserAttribute} from 'shared';
-import {generateID} from '@/utils';
-import Select from 'primevue/select';
-import InputText from 'primevue/inputtext';
+import { generateID } from "@/utils";
+import Button from "primevue/button";
+import Column from "primevue/column";
+import DataTable from "primevue/datatable";
+import InputText from "primevue/inputtext";
+import Select from "primevue/select";
+import { User, UserAttribute } from "shared";
 
 const user = defineModel<User>("user", { required: true });
 
 const onAddAttribute = () => {
-  const id = generateID();
-  user.value.attributes.push({ id, name: 'My attribute', value: 'My value', kind: 'Cookie' });
+	const id = generateID();
+	user.value.attributes.push({
+		id,
+		name: "My attribute",
+		value: "My value",
+		kind: "Cookie",
+	});
 };
 
 const onRemoveAttribute = (attribute: UserAttribute) => {
-  user.value.attributes = user.value.attributes.filter((attr) => attr.id !== attribute.id);
+	user.value.attributes = user.value.attributes.filter(
+		(attr) => attr.id !== attribute.id,
+	);
 };
 
-const onAttributeUpdate = (attribute: UserAttribute, field: keyof UserAttribute, value: string) => {
-  const newAttribute = {
-    ...attribute,
-    [field]: value,
-  }
+const onAttributeUpdate = (
+	attribute: UserAttribute,
+	field: keyof UserAttribute,
+	value: string,
+) => {
+	const newAttribute = {
+		...attribute,
+		[field]: value,
+	};
 
-  user.value.attributes = user.value.attributes.map((attr) => {
-    if (attr.id === attribute.id) {
-      return newAttribute;
-    }
+	user.value.attributes = user.value.attributes.map((attr) => {
+		if (attr.id === attribute.id) {
+			return newAttribute;
+		}
 
-    return attr;
-  });
-
+		return attr;
+	});
 };
 </script>
 

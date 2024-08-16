@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import Card from 'primevue/card';
-import Button from 'primevue/button';
-import {RoleState} from '@/types/roles';
-import {useRoleStore} from '@/stores/roles';
-import RoleTable from './RoleTable.vue';
+import { useRoleStore } from "@/stores/roles";
+import { RoleState } from "@/types/roles";
+import Button from "primevue/button";
+import Card from "primevue/card";
+import RoleTable from "./RoleTable.vue";
 
 defineProps<{
-  state: RoleState & { type: 'Success' };
+	state: RoleState & { type: "Success" };
 }>();
 
 const store = useRoleStore();
 const onAddRole = () => {
-  store.addRole("New role");
+	store.addRole("New role");
 };
-
 </script>
 
 <template>

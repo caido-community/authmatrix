@@ -1,5 +1,5 @@
-import {RequestState} from "@/types/requests"
+import type { RequestState } from "@/types/requests";
 
 export type Context = {
-  state: RequestState
-}
+	state: RequestState;
+};

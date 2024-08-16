@@ -1,48 +1,48 @@
 <script setup lang="ts">
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Card from 'primevue/card';
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
-import InputText from 'primevue/inputtext';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import {UserState} from '@/types/users';
-import {RoleState} from '@/types/roles';
-import {BaseRequest, Role, User} from 'shared';
-import {useRequestStore} from '@/stores/requests';
-import {RequestState} from '@/types/requests';
+import { useRequestStore } from "@/stores/requests";
+import { RequestState } from "@/types/requests";
+import { RoleState } from "@/types/roles";
+import { UserState } from "@/types/users";
+import Button from "primevue/button";
+import Card from "primevue/card";
+import Checkbox from "primevue/checkbox";
+import Column from "primevue/column";
+import DataTable from "primevue/datatable";
+import IconField from "primevue/iconfield";
+import InputIcon from "primevue/inputicon";
+import InputText from "primevue/inputtext";
+import { BaseRequest, Role, User } from "shared";
 
 defineProps<{
-  state: RequestState & { type: 'Success' },
-  userState: UserState & { type: "Success" }
-  roleState: RoleState & { type: "Success" }
+	state: RequestState & { type: "Success" };
+	userState: UserState & { type: "Success" };
+	roleState: RoleState & { type: "Success" };
 }>();
 
 const getRoleValue = (request: BaseRequest, role: Role) => {
-  return request.roleIds.some((roleId) => roleId === role.id);
+	return request.roleIds.some((roleId) => roleId === role.id);
 };
 
 const getUserValue = (request: BaseRequest, user: User) => {
-  return request.userIds.some((userId) => userId === user.id);
+	return request.userIds.some((userId) => userId === user.id);
 };
 
 const store = useRequestStore();
 const toggleRole = (request: BaseRequest, role: Role) => {
-  store.toggleRequestRole(request.id, role.id);
+	store.toggleRequestRole(request.id, role.id);
 };
 
 const toggleUser = (request: BaseRequest, user: User) => {
-  store.toggleRequestUser(request.id, user.id);
+	store.toggleRequestUser(request.id, user.id);
 };
 
 const deleteRequest = (request: BaseRequest) => {
-  store.deleteRequest(request.id);
+	store.deleteRequest(request.id);
 };
 
 const devAddRequest = () => {
-  store.addRequest();
-}
+	store.addRequest();
+};
 </script>
 
 <template>

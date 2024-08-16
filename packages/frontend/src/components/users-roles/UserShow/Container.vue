@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import Card from 'primevue/card';
-import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
+import { useUserStore } from "@/stores/users";
 import { useCloned } from "@vueuse/core";
-import {User} from 'shared';
-import {computed, toRefs} from 'vue';
-import {useUserStore} from '@/stores/users';
+import Button from "primevue/button";
+import Card from "primevue/card";
+import InputText from "primevue/inputtext";
+import { User } from "shared";
+import { computed, toRefs } from "vue";
 
-import AttributeTable from './AttributeTable.vue';
+import AttributeTable from "./AttributeTable.vue";
 
 const props = defineProps<{
-  user: User
+	user: User;
 }>();
 
 const { user } = toRefs(props);
 const { cloned, sync } = useCloned(user);
 
 const isDirty = computed(() => {
-  return JSON.stringify(props.user) !== JSON.stringify(cloned.value);
+	return JSON.stringify(props.user) !== JSON.stringify(cloned.value);
 });
 
 const userStore = useUserStore();
 const onSaveClick = () => {
-  userStore.updateUser(props.user.id, cloned.value);
+	userStore.updateUser(props.user.id, cloned.value);
 };
 
 const onResetClick = () => {
-  sync();
+	sync();
 };
 </script>
 

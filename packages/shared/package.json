@@ -6,7 +6,6 @@
   "license": "CC0-1.0",
   "type": "module",
   "types": "src/index.ts",
-  "scripts": {},
   "dependencies": {
     "zod": "3.23.8"
   }
