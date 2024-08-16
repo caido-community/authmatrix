@@ -54,7 +54,7 @@ const backend: API = {
 			host: "localhost",
 			path: "/",
 			port: 80,
-			protocol: "http" as const,
+			isTls: false,
 			roleIds: [],
 			userIds: [],
 		};

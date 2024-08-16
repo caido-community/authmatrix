@@ -5,7 +5,7 @@ export const baseRequestSchema = z.object({
 	host: z.string(),
 	port: z.number(),
 	path: z.string(),
-	protocol: z.enum(["http", "https"]),
+	isTls: z.boolean(),
 	method: z.string(),
 	roleIds: z.array(z.string()),
 	userIds: z.array(z.string()),

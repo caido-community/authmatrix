@@ -1,4 +1,5 @@
 import type { SDK } from "caido:plugin";
+import type { Request, Response } from "caido:utils";
 import type { BaseRequest } from "shared";
 import { generateID } from "./utils";
 
@@ -13,7 +14,8 @@ export const addRequest = (sdk: SDK) => {
 		id: generateID(),
 		host: "localhost",
 		port: 10134,
-		protocol: "http",
+		path: "/",
+		isTls: false,
 		method: "GET",
 		roleIds: [],
 		userIds: [],
@@ -63,4 +65,25 @@ export const toggleRequestUser = (
 
 		return request;
 	}
+};
+
+export const onInterceptResponse = async (
+	sdk: SDK,
+	request: Request,
+	response: Response,
+) => {
+	requests.push({
+		id: request.getId(),
+		host: request.getHost(),
+		port: request.getPort(),
+		method: request.getMethod(),
+		isTls: request.getTls(),
+		path: request.getPath(),
+		roleIds: [],
+		userIds: [],
+	});
+};
+
+export const registerRequestEvents = (sdk: SDK) => {
+	sdk.events.onInterceptResponse(onInterceptResponse);
 };

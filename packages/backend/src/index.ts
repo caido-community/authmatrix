@@ -3,6 +3,7 @@ import {
 	addRequest,
 	deleteRequest,
 	getRequests,
+	registerRequestEvents,
 	toggleRequestRole,
 	toggleRequestUser,
 } from "./requests";
@@ -49,4 +50,7 @@ export function init(sdk: SDK) {
 	sdk.api.register("deleteRequest", deleteRequest);
 	sdk.api.register("toggleRequestRole", toggleRequestRole);
 	sdk.api.register("toggleRequestUser", toggleRequestUser);
+
+	// Events
+	registerRequestEvents(sdk);
 }

@@ -6,6 +6,7 @@
   "license": "CC0-1.0",
   "type": "module",
   "scripts": {
+    "typecheck": "pnpm -r typecheck",
     "build": "node scripts/clean.js && pnpm -r build && node scripts/pack.js",
     "lint": "biome check --write ./packages/*/src"
   },
