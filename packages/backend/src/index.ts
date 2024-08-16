@@ -9,6 +9,7 @@ import {
 } from "./requests";
 import { addRole, deleteRole, getRoles, updateRole } from "./roles";
 import { addUser, deleteUser, getUsers, updateUser } from "./users";
+import {getSettings, updateSettings} from "./settings";
 
 export type API = DefineAPI<{
 	// Role endpoints
@@ -29,6 +30,10 @@ export type API = DefineAPI<{
 	deleteRequest: typeof deleteRequest;
 	toggleRequestRole: typeof toggleRequestRole;
 	toggleRequestUser: typeof toggleRequestUser;
+
+  // Settings endpoints
+  getSettings: typeof getSettings;
+  updateSettings: typeof updateSettings;
 }>;
 
 export function init(sdk: SDK) {
@@ -50,6 +55,10 @@ export function init(sdk: SDK) {
 	sdk.api.register("deleteRequest", deleteRequest);
 	sdk.api.register("toggleRequestRole", toggleRequestRole);
 	sdk.api.register("toggleRequestUser", toggleRequestUser);
+
+  // Settings endpoints
+  sdk.api.register("getSettings", getSettings);
+  sdk.api.register("updateSettings", updateSettings);
 
 	// Events
 	registerRequestEvents(sdk);

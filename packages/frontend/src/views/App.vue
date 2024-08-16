@@ -7,6 +7,7 @@ import { computed, ref } from "vue";
 import { onMounted } from "vue";
 import Dashboard from "./Dashboard.vue";
 import UsersRoles from "./UsersRoles.vue";
+import {useSettingsStore} from "@/stores/settings";
 
 const page = ref<"Dashboard" | "User & Roles" | "Settings">("Dashboard");
 const items = [
@@ -36,11 +37,13 @@ const component = computed(() => {
 const roleStore = useRoleStore();
 const userStore = useUserStore();
 const requestStore = useRequestStore();
+const settingsStore = useSettingsStore();
 
 onMounted(() => {
 	roleStore.initialize();
 	userStore.initialize();
 	requestStore.initialize();
+  settingsStore.initialize();
 });
 </script>
 

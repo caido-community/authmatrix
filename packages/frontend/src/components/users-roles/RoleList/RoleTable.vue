@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoleStore } from "@/stores/roles";
-import { RoleState } from "@/types/roles";
+import { RoleState } from "@/types";
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";

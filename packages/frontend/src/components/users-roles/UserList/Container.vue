@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from "@/stores/users";
-import { RoleState } from "@/types/roles";
-import { UserState } from "@/types/users";
+import { RoleState } from "@/types";
+import { UserState } from "@/types";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import { User } from "shared";

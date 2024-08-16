@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useRequestStore } from "@/stores/requests";
-import { RequestState } from "@/types/requests";
-import { RoleState } from "@/types/roles";
-import { UserState } from "@/types/users";
+import {useSettingsStore} from "@/stores/settings";
+import { RequestState, SettingsState } from "@/types";
+import { RoleState } from "@/types";
+import { UserState } from "@/types";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Checkbox from "primevue/checkbox";
@@ -17,6 +18,7 @@ defineProps<{
 	state: RequestState & { type: "Success" };
 	userState: UserState & { type: "Success" };
 	roleState: RoleState & { type: "Success" };
+  settingsState: SettingsState & { type: "Success" };
 }>();
 
 const getRoleValue = (request: BaseRequest, role: Role) => {
@@ -43,6 +45,15 @@ const deleteRequest = (request: BaseRequest) => {
 const devAddRequest = () => {
 	store.addRequest();
 };
+
+const settingsStore = useSettingsStore();
+const toggleAutoCaptureRequests = () => {
+  settingsStore.toggleAutoCaptureRequests();
+};
+
+const toggleAutoRunAnalysis = () => {
+  settingsStore.toggleAutoRunAnalysis();
+};
 </script>
 
 <template>
@@ -67,13 +78,19 @@ const devAddRequest = () => {
               class="flex gap-2"
               v-tooltip="'Automatically add each intercepted request to the testing queue for analysis.'">
               <label>Auto-capture requests</label>
-              <Checkbox></Checkbox>
+              <Checkbox
+                binary
+                :model-value="settingsState.settings.autoCaptureRequests"
+                @update:model-value="() => toggleAutoCaptureRequests()" />
             </div>
             <div
               class="flex gap-2"
               v-tooltip="'Automatically trigger the analysis as soon as the request is added to the testing queue.'">
               <label>Auto-run analysis</label>
-              <Checkbox></Checkbox>
+              <Checkbox
+                binary
+                :model-value="settingsState.settings.autoRunAnalysis"
+                @update:model-value="() => toggleAutoRunAnalysis()" />
             </div>
             <Button v-tooltip="'Manually run the analysis on the selected request.'">Analyze</Button>
           </div>

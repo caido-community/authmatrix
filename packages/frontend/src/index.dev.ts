@@ -1,7 +1,7 @@
 import type { API } from "backend";
 import type { BaseRequest } from "shared";
 import { defineApp } from "./app";
-import type { CaidoSDK } from "./types/sdk";
+import type { CaidoSDK } from "./types";
 import { clone } from "./utils";
 
 // This is a mock backend for the SDK
@@ -113,6 +113,15 @@ const backend: API = {
 			return newRequest;
 		}
 	},
+  getSettings: () => {
+    return {
+      autoCaptureRequests: true,
+      autoRunAnalysis: false,
+    };
+  },
+  updateSettings: (newSettings) => {
+    return newSettings;
+  }
 };
 
 const app = defineApp({

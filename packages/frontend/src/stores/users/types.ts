@@ -1,4 +1,4 @@
-import type { UserState } from "@/types/users";
+import type { UserState } from "@/types";
 import type { User } from "shared";
 
 export type Context = {

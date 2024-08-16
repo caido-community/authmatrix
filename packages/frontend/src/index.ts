@@ -1,5 +1,5 @@
 import { defineApp } from "./app";
-import type { CaidoSDK } from "./types/sdk";
+import type { CaidoSDK } from "./types";
 
 export const init = (sdk: CaidoSDK) => {
 	const app = defineApp(sdk);
