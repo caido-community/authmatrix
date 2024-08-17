@@ -6,10 +6,10 @@ import {
 	registerRequestEvents,
 	toggleRequestRole,
 	toggleRequestUser,
-} from "./requests";
-import { addRole, deleteRole, getRoles, updateRole } from "./roles";
-import { addUser, deleteUser, getUsers, updateUser } from "./users";
-import {getSettings, updateSettings} from "./settings";
+} from "./services/requests";
+import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
+import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
+import {getSettings, updateSettings} from "./services/settings";
 
 export type API = DefineAPI<{
 	// Role endpoints

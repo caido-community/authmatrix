@@ -1,10 +1,11 @@
 import type { SDK } from "caido:plugin";
 import type { User } from "shared";
+import {UserStore} from "../stores/users";
 
-const users: User[] = [];
 
 export const getUsers = (sdk: SDK) => {
-	return users;
+  const store = UserStore.get();
+  return store.getUsers();
 };
 
 export const addUser = (sdk: SDK, name: string) => {
@@ -17,22 +18,18 @@ export const addUser = (sdk: SDK, name: string) => {
 		attributes: [],
 	};
 
-	users.push(user);
+  const store = UserStore.get();
+  store.addUser(user);
 
 	return user;
 };
 
 export const deleteUser = (sdk: SDK, id: string) => {
-	const index = users.findIndex((user) => user.id === id);
-	if (index !== -1) {
-		users.splice(index, 1);
-	}
+  const store = UserStore.get();
+  store.deleteUser(id);
 };
 
 export const updateUser = (sdk: SDK, id: string, fields: Omit<User, "id">) => {
-	const user = users.find((user) => user.id === id);
-	if (user) {
-		Object.assign(user, fields);
-		return user;
-	}
+  const store = UserStore.get();
+  return store.updateUser(id, fields);
 };

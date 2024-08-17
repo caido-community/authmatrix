@@ -1,10 +1,12 @@
 import type { SDK } from "caido:plugin";
 import type { Role } from "shared";
+import {RoleStore} from "../stores/roles";
 
-const roles: Role[] = [];
 
 export const getRoles = (sdk: SDK): Role[] => {
-	return roles;
+  const store = RoleStore.get();
+
+  return store.getRoles();
 };
 
 export const addRole = (_sdk: SDK, name: string) => {
@@ -16,22 +18,18 @@ export const addRole = (_sdk: SDK, name: string) => {
 		description: "",
 	};
 
-	roles.push(role);
+  const store = RoleStore.get();
+  store.addRole(role);
 
 	return role;
 };
 
 export const deleteRole = (_sdk: SDK, id: string) => {
-	const index = roles.findIndex((role) => role.id === id);
-	if (index !== -1) {
-		roles.splice(index, 1);
-	}
+  const store = RoleStore.get();
+  store.deleteRole(id);
 };
 
 export const updateRole = (_sdk: SDK, id: string, fields: Omit<Role, "id">) => {
-	const role = roles.find((role) => role.id === id);
-	if (role) {
-		Object.assign(role, fields);
-		return role;
-	}
+  const store = RoleStore.get();
+  return store.updateRole(id, fields);
 };
