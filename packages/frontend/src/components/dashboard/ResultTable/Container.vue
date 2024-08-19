@@ -42,10 +42,6 @@ const deleteRequest = (request: BaseRequest) => {
 	store.deleteRequest(request.id);
 };
 
-const devAddRequest = () => {
-	store.addRequest();
-};
-
 const settingsStore = useSettingsStore();
 const toggleAutoCaptureRequests = () => {
   settingsStore.toggleAutoCaptureRequests();
@@ -53,6 +49,10 @@ const toggleAutoCaptureRequests = () => {
 
 const toggleAutoRunAnalysis = () => {
   settingsStore.toggleAutoRunAnalysis();
+};
+
+const runAnalysis = () => {
+  store.runAnalysis();
 };
 </script>
 
@@ -73,7 +73,6 @@ const toggleAutoRunAnalysis = () => {
 
 
           <div class="flex items-center gap-4">
-            <Button label="+ [DEV] Add request" @click="devAddRequest" />
             <div
               class="flex gap-2"
               v-tooltip="'Automatically add each intercepted request to the testing queue for analysis.'">
@@ -92,7 +91,11 @@ const toggleAutoRunAnalysis = () => {
                 :model-value="settingsState.settings.autoRunAnalysis"
                 @update:model-value="() => toggleAutoRunAnalysis()" />
             </div>
-            <Button v-tooltip="'Manually run the analysis on the selected request.'">Analyze</Button>
+            <Button
+              v-tooltip="'Manually run the analysis on the selected request.'"
+              label="Analyze"
+              :loading="state.analysisState.type === 'Analyzing'"
+              @click="runAnalysis" />
           </div>
         </div>
       </template>
@@ -104,17 +107,21 @@ const toggleAutoRunAnalysis = () => {
           scrollable
           scroll-height="flex"
           size="small"
+          edit-mode="cell"
         >
-          <Column field="id" header="ID"/>
-          <Column field="host" header="Host">
+          <Column header="URL">
             <template #body="{ data }">
-              {{ data.host }}:{{ data.port }}
+              {{ data.meta.method }} {{ data.meta.isTls ? 'https' : 'http' }}://{{ data.meta.host }}:{{ data.meta.port }}
             </template>
           </Column>
 
-          <Column field="method" header="Method"/>
+          <Column field="authSuccessRegex" header="Auth Success Regex">
+            <template #editor="{ data }">
+              <InputText v-model="data.authSuccessRegex" />
+            </template>
+          </Column>
 
-          <Column field="path" header="Path"/>
+
           <Column v-for="role in roleState.roles" key="id" :header="role.name">
             <template #body="{ data }">
               <Checkbox

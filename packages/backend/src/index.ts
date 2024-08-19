@@ -10,6 +10,7 @@ import {
 import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
 import {getSettings, updateSettings} from "./services/settings";
+import {runAnalysis} from "./services/analysis";
 
 export type API = DefineAPI<{
 	// Role endpoints
@@ -34,6 +35,9 @@ export type API = DefineAPI<{
   // Settings endpoints
   getSettings: typeof getSettings;
   updateSettings: typeof updateSettings;
+
+  // Analysis endpoints
+  runAnalysis: typeof runAnalysis;
 }>;
 
 export function init(sdk: SDK) {
@@ -59,6 +63,9 @@ export function init(sdk: SDK) {
   // Settings endpoints
   sdk.api.register("getSettings", getSettings);
   sdk.api.register("updateSettings", updateSettings);
+
+  // Analysis function
+  sdk.api.register("runAnalysis", runAnalysis);
 
 	// Events
 	registerRequestEvents(sdk);

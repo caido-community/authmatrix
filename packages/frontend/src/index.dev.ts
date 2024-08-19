@@ -33,7 +33,7 @@ const backend: API = {
 		return {
 			id: Math.random().toString(),
 			name,
-			roles: [],
+			roleIds: [],
 			attributes: [],
 		};
 	},
@@ -50,11 +50,14 @@ const backend: API = {
 	addRequest: () => {
 		const newRequest = {
 			id: Math.random().toString(),
-			method: "GET",
-			host: "localhost",
-			path: "/",
-			port: 80,
-			isTls: false,
+      authSuccessRegex: "HTTP/1[.]1 200",
+      meta: {
+        method: "GET",
+        host: "localhost",
+        path: "/",
+        port: 80,
+        isTls: false,
+      },
 			roleIds: [],
 			userIds: [],
 		};
@@ -121,6 +124,10 @@ const backend: API = {
   },
   updateSettings: (newSettings) => {
     return newSettings;
+  },
+  runAnalysis: async () => {
+    // Sleep 5000
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 };
 

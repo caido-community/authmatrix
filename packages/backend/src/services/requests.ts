@@ -13,13 +13,16 @@ export const getRequests = (_sdk: SDK): BaseRequest[] => {
 export const addRequest = (sdk: SDK) => {
 	const newRequest: BaseRequest = {
 		id: generateID(),
-		host: "localhost",
-		port: 10134,
-		path: "/",
-		isTls: false,
-		method: "GET",
+    authSuccessRegex: "HTTP/1[.]1 200",
 		roleIds: [],
 		userIds: [],
+    meta: {
+      host: "localhost",
+      port: 10134,
+      path: "/",
+      isTls: false,
+      method: "GET",
+    },
 	};
 
   const store = RequestStore.get();
@@ -60,13 +63,16 @@ export const onInterceptResponse = async (
   const store = RequestStore.get();
   store.addRequest({
     id: request.getId(),
-    host: request.getHost(),
-    port: request.getPort(),
-    method: request.getMethod(),
-    isTls: request.getTls(),
-    path: request.getPath(),
+    authSuccessRegex: `HTTP/1[.]1 ${response.getCode()}`,
     roleIds: [],
     userIds: [],
+    meta: {
+      host: request.getHost(),
+      port: request.getPort(),
+      method: request.getMethod(),
+      isTls: request.getTls(),
+      path: request.getPath(),
+    },
   });
 };
 

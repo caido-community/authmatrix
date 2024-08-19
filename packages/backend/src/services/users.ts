@@ -14,7 +14,7 @@ export const addUser = (sdk: SDK, name: string) => {
 	const user: User = {
 		id,
 		name,
-		roles: [],
+		roleIds: [],
 		attributes: [],
 	};
 

@@ -12,7 +12,7 @@ export type UserAttribute = z.infer<typeof attributesSchema>;
 const userSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	roles: z.array(z.string()),
+	roleIds: z.array(z.string()),
 	attributes: z.array(attributesSchema),
 });
 

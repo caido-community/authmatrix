@@ -12,7 +12,7 @@ export const useRequests = (context: Context) => {
 					request.id === newRequest.id ? newRequest : request,
 				);
 				context.state = {
-					type: "Success",
+          ...context.state,
 					requests: newRequests,
 				};
 			}
@@ -32,7 +32,7 @@ export const useRequests = (context: Context) => {
 					request.id === newRequest.id ? newRequest : request,
 				);
 				context.state = {
-					type: "Success",
+          ...context.state,
 					requests: newRequests,
 				};
 			}
@@ -48,7 +48,7 @@ export const useRequests = (context: Context) => {
 
 		if (context.state.type === "Success") {
 			context.state = {
-				type: "Success",
+        ...context.state,
 				requests: [...context.state.requests, newRequest],
 			};
 		}
@@ -62,7 +62,7 @@ export const useRequests = (context: Context) => {
 				(request) => request.id !== id,
 			);
 			context.state = {
-				type: "Success",
+        ...context.state,
 				requests: newRequests,
 			};
 		}

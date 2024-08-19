@@ -3,6 +3,7 @@ import { reactive } from "vue";
 import type { Context } from "./types";
 import { useInitialize } from "./useInitialize";
 import { useRequests } from "./useRequests";
+import {useAnalyze} from "./useAnalyze";
 
 export const useRequestStore = defineStore("stores.requests", () => {
 	const context: Context = reactive({
@@ -12,5 +13,6 @@ export const useRequestStore = defineStore("stores.requests", () => {
 	return {
 		...useInitialize(context),
 		...useRequests(context),
+    ...useAnalyze(context),
 	};
 });

@@ -9,7 +9,13 @@ export type RequestState =
 	| { type: "Idle" }
 	| { type: "Loading" }
 	| { type: "Error" }
-	| { type: "Success"; requests: BaseRequest[] };
+	| {
+    type: "Success";
+    requests: BaseRequest[],
+    analysisState:
+      | { type: "Idle" }
+      | { type: "Analyzing" }
+  };
 
 export type RoleState =
 	| { type: "Idle" }
