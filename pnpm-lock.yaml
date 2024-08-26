@@ -40,8 +40,8 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
       '@caido/sdk-frontend':
-        specifier: 0.39.0
-        version: 0.39.0
+        specifier: 0.40.1-beta.0
+        version: 0.40.1-beta.0
       '@fortawesome/fontawesome-free':
         specifier: 6.6.0
         version: 6.6.0
@@ -177,8 +177,8 @@ packages:
   '@caido/sdk-backend@0.40.0':
     resolution: {integrity: sha512-eXld4JGqlgY8NBv18t1hglpBfIAUDsfRhIStJuMc3uqwGNcBuBePTOoLFpmjkIFwTB/RuapvWH/BxhwDqpuJ+A==}
 
-  '@caido/sdk-frontend@0.39.0':
-    resolution: {integrity: sha512-XIY24OLh6hcefMdltgfvae2E4t8EhPpikYCihthYlSLJ+LaabRTPePVcdPS4avlMkQPIWm+S19cHCn+lNuNx6Q==}
+  '@caido/sdk-frontend@0.40.1-beta.0':
+    resolution: {integrity: sha512-9g9HZ5sOw9jzbTfw/suHdabIS/NvhifTz+AO0oyTss3PgYQEcJKU48UWnmbdV/JA1DXxMmJ4J7iiHnE+b06RQA==}
 
   '@esbuild/aix-ppc64@0.20.2':
     resolution: {integrity: sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g==}
@@ -1172,7 +1172,7 @@ snapshots:
     dependencies:
       '@caido/quickjs-types': 0.2.1
 
-  '@caido/sdk-frontend@0.39.0': {}
+  '@caido/sdk-frontend@0.40.1-beta.0': {}
 
   '@esbuild/aix-ppc64@0.20.2':
     optional: true
