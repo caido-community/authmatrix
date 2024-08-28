@@ -5,12 +5,14 @@ import type { BaseRequest } from "shared";
 import { generateID } from "../utils";
 import {RequestStore} from "../stores/requests";
 
+import type { BackendEvents } from "../types";
+
 export const getRequests = (_sdk: SDK): BaseRequest[] => {
   const store = RequestStore.get();
   return store.getRequests();
 };
 
-export const addRequest = (sdk: SDK) => {
+export const addRequest = (sdk: SDK<never, BackendEvents>) => {
 	const newRequest: BaseRequest = {
 		id: generateID(),
     authSuccessRegex: "HTTP/1[.]1 200",
@@ -27,17 +29,18 @@ export const addRequest = (sdk: SDK) => {
 
   const store = RequestStore.get();
   store.addRequest(newRequest);
+  sdk.api.send("requests:created", newRequest);
 
 	return newRequest;
 };
 
-export const deleteRequest = (sdk: SDK, requestId: string) => {
+export const deleteRequest = (_sdk: SDK, requestId: string) => {
   const store = RequestStore.get();
   store.deleteRequest(requestId);
 };
 
 export const toggleRequestRole = (
-	sdk: SDK,
+	_sdk: SDK,
 	requestId: string,
 	roleId: string,
 ) => {
@@ -47,7 +50,7 @@ export const toggleRequestRole = (
 };
 
 export const toggleRequestUser = (
-	sdk: SDK,
+	_sdk: SDK,
 	requestId: string,
 	userId: string,
 ) => {
@@ -56,12 +59,12 @@ export const toggleRequestUser = (
 };
 
 export const onInterceptResponse = async (
-	sdk: SDK,
+	sdk: SDK<never, BackendEvents>,
 	request: Request,
 	response: Response,
 ) => {
-  const store = RequestStore.get();
-  store.addRequest({
+
+  const baseRequest: BaseRequest = {
     id: request.getId(),
     authSuccessRegex: `HTTP/1[.]1 ${response.getCode()}`,
     roleIds: [],
@@ -73,7 +76,11 @@ export const onInterceptResponse = async (
       isTls: request.getTls(),
       path: request.getPath(),
     },
-  });
+  }
+
+  const store = RequestStore.get();
+  store.addRequest(baseRequest);
+  sdk.api.send("requests:created", baseRequest);
 };
 
 export const registerRequestEvents = (sdk: SDK) => {

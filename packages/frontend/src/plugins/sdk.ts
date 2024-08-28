@@ -1,8 +1,8 @@
 import type { Caido } from "@caido/sdk-frontend";
-import type { API } from "backend";
+import type { API, BackendEvents } from "backend";
 import { type InjectionKey, type Plugin, inject } from "vue";
 
-type CaidoSDK = Caido<API>;
+type CaidoSDK = Caido<API, BackendEvents>;
 
 const KEY: InjectionKey<CaidoSDK> = Symbol("CaidoSDK");
 

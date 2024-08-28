@@ -17,6 +17,19 @@ export const useInitialize = (context: Context) => {
 			case "Loading":
 				break;
 		}
+
+    sdk.backend.onEvent("requests:created", (request) => {
+      if (context.state.type === "Success") {
+        if (context.state.requests.some((r) => r.id === request.id)) {
+          return;
+        }
+
+        context.state = {
+          ...context.state,
+          requests: [...context.state.requests, request],
+        };
+      }
+    });
 	};
 
 	const getState = () => context.state;

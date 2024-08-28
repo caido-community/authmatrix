@@ -31,8 +31,8 @@ importers:
         version: link:../shared
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.40.0
-        version: 0.40.0
+        specifier: 0.40.1-beta.5
+        version: 0.40.1-beta.5
 
   packages/frontend:
     dependencies:
@@ -40,8 +40,8 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
       '@caido/sdk-frontend':
-        specifier: 0.40.1-beta.0
-        version: 0.40.1-beta.0
+        specifier: 0.40.1-beta.2
+        version: 0.40.1-beta.2
       '@fortawesome/fontawesome-free':
         specifier: 6.6.0
         version: 6.6.0
@@ -62,8 +62,8 @@ importers:
         version: 3.4.37(typescript@5.5.4)
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.39.0
-        version: 0.39.0
+        specifier: 0.40.1-beta.5
+        version: 0.40.1-beta.5
       '@vitejs/plugin-vue':
         specifier: 5.1.2
         version: 5.1.2(vite@5.2.7)(vue@3.4.37(typescript@5.5.4))
@@ -168,17 +168,17 @@ packages:
   '@caido/primevue@0.0.1':
     resolution: {integrity: sha512-Lsb7eNzzd4wqzX0l6HK6muWh0Udh27jtimU+Cxyp0AxNKaALz3Rghhcf4+qRThmE//QVlOIwyh+TdzQeXyQGFg==}
 
-  '@caido/quickjs-types@0.2.1':
-    resolution: {integrity: sha512-ucUw9Mrd3qiSl9KKS6b9YRMZJy4q0QlNL4ZH/eun9vcQj1jzDe44YnO0Ku0q+F9ebDh2ixX2kA9dKuPgPmgJ1Q==}
+  '@caido/quickjs-types@0.4.0':
+    resolution: {integrity: sha512-E+1QNCEiIdK6tkqhVhBLcOXdZ2qpEGpwvNPxdUFo2ucK5KWhfTsOH+iDV6WInSQXg/if1IPykuKAUYL4Q4JULQ==}
 
-  '@caido/sdk-backend@0.39.0':
-    resolution: {integrity: sha512-SIoC7TBfXhRgU6i1n3OWWMoJUL8IoprB4KMp+Bgq0gPczn8nYioofXLUpYht8W9pHBiMvY6jlcEqYS7ZLimxVg==}
+  '@caido/sdk-backend@0.40.1-beta.5':
+    resolution: {integrity: sha512-qyqdlmM3c1qTGW3IJ56zsVkdKl1aLGauXNaA3ip+yQ+Z2UVqEapUd3gQx87JpuW+IsayRspLk+mOyViw5s0c0Q==}
 
-  '@caido/sdk-backend@0.40.0':
-    resolution: {integrity: sha512-eXld4JGqlgY8NBv18t1hglpBfIAUDsfRhIStJuMc3uqwGNcBuBePTOoLFpmjkIFwTB/RuapvWH/BxhwDqpuJ+A==}
+  '@caido/sdk-frontend@0.40.1-beta.2':
+    resolution: {integrity: sha512-/8dgLjgWJF88X422k1oSRSAx7LO2rQsY8v6f7qwqm8TD8S1h9C3X4HJTdq1rvt4r5/iSwVbl2sG9dJ9z5lbvFA==}
 
-  '@caido/sdk-frontend@0.40.1-beta.0':
-    resolution: {integrity: sha512-9g9HZ5sOw9jzbTfw/suHdabIS/NvhifTz+AO0oyTss3PgYQEcJKU48UWnmbdV/JA1DXxMmJ4J7iiHnE+b06RQA==}
+  '@caido/sdk-shared@0.1.0':
+    resolution: {integrity: sha512-blffEE1ha74X/FKRC31HEh94b7gZ8riZqLDbD1Hpp7ihdlvaiQgap8i2Z6BppAaycks83+rUXTLLR6DxXNvdiQ==}
 
   '@esbuild/aix-ppc64@0.20.2':
     resolution: {integrity: sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g==}
@@ -893,6 +893,11 @@ packages:
     resolution: {integrity: sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==}
     engines: {node: ^10 || ^12 || >=14}
 
+  prettier@3.3.2:
+    resolution: {integrity: sha512-rAVeHYMcv8ATV5d508CFdn+8/pHPpXeIid1DdrPwXnaAdH7cqjVbpJaT5eq4yRAFU/lsbwYwSF/n5iNrdJHPQA==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   primevue@4.0.4:
     resolution: {integrity: sha512-1moEddbczJ1+yEyfeYQk3xOQB64iCjjM//f+HSXs6YrKVVC0QjPFx9XPNXrr2JjHlp+6D7EpPZtsmcrfA9jWkA==}
     engines: {node: '>=12.11.0'}
@@ -1164,15 +1169,18 @@ snapshots:
     dependencies:
       '@primevue/themes': 4.0.4
 
-  '@caido/quickjs-types@0.2.1': {}
-
-  '@caido/sdk-backend@0.39.0': {}
-
-  '@caido/sdk-backend@0.40.0':
+  '@caido/quickjs-types@0.4.0':
     dependencies:
-      '@caido/quickjs-types': 0.2.1
+      prettier: 3.3.2
 
-  '@caido/sdk-frontend@0.40.1-beta.0': {}
+  '@caido/sdk-backend@0.40.1-beta.5':
+    dependencies:
+      '@caido/quickjs-types': 0.4.0
+      '@caido/sdk-shared': 0.1.0
+
+  '@caido/sdk-frontend@0.40.1-beta.2': {}
+
+  '@caido/sdk-shared@0.1.0': {}
 
   '@esbuild/aix-ppc64@0.20.2':
     optional: true
@@ -1797,6 +1805,8 @@ snapshots:
       nanoid: 3.3.7
       picocolors: 1.0.1
       source-map-js: 1.2.0
+
+  prettier@3.3.2: {}
 
   primevue@4.0.4(vue@3.4.37(typescript@5.5.4)):
     dependencies:
