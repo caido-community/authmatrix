@@ -12,7 +12,10 @@ export type RequestState =
 	| {
     type: "Success";
     requests: BaseRequest[],
-    selection: BaseRequest | undefined,
+    selection: {
+      request: BaseRequest | undefined,
+      variant: "Original" | { type: "User", id: string } | { type: "Role", id: string }
+    },
     analysisState:
       | { type: "Idle" }
       | { type: "Analyzing" }
