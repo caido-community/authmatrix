@@ -1,30 +1,30 @@
 import type { SDK } from "caido:plugin";
 
-import {RequestStore} from "../stores/requests";
+import {TemplateStore} from "../stores/templates";
 import {UserStore} from "../stores/users";
 
 
-import type { BaseRequest, User } from "shared";
+import type { Template, User } from "shared";
 import {RequestSpec} from "caido:utils";
 
 export const runAnalysis = async (sdk: SDK) => {
-  const requestStore = RequestStore.get();
+  const templateStore = TemplateStore.get();
   const userStore = UserStore.get();
 
   const users = userStore.getUsers();
-  const requests = requestStore.getRequests();
+  const templates = templateStore.getTemplates();
 
-  sdk.console.debug(`Analyzing ${requests.length} requests with ${users.length} users`);
-  const promises = requests.map((request) => {
+  sdk.console.debug(`Analyzing ${templates.length} templates with ${users.length} users`);
+  const promises = templates.map((template) => {
     return users.map((user) => {
-      return analyzeRequest(sdk, request, user);
+      return analyzeRequest(sdk, template, user);
     });
   });
 
   await Promise.all(promises);
 }
 
-const analyzeRequest = async (sdk: SDK, request: BaseRequest, user: User) => {
+const analyzeRequest = async (sdk: SDK, request: Template, user: User) => {
   // Retrieve RequestSpec given an ID
   // Here we mock this behavior as we don't have a real implementation yet
   const protocol = request.meta.isTls ? "https" : "http";

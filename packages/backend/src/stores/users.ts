@@ -1,4 +1,4 @@
-import {User} from "shared";
+import type {User} from "shared";
 
 export class UserStore {
   private static _store?: UserStore;

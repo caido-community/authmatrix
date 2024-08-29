@@ -1,6 +1,6 @@
 import {DefineEvents} from "caido:plugin";
-import {BaseRequest} from "shared";
+import {Template} from "shared";
 
 export type BackendEvents = DefineEvents<{
-  "requests:created": (request: BaseRequest) => void;
+  "templates:created": (template: Template) => void;
 }>;

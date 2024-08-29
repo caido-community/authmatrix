@@ -1,21 +1,23 @@
-import type { BaseRequest, Settings } from "shared";
+import type { Template, Settings } from "shared";
 import type { Role, User } from "shared";
 import type { Caido } from "@caido/sdk-frontend";
 import type { API } from "backend";
 
 export type CaidoSDK = Caido<API>;
 
-export type RequestState =
+export type TemplateVariant = {
+  templateId: string,
+  userId: string | undefined
+}
+
+export type TemplateState =
 	| { type: "Idle" }
 	| { type: "Loading" }
 	| { type: "Error" }
 	| {
     type: "Success";
-    requests: BaseRequest[],
-    selection: {
-      request: BaseRequest | undefined,
-      variant: "Original" | { type: "User", id: string } | { type: "Role", id: string }
-    },
+    templates: Template[],
+    selection: TemplateVariant | undefined,
     analysisState:
       | { type: "Idle" }
       | { type: "Analyzing" }

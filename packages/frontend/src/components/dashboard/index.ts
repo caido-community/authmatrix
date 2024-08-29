@@ -1,3 +1,4 @@
 export * from "./ResultRequest";
-export * from "./ResultTable";
+export * from "./ResultResponse";
+export * from "./TemplateTable";
 export * from "./ResultTabs";

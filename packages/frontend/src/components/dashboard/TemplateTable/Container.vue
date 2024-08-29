@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useRequestStore } from "@/stores/requests";
+import { useTemplateStore } from "@/stores/templates";
 import {useSettingsStore} from "@/stores/settings";
-import { RequestState, SettingsState } from "@/types";
+import { TemplateState, SettingsState } from "@/types";
 import { RoleState } from "@/types";
 import { UserState } from "@/types";
 import Button from "primevue/button";
@@ -12,34 +12,34 @@ import DataTable from "primevue/datatable";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import type { BaseRequest, Role, User } from "shared";
+import type { Template, Role, User } from "shared";
 
 defineProps<{
-	state: RequestState & { type: "Success" };
+	state: TemplateState & { type: "Success" };
 	userState: UserState & { type: "Success" };
 	roleState: RoleState & { type: "Success" };
   settingsState: SettingsState & { type: "Success" };
 }>();
 
-const getRoleValue = (request: BaseRequest, role: Role) => {
+const getRoleValue = (request: Template, role: Role) => {
 	return request.roleIds.some((roleId) => roleId === role.id);
 };
 
-const getUserValue = (request: BaseRequest, user: User) => {
+const getUserValue = (request: Template, user: User) => {
 	return request.userIds.some((userId) => userId === user.id);
 };
 
-const store = useRequestStore();
-const toggleRole = (request: BaseRequest, role: Role) => {
-	store.toggleRequestRole(request.id, role.id);
+const store = useTemplateStore();
+const toggleRole = (request: Template, role: Role) => {
+	store.toggleTemplateRole(request.id, role.id);
 };
 
-const toggleUser = (request: BaseRequest, user: User) => {
-	store.toggleRequestUser(request.id, user.id);
+const toggleUser = (request: Template, user: User) => {
+	store.toggleTemplateUser(request.id, user.id);
 };
 
-const deleteRequest = (request: BaseRequest) => {
-	store.deleteRequest(request.id);
+const deleteTemplate = (request: Template) => {
+	store.deleteTemplate(request.id);
 };
 
 const settingsStore = useSettingsStore();
@@ -102,7 +102,7 @@ const runAnalysis = () => {
 
       <template #content>
         <DataTable
-          :value="state.requests"
+          :value="state.templates"
           striped-rows
           scrollable
           scroll-height="flex"
@@ -147,11 +147,10 @@ const runAnalysis = () => {
           <Column>
             <template #body="{ data }">
               <div class="flex justify-end">
-                <Button icon="fas fa-trash" text severity="danger" size="small" @click="() => deleteRequest(data)" />
+                <Button icon="fas fa-trash" text severity="danger" size="small" @click="() => deleteTemplate(data)" />
               </div>
             </template>
           </Column>
-
         </DataTable>
       </template>
     </Card>

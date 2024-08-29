@@ -1,12 +1,12 @@
 import type { DefineAPI, SDK } from "caido:plugin";
 import {
-	addRequest,
-	deleteRequest,
-	getRequests,
-	registerRequestEvents,
-	toggleRequestRole,
-	toggleRequestUser,
-} from "./services/requests";
+	addTemplate,
+	deleteTemplate,
+	getTemplates,
+	registerTemplateEvents,
+	toggleTemplateRole,
+	toggleTemplateUser,
+} from "./services/templates";
 import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
 import {getSettings, updateSettings} from "./services/settings";
@@ -27,12 +27,12 @@ export type API = DefineAPI<{
 	updateUser: typeof updateUser;
 	deleteUser: typeof deleteUser;
 
-	// Request endpoints
-	getRequests: typeof getRequests;
-	addRequest: typeof addRequest;
-	deleteRequest: typeof deleteRequest;
-	toggleRequestRole: typeof toggleRequestRole;
-	toggleRequestUser: typeof toggleRequestUser;
+	// Template endpoints
+	getTemplates: typeof getTemplates;
+	addTemplate: typeof addTemplate;
+	deleteTemplate: typeof deleteTemplate;
+	toggleTemplateRole: typeof toggleTemplateRole;
+	toggleTemplateUser: typeof toggleTemplateUser;
 
   // Settings endpoints
   getSettings: typeof getSettings;
@@ -55,12 +55,12 @@ export function init(sdk: SDK<API>) {
 	sdk.api.register("updateUser", updateUser);
 	sdk.api.register("deleteUser", deleteUser);
 
-	// Request endpoints
-	sdk.api.register("getRequests", getRequests);
-	sdk.api.register("addRequest", addRequest);
-	sdk.api.register("deleteRequest", deleteRequest);
-	sdk.api.register("toggleRequestRole", toggleRequestRole);
-	sdk.api.register("toggleRequestUser", toggleRequestUser);
+	// Template endpoints
+	sdk.api.register("getTemplates", getTemplates);
+	sdk.api.register("addTemplate", addTemplate);
+	sdk.api.register("deleteTemplate", deleteTemplate);
+	sdk.api.register("toggleTemplateRole", toggleTemplateRole);
+	sdk.api.register("toggleTemplateUser", toggleTemplateUser);
 
   // Settings endpoints
   sdk.api.register("getSettings", getSettings);
@@ -70,5 +70,5 @@ export function init(sdk: SDK<API>) {
   sdk.api.register("runAnalysis", runAnalysis);
 
 	// Events
-	registerRequestEvents(sdk);
+	registerTemplateEvents(sdk);
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRequestStore } from "@/stores/requests";
+import { useTemplateStore } from "@/stores/templates";
 import { useRoleStore } from "@/stores/roles";
 import { useUserStore } from "@/stores/users";
 import MenuBar from "primevue/menubar";
@@ -36,13 +36,13 @@ const component = computed(() => {
 
 const roleStore = useRoleStore();
 const userStore = useUserStore();
-const requestStore = useRequestStore();
+const templateStore = useTemplateStore();
 const settingsStore = useSettingsStore();
 
 onMounted(() => {
 	roleStore.initialize();
 	userStore.initialize();
-	requestStore.initialize();
+	templateStore.initialize();
   settingsStore.initialize();
 });
 </script>

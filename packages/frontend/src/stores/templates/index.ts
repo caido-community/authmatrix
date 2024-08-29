@@ -2,10 +2,10 @@ import { defineStore } from "pinia";
 import { reactive } from "vue";
 import type { Context } from "./types";
 import { useInitialize } from "./useInitialize";
-import { useRequests } from "./useRequests";
+import { useTemplates } from "./useTemplates";
 import {useAnalyze} from "./useAnalyze";
 
-export const useRequestStore = defineStore("stores.requests", () => {
+export const useTemplateStore = defineStore("stores.templates", () => {
 	const context: Context = reactive({
 		state: { type: "Idle" },
     selection: undefined
@@ -13,7 +13,7 @@ export const useRequestStore = defineStore("stores.requests", () => {
 
 	return {
 		...useInitialize(context),
-		...useRequests(context),
+		...useTemplates(context),
     ...useAnalyze(context),
 	};
 });

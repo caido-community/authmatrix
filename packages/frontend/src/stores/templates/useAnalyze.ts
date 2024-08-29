@@ -1,4 +1,4 @@
-import {useSDK} from "@/plugins/sdk";
+import { useSDK } from "@/plugins/sdk";
 import type { Context } from "./types";
 
 export const useAnalyze = (context: Context) => {
