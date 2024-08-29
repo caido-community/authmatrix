@@ -4,8 +4,14 @@ import {TemplateStore} from "../stores/templates";
 import {UserStore} from "../stores/users";
 
 
-import type { Template, User } from "shared";
+import type { AnalysisResult, Template, User } from "shared";
 import {RequestSpec} from "caido:utils";
+import {AnalysisStore} from "../stores/analysis";
+
+export const getResults = (_sdk: SDK): AnalysisResult[] => {
+  const store = AnalysisStore.get();
+  return store.getResults();
+};
 
 export const runAnalysis = async (sdk: SDK) => {
   const templateStore = TemplateStore.get();

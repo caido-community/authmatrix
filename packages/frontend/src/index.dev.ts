@@ -1,5 +1,5 @@
 import type { API } from "backend";
-import type { Template } from "shared";
+import type { AnalysisResult, Template } from "shared";
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
 import { clone } from "./utils";
@@ -22,7 +22,10 @@ const templates: Template[] = [
   }
 ];
 
-const backend: API = {
+const results: AnalysisResult[] = [];
+
+const backend: API & Record<string, unknown> = {
+  onEvent: () => {},
 	getRoles: () => {
 		return [];
 	},
@@ -142,13 +145,16 @@ const backend: API = {
   runAnalysis: async () => {
     // Sleep 5000
     await new Promise((resolve) => setTimeout(resolve, 5000));
-  }
+  },
+  getResults: () => {
+    return results;
+  },
 };
 
 const app = defineApp({
 	backend,
   ui: {
-    httpTemplateEditor: () => ({
+    httpRequestEditor: () => ({
       getElement: () => document.createElement("div")
     }),
     httpResponseEditor: () => ({

@@ -26,19 +26,12 @@ const isDisabled = computed(() => {
           <SelectButton v-model="selection" :options="[{ name: 'Original' }]" option-label="name" :disabled="isDisabled" />
         </div>
 
-        <div class="flex flex-col gap-1">
+        <div v-if="userState.users.length !== 0" class="flex flex-col gap-1">
           <SelectButton
-            v-if="userState.users.length !== 0"
             v-model="selection"
             :options="userState.users"
             option-label="name"
             :disabled="isDisabled" />
-          <SelectButton
-            v-else
-            v-model="selection"
-            :options="[{ name: 'No users found' }]"
-            option-label="name"
-            disabled />
         </div>
       </div>
     </template>

@@ -1,4 +1,4 @@
-import type { Template, Settings } from "shared";
+import type { Template, Settings, AnalysisResult } from "shared";
 import type { Role, User } from "shared";
 import type { Caido } from "@caido/sdk-frontend";
 import type { API } from "backend";
@@ -17,6 +17,7 @@ export type TemplateState =
 	| {
     type: "Success";
     templates: Template[],
+    results: AnalysisResult[],
     selection: TemplateVariant | undefined,
     analysisState:
       | { type: "Idle" }
