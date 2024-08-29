@@ -12,7 +12,7 @@ import DataTable from "primevue/datatable";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import { BaseRequest, Role, User } from "shared";
+import type { BaseRequest, Role, User } from "shared";
 
 defineProps<{
 	state: RequestState & { type: "Success" };

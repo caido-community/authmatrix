@@ -1,4 +1,4 @@
-import {Role} from "shared";
+import type {Role} from "shared";
 
 export class RoleStore {
   private static _store?: RoleStore;

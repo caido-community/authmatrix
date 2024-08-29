@@ -6,7 +6,7 @@ import Button from "primevue/button";
 import Checkbox from "primevue/checkbox";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import { Role, User } from "shared";
+import type { Role, User } from "shared";
 
 defineProps<{
 	state: UserState & { type: "Success" };

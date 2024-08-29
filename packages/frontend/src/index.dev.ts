@@ -133,6 +133,14 @@ const backend: API = {
 
 const app = defineApp({
 	backend,
+  ui: {
+    httpRequestEditor: () => ({
+      getElement: () => document.createElement("div")
+    }),
+    httpResponseEditor: () => ({
+      getElement: () => document.createElement("div")
+    }),
+  }
 } as unknown as CaidoSDK);
 
 app.mount("#app");

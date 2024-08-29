@@ -1,2 +1,2 @@
-export * from "./ResultShow";
+export * from "./ResultRequest";
 export * from "./ResultTable";

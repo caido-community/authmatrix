@@ -5,7 +5,7 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
-import { User, UserAttribute } from "shared";
+import type { User, UserAttribute } from "shared";
 
 const user = defineModel<User>("user", { required: true });
 

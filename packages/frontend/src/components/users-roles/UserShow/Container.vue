@@ -4,7 +4,7 @@ import { useCloned } from "@vueuse/core";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
-import { User } from "shared";
+import type { User } from "shared";
 import { computed, toRefs } from "vue";
 
 import AttributeTable from "./AttributeTable.vue";

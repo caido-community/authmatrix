@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ResultShow, ResultTable } from "@/components/dashboard";
+import { ResultRequest, ResultTable } from "@/components/dashboard";
+import {ResultResponse} from "@/components/dashboard/ResultResponse";
 import { useRequestStore } from "@/stores/requests";
 import { useRoleStore } from "@/stores/roles";
 import {useSettingsStore} from "@/stores/settings";
 import { useUserStore } from "@/stores/users";
-import Splitter from "primevue/splitter";
-import SplitterPanel from "primevue/splitterpanel";
 import { computed } from "vue";
 
 const userStore = useUserStore();
@@ -21,24 +20,27 @@ const settingsState = computed(() => settingsStore.getState());
 
 <template>
   <div class="h-full flex flex-col gap-1">
-    <Splitter class="h-full" layout="vertical">
-      <SplitterPanel :size="50">
-        <ResultTable
-          v-if="
-            roleState.type === 'Success' &&
-            userState.type === 'Success' &&
-            requestState.type === 'Success' &&
-            settingsState.type === 'Success'"
-          :state="requestState"
-          :user-state="userState"
-          :role-state="roleState"
-          :settings-state="settingsState"
-        />
-      </SplitterPanel>
+    <div class="w-full h-1/2">
+      <ResultTable
+        v-if="
+          roleState.type === 'Success' &&
+          userState.type === 'Success' &&
+          requestState.type === 'Success' &&
+          settingsState.type === 'Success'"
+        :state="requestState"
+        :user-state="userState"
+        :role-state="roleState"
+        :settings-state="settingsState"
+      />
+    </div>
+    <div class="w-full h-1/2 flex gap-1">
+      <div class="h-full w-1/2">
+        <ResultRequest />
+      </div>
 
-      <SplitterPanel :size="50">
-        <ResultShow />
-      </SplitterPanel>
-    </Splitter>
+      <div class="h-full w-1/2">
+        <ResultResponse />
+      </div>
+    </div>
   </div>
 </template>

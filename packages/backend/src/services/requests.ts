@@ -85,4 +85,7 @@ export const onInterceptResponse = async (
 
 export const registerRequestEvents = (sdk: SDK) => {
 	sdk.events.onInterceptResponse(onInterceptResponse);
+  sdk.events.onInterceptRequest((sdk, request: Request) => {
+    request
+  })
 };

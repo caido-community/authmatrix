@@ -4,7 +4,7 @@ import { RoleState } from "@/types";
 import { UserState } from "@/types";
 import Button from "primevue/button";
 import Card from "primevue/card";
-import { User } from "shared";
+import type { User } from "shared";
 import UserTable from "./UserTable.vue";
 
 defineProps<{

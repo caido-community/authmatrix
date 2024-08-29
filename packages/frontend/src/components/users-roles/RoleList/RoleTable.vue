@@ -5,7 +5,7 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
-import { Role } from "shared";
+import type { Role } from "shared";
 
 const props = defineProps<{
 	state: RoleState & { type: "Success" };
