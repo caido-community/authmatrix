@@ -1,6 +1,8 @@
 import { useSDK } from "@/plugins/sdk";
 import type { Context } from "./types";
 import {computed} from "vue";
+import {TemplateVariant} from "@/types";
+import {Template, User} from "shared";
 
 export const useTemplates = (context: Context) => {
 	const sdk = useSDK();
@@ -73,26 +75,63 @@ export const useTemplates = (context: Context) => {
 		}
 	};
 
-	const requestSelection = computed({
-		get: () => {
-      if (context.state.type === "Success") {
-        return context.state.selection;
-      }
-    },
-		set: (newSelection) => {
-      if (context.state.type === "Success") {
-        context.state.selection = newSelection;
-      }
-		},
-	});
+  const setSelection = (newTemplate: Template | undefined) => {
+    if (context.state.type === "Success") {
 
+      if (!newTemplate) {
+        context.state = {
+          ...context.state,
+          selection: undefined,
+        };
+      } else {
+        context.state = {
+          ...context.state,
+          selection: {
+            templateId: newTemplate.id,
+            userId: undefined,
+          },
+        };
+      }
+    }
+  }
 
+  const setSelectionUser = (userId: string | undefined) => {
+    const state = context.state;
+    if (state.type === "Success" && state.selection) {
+      if (!userId) {
+        context.state = {
+          ...state,
+          selection: {
+            templateId: state.selection.templateId,
+            userId: undefined,
+          },
+        };
+        return;
+      }
+
+      const selection = state.selection;
+      const hasResult = state.results.some((result) => {
+        return result.userId === userId && result.templateId === selection.templateId ;
+      });
+
+      if (hasResult) {
+        context.state = {
+          ...state,
+          selection: {
+            templateId: selection.templateId,
+            userId,
+          },
+        };
+      }
+    }
+  }
 
 	return {
 		addTemplate,
 		deleteTemplate,
 		toggleTemplateRole,
 		toggleTemplateUser,
-    requestSelection,
+    setSelection,
+    setSelectionUser,
 	};
 };

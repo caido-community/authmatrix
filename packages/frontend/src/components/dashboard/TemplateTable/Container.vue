@@ -13,8 +13,9 @@ import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import type { Template, Role, User } from "shared";
+import {computed} from "vue";
 
-defineProps<{
+const props = defineProps<{
 	state: TemplateState & { type: "Success" };
 	userState: UserState & { type: "Success" };
 	roleState: RoleState & { type: "Success" };
@@ -54,6 +55,15 @@ const toggleAutoRunAnalysis = () => {
 const runAnalysis = () => {
   store.runAnalysis();
 };
+
+const selection = computed({
+  get: () => {
+    return props.state.templates.find((t) => t.id === props.state.selection?.templateId);
+  },
+  set: (template) => {
+    store.setSelection(template)
+  }
+});
 </script>
 
 <template>
@@ -109,7 +119,8 @@ const runAnalysis = () => {
           size="small"
           edit-mode="cell"
           selection-mode="single"
-          v-model:selection="store.requestSelection"
+          data-key="id"
+          v-model:selection="selection"
         >
           <Column header="URL">
             <template #body="{ data }">

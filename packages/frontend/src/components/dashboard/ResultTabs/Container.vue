@@ -3,6 +3,7 @@ import Card from 'primevue/card';
 import SelectButton from 'primevue/selectbutton';
 import {TemplateState, RoleState, UserState} from '@/types';
 import {computed, ref} from 'vue';
+import {useTemplateStore} from '@/stores/templates';
 
 const props = defineProps<{
 	templateState: TemplateState & { type: "Success" };
@@ -10,11 +11,49 @@ const props = defineProps<{
 	roleState: RoleState & { type: "Success" };
 }>();
 
-const selection = ref();
 
-const isDisabled = computed(() => {
-  return !props.templateState.selection;
+const options = computed(() => {
+  const selection = props.templateState.selection;
+  if (!selection) return [];
+
+  const users = props.userState.users
+    .map((user) => user.id);
+
+  return ["Original", ...users];
 });
+
+const getLabel = (option: string) => {
+  if (option === "Original") return option;
+  const user = props.userState.users.find((u) => u.id === option);
+  return user?.name ?? "N/A";
+};
+
+const isDisabled = (option: string) => {
+
+  if (option === "Original") return false;
+
+  const template = props.templateState.selection?.templateId;
+  const hasResult = props.templateState.results.some((result) => {
+    return result.templateId === template && result.userId === option;
+  });
+
+  return !hasResult;
+};
+
+const store = useTemplateStore();
+const selection = computed({
+  get: () => {
+    return props.templateState.selection?.userId ?? "Original";
+  },
+  set: (option) => {
+    if (option === "Original") {
+      store.setSelectionUser(undefined);
+    } else {
+      store.setSelectionUser(option);
+    }
+  }
+});
+
 
 </script>
 
@@ -22,16 +61,21 @@ const isDisabled = computed(() => {
   <Card :pt="{ body: { class: 'p-3' } }">
     <template #content>
       <div class="flex gap-2 items-center w-full">
-        <div class = "flex flex-col gap-1">
-          <SelectButton v-model="selection" :options="[{ name: 'Original' }]" option-label="name" :disabled="isDisabled" />
-        </div>
-
-        <div v-if="userState.users.length !== 0" class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1">
           <SelectButton
             v-model="selection"
-            :options="userState.users"
-            option-label="name"
-            :disabled="isDisabled" />
+            :options="options"
+            :option-disabled="isDisabled"
+            :allow-empty="false"
+            >
+            <template #option="{ option }">
+              <span v-if="option === 'Original'">{{ option }}</span>
+              <span class="flex items-center gap-2" v-else>
+                <span class="text-xs fas fa-user"></span>
+                {{ getLabel(option) }}
+              </span>
+            </template>
+          </SelectButton>
         </div>
       </div>
     </template>

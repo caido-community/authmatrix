@@ -1,5 +1,5 @@
 import type { API } from "backend";
-import type { AnalysisResult, Template } from "shared";
+import type { AnalysisResult, Template, User } from "shared";
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
 import { clone } from "./utils";
@@ -22,7 +22,20 @@ const templates: Template[] = [
   }
 ];
 
-const results: AnalysisResult[] = [];
+const results: AnalysisResult[] = [{
+  id: "1",
+  userId: "1",
+  requestId: "1",
+  templateId: "1",
+  status: "Enforced",
+}];
+
+const users: User[] = [{
+  id: "1",
+  name: "admin",
+  roleIds: [],
+  attributes: [],
+}]
 
 const backend: API & Record<string, unknown> = {
   onEvent: () => {},
@@ -44,7 +57,7 @@ const backend: API & Record<string, unknown> = {
 	},
 	deleteRole: (id) => {},
 	getUsers: () => {
-		return [];
+    return users;
 	},
 	addUser: (name) => {
 		return {
