@@ -8,6 +8,7 @@ import {useAnalyze} from "./useAnalyze";
 export const useRequestStore = defineStore("stores.requests", () => {
 	const context: Context = reactive({
 		state: { type: "Idle" },
+    selection: undefined
 	});
 
 	return {

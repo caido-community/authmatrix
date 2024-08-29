@@ -6,9 +6,24 @@ import { clone } from "./utils";
 
 // This is a mock backend for the SDK
 // This is only for development purposes
-const requests: BaseRequest[] = [];
+const requests: BaseRequest[] = [
+  {
+    id: "1",
+    authSuccessRegex: "HTTP/1[.]1 200",
+    meta: {
+      method: "GET",
+      host: "localhost",
+      path: "/",
+      port: 80,
+      isTls: false,
+    },
+    roleIds: [],
+    userIds: [],
+  }
+];
 
 const backend: API = {
+  onEvent: () => {},
 	getRoles: () => {
 		return [];
 	},

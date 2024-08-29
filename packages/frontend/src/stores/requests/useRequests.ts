@@ -1,5 +1,6 @@
 import { useSDK } from "@/plugins/sdk";
 import type { Context } from "./types";
+import {computed} from "vue";
 
 export const useRequests = (context: Context) => {
 	const sdk = useSDK();
@@ -64,14 +65,31 @@ export const useRequests = (context: Context) => {
 			context.state = {
         ...context.state,
 				requests: newRequests,
+        selection: context.state.selection?.id === id ? newRequests[0] : context.state.selection,
 			};
 		}
 	};
+
+	const requestSelection = computed({
+		get: () => {
+      if (context.state.type === "Success") {
+        return context.state.selection;
+      }
+    },
+		set: (newSelection) => {
+      if (context.state.type === "Success") {
+        context.state.selection = newSelection;
+      }
+		},
+	});
+
+
 
 	return {
 		addRequest,
 		deleteRequest,
 		toggleRequestRole,
 		toggleRequestUser,
+    requestSelection,
 	};
 };

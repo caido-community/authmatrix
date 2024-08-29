@@ -108,6 +108,8 @@ const runAnalysis = () => {
           scroll-height="flex"
           size="small"
           edit-mode="cell"
+          selection-mode="single"
+          v-model:selection="store.requestSelection"
         >
           <Column header="URL">
             <template #body="{ data }">

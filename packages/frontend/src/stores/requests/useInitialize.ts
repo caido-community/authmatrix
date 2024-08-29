@@ -11,7 +11,7 @@ export const useInitialize = (context: Context) => {
 			case "Success": {
 				context.state = { type: "Loading" };
 				const requests = await sdk.backend.getRequests();
-				context.state = { type: "Success", requests, analysisState: { type: "Idle" } };
+				context.state = { type: "Success", requests, selection: requests[0], analysisState: { type: "Idle" } };
 				break;
 			}
 			case "Loading":

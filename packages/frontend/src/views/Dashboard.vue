@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ResultRequest, ResultTable } from "@/components/dashboard";
+import { ResultRequest, ResultTable, ResultTabs } from "@/components/dashboard";
 import {ResultResponse} from "@/components/dashboard/ResultResponse";
 import { useRequestStore } from "@/stores/requests";
 import { useRoleStore } from "@/stores/roles";
@@ -33,6 +33,17 @@ const settingsState = computed(() => settingsStore.getState());
         :settings-state="settingsState"
       />
     </div>
+    <div class="w-full">
+      <ResultTabs
+        v-if="roleState.type === 'Success' &&
+              userState.type === 'Success' &&
+              requestState.type === 'Success'"
+        :state="requestState"
+        :user-state="userState"
+        :role-state="roleState"
+      />
+    </div>
+
     <div class="w-full h-1/2 flex gap-1">
       <div class="h-full w-1/2">
         <ResultRequest />
