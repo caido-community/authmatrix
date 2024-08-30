@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const options = computed(() => {
   const selection = props.templateState.selectionState;
-  if (selection.type === "None") return [];
+  if (selection.type === "None") return ["Original"];
 
   const users = props.userState.users
     .map((user) => user.id);
@@ -29,8 +29,8 @@ const getLabel = (option: string) => {
 
 const isDisabled = (option: string) => {
 
-  if (option === "Original") return false;
   if (props.templateState.selectionState.type === "None") return true;
+  if (option === "Original") return false;
 
   const template = props.templateState.selectionState.templateId;
   const hasResult = props.templateState.results.some((result) => {

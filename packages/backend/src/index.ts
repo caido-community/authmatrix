@@ -64,15 +64,14 @@ export function init(sdk: SDK<API>) {
 	sdk.api.register("toggleTemplateRole", toggleTemplateRole);
 	sdk.api.register("toggleTemplateUser", toggleTemplateUser);
 
-  // Result endpoints
-  sdk.api.register("getResults", getResults);
-
   // Settings endpoints
   sdk.api.register("getSettings", getSettings);
   sdk.api.register("updateSettings", updateSettings);
 
   // Analysis function
   sdk.api.register("runAnalysis", runAnalysis);
+  sdk.api.register("getResults", getResults);
+  sdk.api.register("getRequest", getRequest);
 
 	// Events
 	registerTemplateEvents(sdk);

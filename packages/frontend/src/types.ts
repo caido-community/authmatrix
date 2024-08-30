@@ -5,15 +5,7 @@ import type { API } from "backend";
 
 export type CaidoSDK = Caido<API>;
 
-export type TemplateState =
-	| { type: "Idle" }
-	| { type: "Loading" }
-	| { type: "Error" }
-	| {
-    type: "Success";
-    templates: Template[],
-    results: AnalysisResult[],
-    selectionState:
+export type SelectionState =
       | { type: "None" }
       | { type: "Loading", templateId: string, userId: string | undefined }
       | { type: "Error", templateId: string, userId: string | undefined }
@@ -26,9 +18,22 @@ export type TemplateState =
           raw: string,
         }
       }
-    analysisState:
+
+export type AnalysisState =
       | { type: "Idle" }
-      | { type: "Analyzing" }
+      | { type: "Analyzing" };
+
+
+export type TemplateState =
+	| { type: "Idle" }
+	| { type: "Loading" }
+	| { type: "Error" }
+	| {
+    type: "Success";
+    templates: Template[],
+    results: AnalysisResult[],
+    selectionState: SelectionState
+    analysisState: AnalysisState
   };
 
 export type RoleState =
