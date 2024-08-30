@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import {useSDK} from "@/plugins/sdk";
-import {onMounted, ref} from "vue";
+import {TemplateState} from "@/types";
 
-const sdk = useSDK();
-const editor = sdk.ui.httpResponseEditor();
+import None from "./None.vue";
+import Loading from "./Loading.vue";
+import Show from "./Show.vue";
+import Error from "./Error.vue";
 
-const editorRoot = ref();
-onMounted(() => {
-  editorRoot.value.appendChild(editor.getElement());
-});
+const props = defineProps<{
+  templateState: TemplateState & { type: "Success" };
+}>();
+
 </script>
 
 <template>
-  <div ref="editorRoot" class="h-full"></div>
+  <None v-if="props.templateState.selectionState.type === 'None'" />
+  <Loading v-else-if="props.templateState.selectionState.type === 'Loading'" />
+  <Error v-else-if="props.templateState.selectionState.type === 'Error'" />
+  <Show v-else :selection-state="props.templateState.selectionState" />
 </template>
