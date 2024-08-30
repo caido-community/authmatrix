@@ -40,8 +40,8 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
       '@caido/sdk-frontend':
-        specifier: 0.40.1-beta.2
-        version: 0.40.1-beta.2
+        specifier: 0.40.1-beta.3
+        version: 0.40.1-beta.3(@codemirror/view@6.33.0)
       '@fortawesome/fontawesome-free':
         specifier: 6.6.0
         version: 6.6.0
@@ -174,11 +174,19 @@ packages:
   '@caido/sdk-backend@0.40.1-beta.5':
     resolution: {integrity: sha512-qyqdlmM3c1qTGW3IJ56zsVkdKl1aLGauXNaA3ip+yQ+Z2UVqEapUd3gQx87JpuW+IsayRspLk+mOyViw5s0c0Q==}
 
-  '@caido/sdk-frontend@0.40.1-beta.2':
-    resolution: {integrity: sha512-/8dgLjgWJF88X422k1oSRSAx7LO2rQsY8v6f7qwqm8TD8S1h9C3X4HJTdq1rvt4r5/iSwVbl2sG9dJ9z5lbvFA==}
+  '@caido/sdk-frontend@0.40.1-beta.3':
+    resolution: {integrity: sha512-iuj8ypYrH+chYDy6y8fcNRn5Dl8We7AxldQ7mKEfqezfFdepSrcBVGWWMesHNNJRvFpIvPC59twrzUy+4rG0DA==}
+    peerDependencies:
+      '@codemirror/view': ^6.0.0
 
   '@caido/sdk-shared@0.1.0':
     resolution: {integrity: sha512-blffEE1ha74X/FKRC31HEh94b7gZ8riZqLDbD1Hpp7ihdlvaiQgap8i2Z6BppAaycks83+rUXTLLR6DxXNvdiQ==}
+
+  '@codemirror/state@6.4.1':
+    resolution: {integrity: sha512-QkEyUiLhsJoZkbumGZlswmAhA7CBU02Wrz7zvH4SrcifbsqwlXShVXg65f3v/ts57W3dqyamEriMhij1Z3Zz4A==}
+
+  '@codemirror/view@6.33.0':
+    resolution: {integrity: sha512-AroaR3BvnjRW8fiZBalAaK+ZzB5usGgI014YKElYZvQdNH5ZIidHlO+cyf/2rWzyBFRkvG6VhiXeAEbC53P2YQ==}
 
   '@esbuild/aix-ppc64@0.20.2':
     resolution: {integrity: sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g==}
@@ -988,6 +996,9 @@ packages:
     resolution: {integrity: sha512-iq6eVVI64nQQTRYq2KtEg2d2uU7LElhTJwsH4YzIHZshxlgZms/wIc4VoDQTlG/IvVIrBKG06CrZnp0qv7hkcQ==}
     engines: {node: '>=12'}
 
+  style-mod@4.1.2:
+    resolution: {integrity: sha512-wnD1HyVqpJUI2+eKZ+eo1UwghftP6yuFheBqqe+bWCotBjC2K1YnteJILRMs3SM4V/0dLEW1SC27MWP5y+mwmw==}
+
   sucrase@3.35.0:
     resolution: {integrity: sha512-8EbVDiu9iN/nESwxeSxDKe0dunta1GOlHufmSSXxMD2z2/tMZpDMpvXQGsc+ajGo8y2uYUmixaSRUc/QPoQ0GA==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -1087,6 +1098,9 @@ packages:
       typescript:
         optional: true
 
+  w3c-keyname@2.2.8:
+    resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
@@ -1178,9 +1192,19 @@ snapshots:
       '@caido/quickjs-types': 0.4.0
       '@caido/sdk-shared': 0.1.0
 
-  '@caido/sdk-frontend@0.40.1-beta.2': {}
+  '@caido/sdk-frontend@0.40.1-beta.3(@codemirror/view@6.33.0)':
+    dependencies:
+      '@codemirror/view': 6.33.0
 
   '@caido/sdk-shared@0.1.0': {}
+
+  '@codemirror/state@6.4.1': {}
+
+  '@codemirror/view@6.33.0':
+    dependencies:
+      '@codemirror/state': 6.4.1
+      style-mod: 4.1.2
+      w3c-keyname: 2.2.8
 
   '@esbuild/aix-ppc64@0.20.2':
     optional: true
@@ -1917,6 +1941,8 @@ snapshots:
     dependencies:
       ansi-regex: 6.0.1
 
+  style-mod@4.1.2: {}
+
   sucrase@3.35.0:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.5
@@ -2010,6 +2036,8 @@ snapshots:
       '@vue/shared': 3.4.37
     optionalDependencies:
       typescript: 5.5.4
+
+  w3c-keyname@2.2.8: {}
 
   which@2.0.2:
     dependencies:
