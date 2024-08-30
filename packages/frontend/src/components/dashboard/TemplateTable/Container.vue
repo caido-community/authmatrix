@@ -58,7 +58,9 @@ const runAnalysis = () => {
 
 const selection = computed({
   get: () => {
-    return props.state.templates.find((t) => t.id === props.state.selection?.templateId);
+    if (props.state.selectionState.type === "None") return undefined;
+    const templateId = props.state.selectionState.templateId;
+    return props.state.templates.find((t) => t.id === templateId);
   },
   set: (template) => {
     store.setSelection(template)

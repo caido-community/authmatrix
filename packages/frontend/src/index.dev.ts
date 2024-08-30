@@ -9,6 +9,7 @@ import { clone } from "./utils";
 const templates: Template[] = [
   {
     id: "1",
+    requestId: "1",
     authSuccessRegex: "HTTP/1[.]1 200",
     meta: {
       method: "GET",
@@ -80,6 +81,7 @@ const backend: API & Record<string, unknown> = {
 	addTemplate: () => {
 		const newTemplate = {
 			id: Math.random().toString(),
+      requestId: "1",
       authSuccessRegex: "HTTP/1[.]1 200",
       meta: {
         method: "GET",
@@ -162,6 +164,12 @@ const backend: API & Record<string, unknown> = {
   getResults: () => {
     return results;
   },
+  getRequest: async (id) => {
+    return {
+      id,
+      raw: "hello"
+    }
+  }
 };
 
 const app = defineApp({

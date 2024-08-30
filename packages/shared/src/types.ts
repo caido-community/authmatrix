@@ -5,6 +5,7 @@ export const templateSchema = z.object({
   authSuccessRegex: z.string(),
 	roleIds: z.array(z.string()),
 	userIds: z.array(z.string()),
+  requestId: z.string(),
   meta: z.object({
     host: z.string(),
     port: z.number(),

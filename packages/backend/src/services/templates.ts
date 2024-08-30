@@ -15,6 +15,7 @@ export const getTemplates = (_sdk: SDK): Template[] => {
 export const addTemplate = (sdk: SDK<never, BackendEvents>) => {
 	const newTemplate: Template = {
 		id: generateID(),
+    requestId: generateID(),
     authSuccessRegex: "HTTP/1[.]1 200",
 		roleIds: [],
 		userIds: [],
@@ -65,7 +66,8 @@ export const onInterceptResponse = async (
 ) => {
 
   const template: Template = {
-    id: request.getId(),
+    id: generateID(),
+    requestId: request.getId(),
     authSuccessRegex: `HTTP/1[.]1 ${response.getCode()}`,
     roleIds: [],
     userIds: [],

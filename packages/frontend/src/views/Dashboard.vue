@@ -46,7 +46,7 @@ const settingsState = computed(() => settingsStore.getState());
 
     <div class="w-full h-1/2 flex gap-1">
       <div class="h-full w-1/2">
-        <ResultRequest />
+        <ResultRequest v-if="templateState.type === 'Success'" :template-state="templateState" />
       </div>
 
       <div class="h-full w-1/2">

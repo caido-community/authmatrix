@@ -10,7 +10,7 @@ import {
 import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
 import {getSettings, updateSettings} from "./services/settings";
-import {getResults, runAnalysis} from "./services/analysis";
+import {getRequest, getResults, runAnalysis} from "./services/analysis";
 
 export type { BackendEvents } from "./types";
 
@@ -41,6 +41,7 @@ export type API = DefineAPI<{
   // Analysis endpoints
   runAnalysis: typeof runAnalysis;
   getResults: typeof getResults;
+  getRequest: typeof getRequest;
 }>;
 
 export function init(sdk: SDK<API>) {

@@ -1,6 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
 import type { Context } from "./types";
-import { TemplateVariant } from "@/types";
 
 export const useInitialize = (context: Context) => {
 	const sdk = useSDK();
@@ -16,12 +15,51 @@ export const useInitialize = (context: Context) => {
           sdk.backend.getResults()
         ]);
 
-        const firstTemplate = templates[0];
-        const selection: TemplateVariant | undefined = firstTemplate
-          ? { templateId: firstTemplate.id, userId: undefined }
-          : undefined;
+				context.state = {
+          type: "Success",
+          templates,
+          results,
+          selectionState: {
+            type: "None"
+          },
+          analysisState: { type: "Idle" }
+        };
 
-				context.state = { type: "Success", templates, results, selection, analysisState: { type: "Idle" } };
+        const firstTemplate = templates[0];
+        if (firstTemplate) {
+          context.state = {
+            ...context.state,
+            selectionState: {
+              type: "Loading",
+              templateId: firstTemplate.id,
+              userId: undefined
+            }
+          }
+
+          try {
+            const result = await sdk.backend.getRequest(firstTemplate.requestId);
+            context.state = {
+              ...context.state,
+              selectionState: {
+                type: "Success",
+                templateId: firstTemplate.id,
+                userId: undefined,
+                request: result
+              }
+            }
+          } catch {
+            context.state = {
+              ...context.state,
+              selectionState: {
+                type: "Error",
+                templateId: firstTemplate.id,
+                userId: undefined
+              }
+            }
+          }
+        }
+
+
 				break;
 			}
 			case "Loading":

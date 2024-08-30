@@ -13,6 +13,20 @@ export const getResults = (_sdk: SDK): AnalysisResult[] => {
   return store.getResults();
 };
 
+export const getRequest = async (sdk: SDK, id: string) => {
+  return {
+    id,
+    raw: "hello from request"
+  }
+}
+
+export const getResponse = async (sdk: SDK, id: string) => {
+  return {
+    id,
+    raw: "hello from response"
+  }
+}
+
 export const runAnalysis = async (sdk: SDK) => {
   const templateStore = TemplateStore.get();
   const userStore = UserStore.get();

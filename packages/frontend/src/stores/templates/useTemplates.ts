@@ -1,7 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
 import type { Context } from "./types";
-import {computed} from "vue";
-import {TemplateVariant} from "@/types";
 import {Template, User} from "shared";
 
 export const useTemplates = (context: Context) => {
@@ -65,63 +63,147 @@ export const useTemplates = (context: Context) => {
 				(template) => template.id !== id,
 			);
 
-      const newSelection = context.state.selection?.templateId === id ? undefined : context.state.selection;
-
 			context.state = {
         ...context.state,
 				templates: newTemplates,
-        selection: newSelection,
 			};
+
+      if (context.state.selectionState.type !== "None") {
+        if (context.state.selectionState.templateId === id) {
+          context.state = {
+            ...context.state,
+            selectionState: {
+              type: "None",
+            },
+          };
+        }
+      }
 		}
 	};
 
-  const setSelection = (newTemplate: Template | undefined) => {
+  const setSelection = async (newTemplate: Template | undefined) => {
     if (context.state.type === "Success") {
 
       if (!newTemplate) {
         context.state = {
           ...context.state,
-          selection: undefined,
+          selectionState: {
+            type: "None",
+          },
         };
       } else {
         context.state = {
           ...context.state,
-          selection: {
+          selectionState: {
+            type: "Loading",
             templateId: newTemplate.id,
             userId: undefined,
           },
         };
+
+        try {
+          const result = await sdk.backend.getRequest(newTemplate.requestId);
+          context.state = {
+            ...context.state,
+            selectionState: {
+              type: "Success",
+              templateId: newTemplate.id,
+              userId: undefined,
+              request: result,
+            },
+          };
+        } catch {
+          context.state = {
+            ...context.state,
+            selectionState: {
+              type: "Error",
+              templateId: newTemplate.id,
+              userId: undefined,
+            },
+          };
+          return;
+        }
       }
     }
   }
 
-  const setSelectionUser = (userId: string | undefined) => {
+  const setSelectionUser = async (userId: string | undefined) => {
     const state = context.state;
-    if (state.type === "Success" && state.selection) {
-      if (!userId) {
-        context.state = {
-          ...state,
-          selection: {
-            templateId: state.selection.templateId,
-            userId: undefined,
-          },
-        };
-        return;
-      }
+    if (state.type === "Success" && state.selectionState.type !== "None") {
+      const templateId = state.selectionState.templateId;
 
-      const selection = state.selection;
-      const hasResult = state.results.some((result) => {
-        return result.userId === userId && result.templateId === selection.templateId ;
+      const result = state.results.find((result) => {
+        return result.userId === userId && result.templateId === templateId;
       });
 
-      if (hasResult) {
+      if (userId && result) {
         context.state = {
           ...state,
-          selection: {
-            templateId: selection.templateId,
+          selectionState: {
+            type: "Loading",
+            templateId,
             userId,
           },
         };
+
+        try {
+          const request = await sdk.backend.getRequest(result.requestId);
+          context.state = {
+            ...state,
+            selectionState: {
+              type: "Success",
+              templateId,
+              userId,
+              request,
+            },
+          };
+        } catch {
+          context.state = {
+            ...state,
+            selectionState: {
+              type: "Error",
+              templateId,
+              userId,
+            },
+          };
+        }
+
+        return;
+      }
+
+      const requestId = state.templates.find((template) => template.id === templateId)?.requestId;
+      if (!userId && requestId) {
+        context.state = {
+          ...state,
+          selectionState: {
+            type: "Loading",
+            templateId,
+            userId,
+          }
+        }
+
+        try {
+          const request = await sdk.backend.getRequest(requestId);
+
+          context.state = {
+            ...state,
+            selectionState: {
+              type: "Success",
+              templateId,
+              userId,
+              request,
+            },
+          };
+        } catch {
+          context.state = {
+            ...state,
+            selectionState: {
+              type: "Error",
+              templateId,
+              userId,
+            },
+          };
+        }
       }
     }
   }
