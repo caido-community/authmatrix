@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { useTemplateStore } from "@/stores/templates";
 import { useRoleStore } from "@/stores/roles";
+import { useSettingsStore } from "@/stores/settings";
+import { useTemplateStore } from "@/stores/templates";
 import { useUserStore } from "@/stores/users";
 import MenuBar from "primevue/menubar";
 import { computed, ref } from "vue";
 import { onMounted } from "vue";
 import Dashboard from "./Dashboard.vue";
 import UsersRoles from "./UsersRoles.vue";
-import {useSettingsStore} from "@/stores/settings";
 
 const page = ref<"Dashboard" | "User & Roles" | "Settings">("Dashboard");
 const items = [
-	{
-		label: "Dashboard",
-		command: () => {
-			page.value = "Dashboard";
-		},
-	},
-	{
-		label: "Users & Roles",
-		command: () => {
-			page.value = "User & Roles";
-		},
-	},
+  {
+    label: "Dashboard",
+    command: () => {
+      page.value = "Dashboard";
+    },
+  },
+  {
+    label: "Users & Roles",
+    command: () => {
+      page.value = "User & Roles";
+    },
+  },
 ];
 
 const component = computed(() => {
-	switch (page.value) {
-		case "Dashboard":
-			return Dashboard;
-		case "User & Roles":
-			return UsersRoles;
-	}
+  switch (page.value) {
+    case "Dashboard":
+      return Dashboard;
+    case "User & Roles":
+      return UsersRoles;
+  }
 });
 
 const roleStore = useRoleStore();
@@ -40,9 +40,9 @@ const templateStore = useTemplateStore();
 const settingsStore = useSettingsStore();
 
 onMounted(() => {
-	roleStore.initialize();
-	userStore.initialize();
-	templateStore.initialize();
+  roleStore.initialize();
+  userStore.initialize();
+  templateStore.initialize();
   settingsStore.initialize();
 });
 </script>

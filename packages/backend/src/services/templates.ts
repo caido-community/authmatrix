@@ -2,8 +2,8 @@ import type { SDK } from "caido:plugin";
 import type { Request, Response } from "caido:utils";
 import type { Template } from "shared";
 
+import { TemplateStore } from "../stores/templates";
 import { generateID } from "../utils";
-import {TemplateStore} from "../stores/templates";
 
 import type { BackendEvents } from "../types";
 
@@ -13,12 +13,12 @@ export const getTemplates = (_sdk: SDK): Template[] => {
 };
 
 export const addTemplate = (sdk: SDK<never, BackendEvents>) => {
-	const newTemplate: Template = {
-		id: generateID(),
+  const newTemplate: Template = {
+    id: generateID(),
     requestId: generateID(),
     authSuccessRegex: "HTTP/1[.]1 200",
-		roleIds: [],
-		userIds: [],
+    roleIds: [],
+    userIds: [],
     meta: {
       host: "localhost",
       port: 10134,
@@ -26,13 +26,13 @@ export const addTemplate = (sdk: SDK<never, BackendEvents>) => {
       isTls: false,
       method: "GET",
     },
-	};
+  };
 
   const store = TemplateStore.get();
   store.addTemplate(newTemplate);
   sdk.api.send("templates:created", newTemplate);
 
-	return newTemplate;
+  return newTemplate;
 };
 
 export const deleteTemplate = (_sdk: SDK, requestId: string) => {
@@ -41,30 +41,28 @@ export const deleteTemplate = (_sdk: SDK, requestId: string) => {
 };
 
 export const toggleTemplateRole = (
-	_sdk: SDK,
-	requestId: string,
-	roleId: string,
+  _sdk: SDK,
+  requestId: string,
+  roleId: string,
 ) => {
-
   const store = TemplateStore.get();
   return store.toggleTemplateRole(requestId, roleId);
 };
 
 export const toggleTemplateUser = (
-	_sdk: SDK,
-	requestId: string,
-	userId: string,
+  _sdk: SDK,
+  requestId: string,
+  userId: string,
 ) => {
   const store = TemplateStore.get();
   return store.toggleTemplateUser(requestId, userId);
 };
 
 export const onInterceptResponse = async (
-	sdk: SDK<never, BackendEvents>,
-	request: Request,
-	response: Response,
+  sdk: SDK<never, BackendEvents>,
+  request: Request,
+  response: Response,
 ) => {
-
   const template: Template = {
     id: generateID(),
     requestId: request.getId(),
@@ -78,7 +76,7 @@ export const onInterceptResponse = async (
       isTls: request.getTls(),
       path: request.getPath(),
     },
-  }
+  };
 
   const store = TemplateStore.get();
   store.addTemplate(template);
@@ -86,5 +84,5 @@ export const onInterceptResponse = async (
 };
 
 export const registerTemplateEvents = (sdk: SDK) => {
-	sdk.events.onInterceptResponse(onInterceptResponse);
+  sdk.events.onInterceptResponse(onInterceptResponse);
 };

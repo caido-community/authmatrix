@@ -1,4 +1,4 @@
-import {Settings} from "shared";
+import type { Settings } from "shared";
 
 export class SettingsStore {
   private static _store?: SettingsStore;
@@ -8,7 +8,7 @@ export class SettingsStore {
   private constructor() {
     this.settings = {
       autoCaptureRequests: true,
-      autoRunAnalysis: false
+      autoRunAnalysis: false,
     };
   }
 
@@ -29,4 +29,3 @@ export class SettingsStore {
     return this.settings;
   }
 }
-

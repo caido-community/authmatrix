@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { useSettingsStore } from "@/stores/settings";
 import { useTemplateStore } from "@/stores/templates";
-import {useSettingsStore} from "@/stores/settings";
-import { TemplateState, SettingsState } from "@/types";
+import { SettingsState, TemplateState } from "@/types";
 import { RoleState } from "@/types";
 import { UserState } from "@/types";
 import Button from "primevue/button";
@@ -12,35 +12,35 @@ import DataTable from "primevue/datatable";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import type { Template, Role, User } from "shared";
-import {computed} from "vue";
+import type { Role, Template, User } from "shared";
+import { computed } from "vue";
 
 const props = defineProps<{
-	state: TemplateState & { type: "Success" };
-	userState: UserState & { type: "Success" };
-	roleState: RoleState & { type: "Success" };
+  state: TemplateState & { type: "Success" };
+  userState: UserState & { type: "Success" };
+  roleState: RoleState & { type: "Success" };
   settingsState: SettingsState & { type: "Success" };
 }>();
 
 const getRoleValue = (request: Template, role: Role) => {
-	return request.roleIds.some((roleId) => roleId === role.id);
+  return request.roleIds.some((roleId) => roleId === role.id);
 };
 
 const getUserValue = (request: Template, user: User) => {
-	return request.userIds.some((userId) => userId === user.id);
+  return request.userIds.some((userId) => userId === user.id);
 };
 
 const store = useTemplateStore();
 const toggleRole = (request: Template, role: Role) => {
-	store.toggleTemplateRole(request.id, role.id);
+  store.toggleTemplateRole(request.id, role.id);
 };
 
 const toggleUser = (request: Template, user: User) => {
-	store.toggleTemplateUser(request.id, user.id);
+  store.toggleTemplateUser(request.id, user.id);
 };
 
 const deleteTemplate = (request: Template) => {
-	store.deleteTemplate(request.id);
+  store.deleteTemplate(request.id);
 };
 
 const settingsStore = useSettingsStore();
@@ -63,8 +63,8 @@ const selection = computed({
     return props.state.templates.find((t) => t.id === templateId);
   },
   set: (template) => {
-    store.setSelection(template)
-  }
+    store.setSelection(template);
+  },
 });
 </script>
 

@@ -29,4 +29,3 @@ export class AnalysisStore {
     this.results.delete(resultId);
   }
 }
-

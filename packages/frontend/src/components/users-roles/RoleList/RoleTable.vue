@@ -8,24 +8,24 @@ import InputText from "primevue/inputtext";
 import type { Role } from "shared";
 
 const props = defineProps<{
-	state: RoleState & { type: "Success" };
+  state: RoleState & { type: "Success" };
 }>();
 
 const columns = [
-	{ field: "name", header: "Name" },
-	{ field: "description", header: "Description" },
+  { field: "name", header: "Name" },
+  { field: "description", header: "Description" },
 ];
 
 const store = useRoleStore();
 const onDeleteRole = (role: Role) => {
-	store.deleteRole(role.id);
+  store.deleteRole(role.id);
 };
 
 const onRoleUpdate = (role: Role, field: keyof Role, value: string) => {
-	store.updateRole(role.id, {
-		...role,
-		[field]: value,
-	});
+  store.updateRole(role.id, {
+    ...role,
+    [field]: value,
+  });
 };
 </script>
 

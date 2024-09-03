@@ -9,6 +9,9 @@
 			"recommended": true
 		}
 	},
+  "formatter": {
+    "indentStyle": "space"
+  },
   "overrides": [
     {
       "include": ["*.vue"],

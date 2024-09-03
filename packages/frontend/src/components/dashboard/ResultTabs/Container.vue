@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import Card from 'primevue/card';
-import SelectButton from 'primevue/selectbutton';
-import {TemplateState, UserState} from '@/types';
-import {computed} from 'vue';
-import {useTemplateStore} from '@/stores/templates';
+import { useTemplateStore } from "@/stores/templates";
+import { TemplateState, UserState } from "@/types";
+import Card from "primevue/card";
+import SelectButton from "primevue/selectbutton";
+import { computed } from "vue";
 
 const props = defineProps<{
-	templateState: TemplateState & { type: "Success" };
-	userState: UserState & { type: "Success" };
+  templateState: TemplateState & { type: "Success" };
+  userState: UserState & { type: "Success" };
 }>();
-
 
 const options = computed(() => {
   const selection = props.templateState.selectionState;
   if (selection.type === "None") return ["Original"];
 
-  const users = props.userState.users
-    .map((user) => user.id);
+  const users = props.userState.users.map((user) => user.id);
 
   return ["Original", ...users];
 });
@@ -28,7 +26,6 @@ const getLabel = (option: string) => {
 };
 
 const isDisabled = (option: string) => {
-
   if (props.templateState.selectionState.type === "None") return true;
   if (option === "Original") return false;
 
@@ -45,7 +42,6 @@ const selection = computed({
   get: () => {
     if (props.templateState.selectionState.type === "None") return "Original";
     return props.templateState.selectionState.userId ?? "Original";
-
   },
   set: (option) => {
     if (option === "Original") {
@@ -53,10 +49,8 @@ const selection = computed({
     } else {
       store.setSelectionUser(option);
     }
-  }
+  },
 });
-
-
 </script>
 
 <template>

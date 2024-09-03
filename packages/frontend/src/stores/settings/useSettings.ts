@@ -2,11 +2,10 @@ import { useSDK } from "@/plugins/sdk";
 import type { Context } from "./types";
 
 export const useSettings = (context: Context) => {
-	const sdk = useSDK();
+  const sdk = useSDK();
 
   const toggleAutoRunAnalysis = async () => {
     if (context.state.type === "Success") {
-
       const newSettings = await sdk.backend.updateSettings({
         ...context.state.settings,
         autoRunAnalysis: !context.state.settings.autoRunAnalysis,
@@ -14,14 +13,13 @@ export const useSettings = (context: Context) => {
 
       context.state = {
         type: "Success",
-        settings: newSettings
+        settings: newSettings,
       };
     }
-  }
+  };
 
   const toggleAutoCaptureRequests = async () => {
     if (context.state.type === "Success") {
-
       const newSettings = await sdk.backend.updateSettings({
         ...context.state.settings,
         autoCaptureRequests: !context.state.settings.autoCaptureRequests,
@@ -29,13 +27,13 @@ export const useSettings = (context: Context) => {
 
       context.state = {
         type: "Success",
-        settings: newSettings
+        settings: newSettings,
       };
     }
   };
 
-	return {
+  return {
     toggleAutoRunAnalysis,
     toggleAutoCaptureRequests,
-	};
+  };
 };

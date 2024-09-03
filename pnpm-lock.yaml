@@ -37,8 +37,8 @@ importers:
   packages/frontend:
     dependencies:
       '@caido/primevue':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: 0.0.3
+        version: 0.0.3
       '@caido/sdk-frontend':
         specifier: 0.40.1-beta.3
         version: 0.40.1-beta.3(@codemirror/view@6.33.0)
@@ -52,8 +52,8 @@ importers:
         specifier: 2.2.1
         version: 2.2.1(typescript@5.5.4)(vue@3.4.37(typescript@5.5.4))
       primevue:
-        specifier: 4.0.4
-        version: 4.0.4(vue@3.4.37(typescript@5.5.4))
+        specifier: 4.0.5
+        version: 4.0.5(vue@3.4.37(typescript@5.5.4))
       shared:
         specifier: workspace:*
         version: link:../shared
@@ -165,8 +165,8 @@ packages:
   '@caido/plugin-manifest@0.1.3':
     resolution: {integrity: sha512-6PK/mIz2vIImgNFmc34Smiz86ifE+B962xz7uR4MPMxRaRlMlgfL8IvPkbpJyRaXb0mDDVqGzMB82HddpyGQSw==}
 
-  '@caido/primevue@0.0.1':
-    resolution: {integrity: sha512-Lsb7eNzzd4wqzX0l6HK6muWh0Udh27jtimU+Cxyp0AxNKaALz3Rghhcf4+qRThmE//QVlOIwyh+TdzQeXyQGFg==}
+  '@caido/primevue@0.0.3':
+    resolution: {integrity: sha512-kJEamKSUDx5VESYFJq/X2PJFdFkKLavk/vIUxA4PxN2DUHGxt52K95j8DHF83FEdb7VRJHcYO3cw3zo/oQrX5w==}
 
   '@caido/quickjs-types@0.4.0':
     resolution: {integrity: sha512-E+1QNCEiIdK6tkqhVhBLcOXdZ2qpEGpwvNPxdUFo2ucK5KWhfTsOH+iDV6WInSQXg/if1IPykuKAUYL4Q4JULQ==}
@@ -376,14 +376,14 @@ packages:
     resolution: {integrity: sha512-ntUiUgtRtkF8KuaxHffzhYxQxoXk6LAPHm7CVlFjdqS8Rx8xRkLkZVyo84E+pO2hcNFkOGVP/GxHhQ2s94O8zA==}
     engines: {node: '>=12.11.0'}
 
-  '@primevue/core@4.0.4':
-    resolution: {integrity: sha512-xGD2hNYL4WLnkWuoxIjMIqEXiydYpFovDuCMHMWRl3yb/AFJcHpyZpUlgZ2HnJydA5ZsLS00sGsPHEoV5u2M8A==}
+  '@primevue/core@4.0.5':
+    resolution: {integrity: sha512-DUCslDA93eUOVW0A1I3yoZgRLI4zmI2++loZQXbUF5jaXCwKiAza14+iyUU+cWH27VSq+jQnCEP9QJtPZiJJ0w==}
     engines: {node: '>=12.11.0'}
     peerDependencies:
       vue: ^3.0.0
 
-  '@primevue/icons@4.0.4':
-    resolution: {integrity: sha512-eHOuO5jIv/qb3mpo3m1qpDKJxw/B8ZFpAcsKxV4uWhAXkxWo/afmykGO38PVabKc3SSai8bq1zFVXPA1w0cg9g==}
+  '@primevue/icons@4.0.5':
+    resolution: {integrity: sha512-ZxR9W1wlAE2fTtUhrHyeMx5t0jNyAgxDcHPm0cNXpX8q1XF95rSM/qb48QKXIBDBrJ/xs57BcyCNADP/VDPY4g==}
     engines: {node: '>=12.11.0'}
 
   '@primevue/themes@4.0.4':
@@ -906,8 +906,8 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  primevue@4.0.4:
-    resolution: {integrity: sha512-1moEddbczJ1+yEyfeYQk3xOQB64iCjjM//f+HSXs6YrKVVC0QjPFx9XPNXrr2JjHlp+6D7EpPZtsmcrfA9jWkA==}
+  primevue@4.0.5:
+    resolution: {integrity: sha512-MALszGIZ5SnEQy1XeZLBFhpMXQ1OS7D1U7H+l/JAX5U46RQ1vufo7NAiWbbV5/ADjPGw4uLplqMQxujkksNY2g==}
     engines: {node: '>=12.11.0'}
 
   process-nextick-args@2.0.1:
@@ -1179,7 +1179,7 @@ snapshots:
     dependencies:
       ajv: 8.16.0
 
-  '@caido/primevue@0.0.1':
+  '@caido/primevue@0.0.3':
     dependencies:
       '@primevue/themes': 4.0.4
 
@@ -1324,16 +1324,16 @@ snapshots:
 
   '@primeuix/utils@0.0.5': {}
 
-  '@primevue/core@4.0.4(vue@3.4.37(typescript@5.5.4))':
+  '@primevue/core@4.0.5(vue@3.4.37(typescript@5.5.4))':
     dependencies:
       '@primeuix/styled': 0.0.5
       '@primeuix/utils': 0.0.5
       vue: 3.4.37(typescript@5.5.4)
 
-  '@primevue/icons@4.0.4(vue@3.4.37(typescript@5.5.4))':
+  '@primevue/icons@4.0.5(vue@3.4.37(typescript@5.5.4))':
     dependencies:
       '@primeuix/utils': 0.0.5
-      '@primevue/core': 4.0.4(vue@3.4.37(typescript@5.5.4))
+      '@primevue/core': 4.0.5(vue@3.4.37(typescript@5.5.4))
     transitivePeerDependencies:
       - vue
 
@@ -1832,12 +1832,12 @@ snapshots:
 
   prettier@3.3.2: {}
 
-  primevue@4.0.4(vue@3.4.37(typescript@5.5.4)):
+  primevue@4.0.5(vue@3.4.37(typescript@5.5.4)):
     dependencies:
       '@primeuix/styled': 0.0.5
       '@primeuix/utils': 0.0.5
-      '@primevue/core': 4.0.4(vue@3.4.37(typescript@5.5.4))
-      '@primevue/icons': 4.0.4(vue@3.4.37(typescript@5.5.4))
+      '@primevue/core': 4.0.5(vue@3.4.37(typescript@5.5.4))
+      '@primevue/icons': 4.0.5(vue@3.4.37(typescript@5.5.4))
     transitivePeerDependencies:
       - vue
 

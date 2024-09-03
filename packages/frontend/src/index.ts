@@ -2,19 +2,19 @@ import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
 
 export const init = (sdk: CaidoSDK) => {
-	const app = defineApp(sdk);
+  const app = defineApp(sdk);
 
-	const root = document.createElement("div");
-	Object.assign(root.style, {
-		height: "100%",
-		width: "100%",
-	});
+  const root = document.createElement("div");
+  Object.assign(root.style, {
+    height: "100%",
+    width: "100%",
+  });
 
-	app.mount(root);
+  app.mount(root);
 
-	sdk.navigation.addPage("/autorize", {
-		body: root,
-	});
+  sdk.navigation.addPage("/autorize", {
+    body: root,
+  });
 
-	sdk.sidebar.registerItem("Autorize", "/autorize");
+  sdk.sidebar.registerItem("Autorize", "/autorize");
 };

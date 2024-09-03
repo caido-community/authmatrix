@@ -2,27 +2,27 @@ import { useSDK } from "@/plugins/sdk";
 import type { Context } from "./types";
 
 export const useInitialize = (context: Context) => {
-	const sdk = useSDK();
+  const sdk = useSDK();
 
-	const initialize = async () => {
-		switch (context.state.type) {
-			case "Idle":
-			case "Error":
-			case "Success": {
-				context.state = { type: "Loading" };
+  const initialize = async () => {
+    switch (context.state.type) {
+      case "Idle":
+      case "Error":
+      case "Success": {
+        context.state = { type: "Loading" };
         const [templates, results] = await Promise.all([
           sdk.backend.getTemplates(),
-          sdk.backend.getResults()
+          sdk.backend.getResults(),
         ]);
 
-				context.state = {
+        context.state = {
           type: "Success",
           templates,
           results,
           selectionState: {
-            type: "None"
+            type: "None",
           },
-          analysisState: { type: "Idle" }
+          analysisState: { type: "Idle" },
         };
 
         const firstTemplate = templates[0];
@@ -32,39 +32,40 @@ export const useInitialize = (context: Context) => {
             selectionState: {
               type: "Loading",
               templateId: firstTemplate.id,
-              userId: undefined
-            }
-          }
+              userId: undefined,
+            },
+          };
 
           try {
-            const result = await sdk.backend.getRequest(firstTemplate.requestId);
+            const result = await sdk.backend.getRequest(
+              firstTemplate.requestId,
+            );
             context.state = {
               ...context.state,
               selectionState: {
                 type: "Success",
                 templateId: firstTemplate.id,
                 userId: undefined,
-                request: result
-              }
-            }
+                request: result,
+              },
+            };
           } catch {
             context.state = {
               ...context.state,
               selectionState: {
                 type: "Error",
                 templateId: firstTemplate.id,
-                userId: undefined
-              }
-            }
+                userId: undefined,
+              },
+            };
           }
         }
 
-
-				break;
-			}
-			case "Loading":
-				break;
-		}
+        break;
+      }
+      case "Loading":
+        break;
+    }
 
     sdk.backend.onEvent("templates:created", (request) => {
       if (context.state.type === "Success") {
@@ -78,12 +79,12 @@ export const useInitialize = (context: Context) => {
         };
       }
     });
-	};
+  };
 
-	const getState = () => context.state;
+  const getState = () => context.state;
 
-	return {
-		getState,
-		initialize,
-	};
+  return {
+    getState,
+    initialize,
+  };
 };

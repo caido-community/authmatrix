@@ -5,12 +5,12 @@ import { useInitialize } from "./useInitialize";
 import { useRoles } from "./useRoles";
 
 export const useRoleStore = defineStore("stores.roles", () => {
-	const context: Context = reactive({
-		state: { type: "Idle" },
-	});
+  const context: Context = reactive({
+    state: { type: "Idle" },
+  });
 
-	return {
-		...useInitialize(context),
-		...useRoles(context),
-	};
+  return {
+    ...useInitialize(context),
+    ...useRoles(context),
+  };
 });

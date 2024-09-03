@@ -5,12 +5,12 @@ import { useInitialize } from "./useInitialize";
 import { useSettings } from "./useSettings";
 
 export const useSettingsStore = defineStore("stores.settings", () => {
-	const context: Context = reactive({
-		state: { type: "Idle" },
-	});
+  const context: Context = reactive({
+    state: { type: "Idle" },
+  });
 
-	return {
-		...useInitialize(context),
-		...useSettings(context),
-	};
+  return {
+    ...useInitialize(context),
+    ...useSettings(context),
+  };
 });

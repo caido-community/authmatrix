@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import {useSDK} from '@/plugins/sdk';
-import {SelectionState} from '@/types';
-import {onMounted, ref} from 'vue';
+import { useSDK } from "@/plugins/sdk";
+import { SelectionState } from "@/types";
+import { onMounted, ref } from "vue";
 
 const props = defineProps<{
-  selectionState: SelectionState & { type: 'Success' }
-}>()
+  selectionState: SelectionState & { type: "Success" };
+}>();
 
-const sdk = useSDK()
+const sdk = useSDK();
 
-const root = ref()
+const root = ref();
 
 onMounted(() => {
-  const editor = sdk.ui.httpRequestEditor()
-  root.value.appendChild(editor.getElement())
+  const editor = sdk.ui.httpRequestEditor();
+  root.value.appendChild(editor.getElement());
 
   const view = editor.getEditorView();
   console.log(view);
@@ -22,10 +22,10 @@ onMounted(() => {
     changes: {
       from: 0,
       to: view.state.doc.length,
-      insert: props.selectionState.request.raw
-    }
+      insert: props.selectionState.request.raw,
+    },
   });
-})
+});
 </script>
 
 <template>

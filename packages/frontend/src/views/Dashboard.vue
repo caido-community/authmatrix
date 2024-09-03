@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ResultRequest, TemplateTable, ResultTabs } from "@/components/dashboard";
-import {ResultResponse} from "@/components/dashboard/ResultResponse";
-import { useTemplateStore } from "@/stores/templates";
+import {
+  ResultRequest,
+  ResultTabs,
+  TemplateTable,
+} from "@/components/dashboard";
+import { ResultResponse } from "@/components/dashboard/ResultResponse";
 import { useRoleStore } from "@/stores/roles";
-import {useSettingsStore} from "@/stores/settings";
+import { useSettingsStore } from "@/stores/settings";
+import { useTemplateStore } from "@/stores/templates";
 import { useUserStore } from "@/stores/users";
 import { computed } from "vue";
 
@@ -50,7 +54,7 @@ const settingsState = computed(() => settingsStore.getState());
       </div>
 
       <div class="h-full w-1/2">
-        <ResultResponse />
+        <ResultResponse v-if="templateState.type ==='Success'" :template-state="templateState" />
       </div>
     </div>
   </div>

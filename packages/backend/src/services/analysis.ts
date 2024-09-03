@@ -1,12 +1,11 @@
 import type { SDK } from "caido:plugin";
 
-import {TemplateStore} from "../stores/templates";
-import {UserStore} from "../stores/users";
+import { TemplateStore } from "../stores/templates";
+import { UserStore } from "../stores/users";
 
-
+import { RequestSpec } from "caido:utils";
 import type { AnalysisResult, Template, User } from "shared";
-import {RequestSpec} from "caido:utils";
-import {AnalysisStore} from "../stores/analysis";
+import { AnalysisStore } from "../stores/analysis";
 
 export const getResults = (_sdk: SDK): AnalysisResult[] => {
   const store = AnalysisStore.get();
@@ -16,16 +15,16 @@ export const getResults = (_sdk: SDK): AnalysisResult[] => {
 export const getRequest = async (sdk: SDK, id: string) => {
   return {
     id,
-    raw: "hello from request"
-  }
-}
+    raw: "hello from request",
+  };
+};
 
 export const getResponse = async (sdk: SDK, id: string) => {
   return {
     id,
-    raw: "hello from response"
-  }
-}
+    raw: "hello from response",
+  };
+};
 
 export const runAnalysis = async (sdk: SDK) => {
   const templateStore = TemplateStore.get();
@@ -34,7 +33,9 @@ export const runAnalysis = async (sdk: SDK) => {
   const users = userStore.getUsers();
   const templates = templateStore.getTemplates();
 
-  sdk.console.debug(`Analyzing ${templates.length} templates with ${users.length} users`);
+  sdk.console.debug(
+    `Analyzing ${templates.length} templates with ${users.length} users`,
+  );
   const promises = templates.map((template) => {
     return users.map((user) => {
       return analyzeRequest(sdk, template, user);
@@ -42,7 +43,7 @@ export const runAnalysis = async (sdk: SDK) => {
   });
 
   await Promise.all(promises);
-}
+};
 
 const analyzeRequest = async (sdk: SDK, request: Template, user: User) => {
   // Retrieve RequestSpec given an ID
@@ -63,15 +64,17 @@ const analyzeRequest = async (sdk: SDK, request: Template, user: User) => {
     if (typeof name === "string" && typeof value === "string") {
       cookies[name] = value;
     }
-  };
+  }
 
   for (const newCookie of newCookies) {
     cookies[newCookie.name] = newCookie.value;
   }
 
-  const newCookieString = Object.entries(cookies).map(([name, value]) => {
-    return `${name}=${value}`;
-  }).join("; ");
+  const newCookieString = Object.entries(cookies)
+    .map(([name, value]) => {
+      return `${name}=${value}`;
+    })
+    .join("; ");
 
   spec.setHeader("Cookie", newCookieString);
 
@@ -88,7 +91,6 @@ const analyzeRequest = async (sdk: SDK, request: Template, user: User) => {
 
   // Check if the user is supposed to have access to the request
   if (!hasAccess && result.response.getCode() === 200) {
-
     // User is not supposed to have access
     return;
   }

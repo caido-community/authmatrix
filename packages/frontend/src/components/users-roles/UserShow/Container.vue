@@ -10,23 +10,23 @@ import { computed, toRefs } from "vue";
 import AttributeTable from "./AttributeTable.vue";
 
 const props = defineProps<{
-	user: User;
+  user: User;
 }>();
 
 const { user } = toRefs(props);
 const { cloned, sync } = useCloned(user);
 
 const isDirty = computed(() => {
-	return JSON.stringify(props.user) !== JSON.stringify(cloned.value);
+  return JSON.stringify(props.user) !== JSON.stringify(cloned.value);
 });
 
 const userStore = useUserStore();
 const onSaveClick = () => {
-	userStore.updateUser(props.user.id, cloned.value);
+  userStore.updateUser(props.user.id, cloned.value);
 };
 
 const onResetClick = () => {
-	sync();
+  sync();
 };
 </script>
 

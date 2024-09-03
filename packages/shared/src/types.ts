@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const templateSchema = z.object({
-	id: z.string(),
+  id: z.string(),
   authSuccessRegex: z.string(),
-	roleIds: z.array(z.string()),
-	userIds: z.array(z.string()),
+  roleIds: z.array(z.string()),
+  userIds: z.array(z.string()),
   requestId: z.string(),
   meta: z.object({
     host: z.string(),
@@ -18,19 +18,19 @@ export const templateSchema = z.object({
 export type Template = z.infer<typeof templateSchema>;
 
 export const analysisResultSchema = z.object({
-	id: z.string(),
+  id: z.string(),
   userId: z.string(),
   requestId: z.string(),
   templateId: z.string(),
-  status: z.enum(["Enforced", "Bypassed", "Unexpected"])
+  status: z.enum(["Enforced", "Bypassed", "Unexpected"]),
 });
 
 export type AnalysisResult = z.infer<typeof analysisResultSchema>;
 
 export const roleSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	description: z.string(),
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
 });
 
 export type Role = z.infer<typeof roleSchema>;
@@ -43,19 +43,19 @@ export const settingsSchema = z.object({
 export type Settings = z.infer<typeof settingsSchema>;
 
 const attributesSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	value: z.string(),
-	kind: z.enum(["Cookie", "Header"]),
+  id: z.string(),
+  name: z.string(),
+  value: z.string(),
+  kind: z.enum(["Cookie", "Header"]),
 });
 
 export type UserAttribute = z.infer<typeof attributesSchema>;
 
 const userSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	roleIds: z.array(z.string()),
-	attributes: z.array(attributesSchema),
+  id: z.string(),
+  name: z.string(),
+  roleIds: z.array(z.string()),
+  attributes: z.array(attributesSchema),
 });
 
 export type User = z.infer<typeof userSchema>;

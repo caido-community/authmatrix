@@ -9,33 +9,33 @@ import DataTable from "primevue/datatable";
 import type { Role, User } from "shared";
 
 defineProps<{
-	state: UserState & { type: "Success" };
-	roleState: RoleState & { type: "Success" };
+  state: UserState & { type: "Success" };
+  roleState: RoleState & { type: "Success" };
 }>();
 
 const getRoleValue = (user: User, role: Role) => {
-	return user.roleIds.some((roleId) => roleId === role.id);
+  return user.roleIds.some((roleId) => roleId === role.id);
 };
 
 const store = useUserStore();
 const toggleRole = (user: User, role: Role) => {
-	const isEnabled = user.roleIds.some((roleId) => roleId === role.id);
+  const isEnabled = user.roleIds.some((roleId) => roleId === role.id);
 
-	if (isEnabled) {
-		store.updateUser(user.id, {
-			...user,
-			roleIds: user.roleIds.filter((roleId) => roleId !== role.id),
-		});
-	} else {
-		store.updateUser(user.id, {
-			...user,
-			roleIds: [...user.roleIds, role.id],
-		});
-	}
+  if (isEnabled) {
+    store.updateUser(user.id, {
+      ...user,
+      roleIds: user.roleIds.filter((roleId) => roleId !== role.id),
+    });
+  } else {
+    store.updateUser(user.id, {
+      ...user,
+      roleIds: [...user.roleIds, role.id],
+    });
+  }
 };
 
 const onDeleteUser = (user: User) => {
-	store.deleteUser(user.id);
+  store.deleteUser(user.id);
 };
 </script>
 

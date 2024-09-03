@@ -6,12 +6,12 @@ import Card from "primevue/card";
 import RoleTable from "./RoleTable.vue";
 
 defineProps<{
-	state: RoleState & { type: "Success" };
+  state: RoleState & { type: "Success" };
 }>();
 
 const store = useRoleStore();
 const onAddRole = () => {
-	store.addRole("New role");
+  store.addRole("New role");
 };
 </script>
 

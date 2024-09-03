@@ -8,15 +8,15 @@ import type { User } from "shared";
 import UserTable from "./UserTable.vue";
 
 defineProps<{
-	state: UserState & { type: "Success" };
-	roleState: RoleState & { type: "Success" };
+  state: UserState & { type: "Success" };
+  roleState: RoleState & { type: "Success" };
 }>();
 
 const selection = defineModel<User | null>("selection", { required: true });
 
 const store = useUserStore();
 const onAddUser = () => {
-	store.addUser("New user");
+  store.addUser("New user");
 };
 </script>
 
