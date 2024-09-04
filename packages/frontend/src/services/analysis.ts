@@ -33,6 +33,10 @@ export const useAnalysisService = defineStore("services.analysis", () => {
     } else {
       store.resultState.send({ type: "Error", error: result.error });
     }
+
+    sdk.backend.onEvent("results:created", (result) => {
+      store.resultState.send({ type: "AddResult", result });
+    });
   };
 
   const selectResult = async (templateId?: string, userId?: string) => {

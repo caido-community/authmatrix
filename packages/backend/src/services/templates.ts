@@ -17,8 +17,7 @@ export const addTemplate = (sdk: SDK<never, BackendEvents>) => {
     id: generateID(),
     requestId: generateID(),
     authSuccessRegex: "HTTP/1[.]1 200",
-    roleIds: [],
-    userIds: [],
+    rules: [],
     meta: {
       host: "localhost",
       port: 10134,
@@ -63,12 +62,23 @@ export const onInterceptResponse = async (
   request: Request,
   response: Response,
 ) => {
-  const template: Template = {
+
+  const store = TemplateStore.get();
+  const template = toTemplate(request, response);
+  store.addTemplate(template);
+  sdk.api.send("templates:created", template);
+};
+
+export const registerTemplateEvents = (sdk: SDK) => {
+  sdk.events.onInterceptResponse(onInterceptResponse);
+};
+
+const toTemplate = (request: Request, response: Response): Template => {
+  return {
     id: generateID(),
     requestId: request.getId(),
     authSuccessRegex: `HTTP/1[.]1 ${response.getCode()}`,
-    roleIds: [],
-    userIds: [],
+    rules: [],
     meta: {
       host: request.getHost(),
       port: request.getPort(),
@@ -77,12 +87,4 @@ export const onInterceptResponse = async (
       path: request.getPath(),
     },
   };
-
-  const store = TemplateStore.get();
-  store.addTemplate(template);
-  sdk.api.send("templates:created", template);
-};
-
-export const registerTemplateEvents = (sdk: SDK) => {
-  sdk.events.onInterceptResponse(onInterceptResponse);
-};
+}

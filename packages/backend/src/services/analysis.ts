@@ -1,12 +1,14 @@
 import type { SDK } from "caido:plugin";
+import type { RequestSpec } from "caido:utils";
 
 import { TemplateStore } from "../stores/templates";
 import { UserStore } from "../stores/users";
 
-import { RequestSpec } from "caido:utils";
-import type { AnalysisResult, Template, User } from "shared";
+import type { AnalysisResult, Template, User, UserAttribute } from "shared";
 import { AnalysisStore } from "../stores/analysis";
 import { Uint8ArrayToString } from "../utils";
+
+import type {BackendEvents} from "../types";
 
 export const getResults = (_sdk: SDK): AnalysisResult[] => {
   const store = AnalysisStore.get();
@@ -37,7 +39,7 @@ export const getRequestResponse = async (sdk: SDK, requestId: string) => {
   };
 };
 
-export const runAnalysis = async (sdk: SDK) => {
+export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   const templateStore = TemplateStore.get();
   const userStore = UserStore.get();
 
@@ -47,6 +49,7 @@ export const runAnalysis = async (sdk: SDK) => {
   sdk.console.debug(
     `Analyzing ${templates.length} templates with ${users.length} users`,
   );
+
   const promises = templates.map((template) => {
     return users.map((user) => {
       return analyzeRequest(sdk, template, user);
@@ -56,15 +59,60 @@ export const runAnalysis = async (sdk: SDK) => {
   await Promise.all(promises);
 };
 
-const analyzeRequest = async (sdk: SDK, template: Template, user: User) => {
-  // Retrieve RequestSpec given an ID
-  // Here we mock this behavior as we don't have a real implementation yet
-  const protocol = template.meta.isTls ? "https" : "http";
-  const connectionURL = `${protocol}://${template.meta.host}:${template.meta.port}`;
-  const spec = new RequestSpec(connectionURL);
+const analyzeRequest = async (sdk: SDK<never, BackendEvents>, template: Template, user: User) => {
+  const { request: baseRequest } = await sdk.requests.get(template.requestId) ?? {};
 
-  const newHeaders = user.attributes.filter((attr) => attr.kind === "Header");
-  const newCookies = user.attributes.filter((attr) => attr.kind === "Cookie");
+  if (!baseRequest) {
+    sdk.console.error(`Request not found for template ${template.id}`);
+    return;
+  }
+
+  const spec = setAttributes(baseRequest.toSpec(), user.attributes);
+
+  sdk.console.debug(`Sending request ${spec}`);
+  const { request, response } = await sdk.requests.send(spec);
+  const shouldHaveAccess = template.rules.some((rule) => {
+    return user.roleIds.includes(roleId);
+  });
+
+  const requestId = request.getId();
+  const analysisResult: AnalysisResult = {
+    id: `${template.id}-${user.id}-${requestId}`,
+    templateId: template.id,
+    userId: user.id,
+    requestId,
+    //status: "Unexpected"
+  }
+
+  const responseRaw = response.getRaw().toText();
+  const hasAccess = responseRaw.match(template.authSuccessRegex);
+
+  const store = AnalysisStore.get();
+  if (!shouldHaveAccess && hasAccess) {
+    //analysisResult.status = "Bypassed";
+    store.addResult(analysisResult);
+    sdk.api.send("results:created", analysisResult);
+    return;
+  }
+
+  if ((shouldHaveAccess && hasAccess) || (!shouldHaveAccess && !hasAccess)) {
+    //analysisResult.status = "Enforced";
+    store.addResult(analysisResult);
+    sdk.api.send("results:created", analysisResult);
+    return;
+  }
+
+  if (shouldHaveAccess && !hasAccess) {
+    //analysisResult.status = "Unexpected";
+    store.addResult(analysisResult);
+    sdk.api.send("results:created", analysisResult);
+    return;
+  }
+};
+
+const setAttributes = (spec: RequestSpec, attributes: UserAttribute[]) => {
+  const newHeaders = attributes.filter((attr) => attr.kind === "Header");
+  const newCookies = attributes.filter((attr) => attr.kind === "Cookie");
 
   // Set cookies
   const cookies: Record<string, string> = {};
@@ -94,15 +142,5 @@ const analyzeRequest = async (sdk: SDK, template: Template, user: User) => {
     spec.setHeader(newHeader.name, newHeader.value);
   }
 
-  sdk.console.debug(`Sending request ${spec}`);
-  const result = await sdk.requests.send(spec);
-  const hasAccess = template.roleIds.some((roleId) => {
-    return user.roleIds.includes(roleId);
-  });
-
-  // Check if the user is supposed to have access to the request
-  if (!hasAccess && result.response.getCode() === 200) {
-    // User is not supposed to have access
-    return;
-  }
-};
+  return spec;
+}

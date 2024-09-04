@@ -3,8 +3,19 @@ import { z } from "zod";
 export const templateSchema = z.object({
   id: z.string(),
   authSuccessRegex: z.string(),
-  roleIds: z.array(z.string()),
-  userIds: z.array(z.string()),
+  rules: z.array(
+    z.object({
+      type: z.literal("RoleRule"),
+      roleId: z.string(),
+      hasAccess: z.boolean(),
+      status: z.enum(["Untested", "Enforced", "Bypassed", "Unexpected"]),
+    }).or(z.object({
+      type: z.literal("UserRule"),
+      userId: z.string(),
+      hasAccess: z.boolean(),
+      status: z.enum(["Untested", "Enforced", "Bypassed", "Unexpected"]),
+    })),
+  ),
   requestId: z.string(),
   meta: z.object({
     host: z.string(),
@@ -22,7 +33,6 @@ export const analysisResultSchema = z.object({
   userId: z.string(),
   requestId: z.string(),
   templateId: z.string(),
-  status: z.enum(["Enforced", "Bypassed", "Unexpected"]),
 });
 
 export type AnalysisResult = z.infer<typeof analysisResultSchema>;
