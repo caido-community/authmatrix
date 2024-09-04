@@ -31,8 +31,8 @@ importers:
         version: link:../shared
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.40.1-beta.6
-        version: 0.40.1-beta.6
+        specifier: 0.40.1-beta.7
+        version: 0.40.1-beta.7
 
   packages/frontend:
     dependencies:
@@ -62,8 +62,8 @@ importers:
         version: 3.4.37(typescript@5.5.4)
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.40.1-beta.6
-        version: 0.40.1-beta.6
+        specifier: 0.40.1-beta.7
+        version: 0.40.1-beta.7
       '@codemirror/view':
         specifier: 6.28.1
         version: 6.28.1
@@ -171,11 +171,11 @@ packages:
   '@caido/primevue@0.0.3':
     resolution: {integrity: sha512-kJEamKSUDx5VESYFJq/X2PJFdFkKLavk/vIUxA4PxN2DUHGxt52K95j8DHF83FEdb7VRJHcYO3cw3zo/oQrX5w==}
 
-  '@caido/quickjs-types@0.5.0':
-    resolution: {integrity: sha512-2Aq72WZR2a8+NfQKB+UyKu2WvGV6Vs4vNJQ4zMPXgEl3msWlMX7JV1WAW1/PrkDXtZWzIQec41ceMAip1ddonQ==}
+  '@caido/quickjs-types@0.6.0':
+    resolution: {integrity: sha512-R3CsIpTK5a4JdgvKEWgAcJFoNYqIT7ktgHp8NKtAYfJFHlCSH8CZFVFm9J0PkH4p9q/x1jnXocNGT9nK7KO0Og==}
 
-  '@caido/sdk-backend@0.40.1-beta.6':
-    resolution: {integrity: sha512-s29Hnp5/hes08FSt5VwTKs0b+w+7pFd9PVOoGDy24oykZVoIVDBB20tgGmFJTcVZOm/5pAC2xTSdkWsA8T7ZDA==}
+  '@caido/sdk-backend@0.40.1-beta.7':
+    resolution: {integrity: sha512-NwjUa0M8w7MAg9rI2BTQ0JLZH8Iq1GkSsqXhHmthEZlloKe1JeYZYx1P+EX4p9wKNonote6UsK4uSS3CCTrvMg==}
 
   '@caido/sdk-frontend@0.40.1-beta.3':
     resolution: {integrity: sha512-iuj8ypYrH+chYDy6y8fcNRn5Dl8We7AxldQ7mKEfqezfFdepSrcBVGWWMesHNNJRvFpIvPC59twrzUy+4rG0DA==}
@@ -1186,13 +1186,13 @@ snapshots:
     dependencies:
       '@primevue/themes': 4.0.4
 
-  '@caido/quickjs-types@0.5.0':
+  '@caido/quickjs-types@0.6.0':
     dependencies:
       prettier: 3.3.2
 
-  '@caido/sdk-backend@0.40.1-beta.6':
+  '@caido/sdk-backend@0.40.1-beta.7':
     dependencies:
-      '@caido/quickjs-types': 0.5.0
+      '@caido/quickjs-types': 0.6.0
       '@caido/sdk-shared': 0.1.0
 
   '@caido/sdk-frontend@0.40.1-beta.3(@codemirror/view@6.28.1)':

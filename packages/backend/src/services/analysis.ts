@@ -31,7 +31,7 @@ export const getRequestResponse = async (sdk: SDK, requestId: string) => {
     response: response
       ? {
           id: response.getId(),
-          raw: "Test",
+          raw: response.getRaw().toText(),
         }
       : undefined,
   };

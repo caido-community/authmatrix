@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@codemirror/view": "6.28.1",
-    "@caido/sdk-backend": "0.40.1-beta.6",
+    "@caido/sdk-backend": "0.40.1-beta.7",
     "@vitejs/plugin-vue": "5.1.2",
     "backend": "workspace:*",
     "postcss-prefixwrap": "1.51.0",
