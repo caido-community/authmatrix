@@ -2,6 +2,7 @@ import type { API } from "backend";
 import type { AnalysisResult, Template, User } from "shared";
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
+import { EditorView } from "@codemirror/view";
 import { clone } from "./utils";
 
 // This is a mock backend for the SDK
@@ -188,11 +189,11 @@ const app = defineApp({
   ui: {
     httpRequestEditor: () => ({
       getElement: () => document.createElement("div"),
-      getEditorView: () => ({}),
+      getEditorView: () => new EditorView(),
     }),
     httpResponseEditor: () => ({
       getElement: () => document.createElement("div"),
-      getEditorView: () => ({}),
+      getEditorView: () => new EditorView(),
     }),
   },
 } as unknown as CaidoSDK);
