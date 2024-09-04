@@ -1,126 +1,120 @@
 import { defineStore } from "pinia";
-import { computed, reactive } from "vue";
-
+import { reactive } from "vue";
 import type { UserState } from "@/types";
-import type { User } from "shared";
-import {useSDK} from "@/plugins/sdk";
-import {useUserRepository} from "@/repositories/users";
+import { User } from "shared";
 
-export type Context = {
+type Context = {
   state: UserState;
-  selection: User | undefined;
 };
-export const useUserStore = defineStore("stores.users", () => {
-  const sdk = useSDK();
-  const repository = useUserRepository();
 
+type Message =
+  | { type: "Start" }
+  | { type: "Error", error: string }
+  | { type: "Success", users: User[] }
+  | { type: "AddUser", user: User }
+  | { type: "UpdateUser", user: User }
+  | { type: "DeleteUser", id: string }
+  | { type: "SelectUser", id: string | undefined };
+
+export const useUserStore = defineStore("stores.users", () => {
   const context: Context = reactive({
     state: { type: "Idle" },
-    selection: undefined,
   });
-
-  const initialize = async () => {
-    switch (context.state.type) {
-      case "Idle":
-      case "Error":
-      case "Success": {
-        context.state = { type: "Loading" };
-        const result = await repository.getUsers();
-
-        if (result.type === "Ok") {
-          context.state = { type: "Success", users: result.users };
-        } else {
-          context.state = { type: "Error", error: result.error };
-        }
-        break;
-      }
-      case "Loading":
-        break;
-    }
-  };
 
   const getState = () => context.state;
 
-  const addUser = async (name: string) => {
-    if (context.state.type === "Success") {
-      const result = await repository.addUser(name);
-      if (result.type === "Ok") {
-        context.state = {
-          ...context.state,
-          users: [...context.state.users, result.user],
-        };
+  const send = (message: Message) => {
+    const currState = context.state;
 
-        context.selection = result.user;
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
+    switch (currState.type) {
+      case "Idle":
+        context.state = processIdle(currState, message);
+        break;
+      case "Error":
+        context.state = processError(currState, message);
+        break;
+      case "Success":
+        context.state = processSuccess(currState, message);
+        break;
+      case "Loading":
+        context.state = processLoading(currState, message);
+        break;
     }
-  };
+  }
 
-  const updateUser = async (id: string, fields: Omit<User, "id">) => {
-
-    if (context.state.type === "Success") {
-      const result = await repository.updateUser(id, fields);
-
-      if (result.type === "Ok") {
-        const newUser = result.user;
-        const newUsers = context.state.users.map((role) => {
-          return role.id === newUser.id ? newUser : role
-        });
-
-        context.state = {
-          ...context.state,
-          users: newUsers,
-        };
-
-        if (context.selection?.id === id) {
-          context.selection = newUser;
-        }
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    }
-  };
-
-  const deleteUser = async (id: string) => {
-    if (context.state.type === "Success") {
-      const result = await repository.deleteUser(id);
-      if (result.type === "Ok") {
-        const newUsers = context.state.users.filter((role) => role.id !== id);
-        context.state = {
-          type: "Success",
-          users: newUsers,
-        };
-
-        if (context.selection?.id === id) {
-          context.selection = undefined;
-        }
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    }
-  };
-
-  const userSelection = computed({
-    get: () => context.selection,
-    set: (newSelection) => {
-      context.selection = newSelection;
-    },
-  });
-
-
-  return {
-    initialize,
-    getState,
-    addUser,
-    updateUser,
-    deleteUser,
-    userSelection,
-  };
+  return { getState, send };
 });
+
+const processIdle = (state: UserState & { type: "Idle" }, message: Message): UserState => {
+  switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
+    case "Error":
+    case "Success":
+    case "AddUser":
+    case "UpdateUser":
+    case "DeleteUser":
+    case "SelectUser":
+      return state;
+  }
+}
+
+const processError = (state: UserState & { type: "Error" }, message: Message): UserState => {
+  switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
+    case "Error":
+    case "Success":
+    case "AddUser":
+    case "UpdateUser":
+    case "DeleteUser":
+    case "SelectUser":
+      return state;
+  }
+}
+
+const processSuccess = (state: UserState & { type: "Success" }, message: Message): UserState => {
+  switch (message.type) {
+    case "AddUser":
+      return {
+        ...state,
+        users: [...state.users, message.user],
+      }
+    case "UpdateUser":
+      return {
+        ...state,
+        users: state.users.map((user) => user.id === message.user.id ? message.user : user),
+      }
+    case "DeleteUser":
+      return {
+        ...state,
+        users: state.users.filter((user) => user.id !== message.id),
+      }
+
+    case "SelectUser":
+      return {
+        ...state,
+        selectedUserId: message.id,
+      }
+
+    case "Start":
+    case "Error":
+    case "Success":
+      return state;
+  }
+}
+
+const processLoading = (state: UserState & { type: "Loading" }, message: Message): UserState => {
+  switch (message.type) {
+    case "Error":
+      return { type: "Error", error: message.error };
+    case "Success":
+      return { type: "Success", users: message.users, selectedUserId: message.users[0]?.id };
+    case "Start":
+    case "AddUser":
+    case "UpdateUser":
+    case "DeleteUser":
+    case "SelectUser":
+      return state;
+  }
+}

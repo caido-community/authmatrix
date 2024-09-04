@@ -1,86 +1,92 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
 import type { SettingsState } from "@/types";
-import {useSDK} from "@/plugins/sdk";
-import {useSettingsRepository} from "@/repositories/settings";
+import { Settings } from "shared";
 
 type Context = {
   state: SettingsState;
 };
 
-export const useSettingsStore = defineStore("stores.settings", () => {
-  const sdk = useSDK();
-  const repository = useSettingsRepository();
+type Message =
+  | { type: "Start" }
+  | { type: "Error", error: string }
+  | { type: "Success", settings: Settings }
+  | { type: "UpdateSettings", settings: Settings }
 
+export const useSettingsStore = defineStore("stores.settings", () => {
   const context: Context = reactive({
     state: { type: "Idle" },
   });
 
   const getState = () => context.state;
 
-  const initialize = async () => {
-    switch (context.state.type) {
+  const send = (message: Message) => {
+    const currState = context.state;
+
+    switch (currState.type) {
       case "Idle":
+        context.state = processIdle(currState, message);
+        break;
       case "Error":
-      case "Success": {
-        context.state = { type: "Loading" };
-        const result = await repository.getSettings();
-        if (result.type === "Ok") {
-          context.state = { type: "Success", settings: result.settings };
-        } else {
-          context.state = { type: "Error", error: result.error };
-        }
+        context.state = processError(currState, message);
         break;
-      }
+      case "Success":
+        context.state = processSuccess(currState, message);
+        break;
       case "Loading":
+        context.state = processLoading(currState, message);
         break;
     }
-  };
+  }
 
-  const toggleAutoRunAnalysis = async () => {
-    if (context.state.type === "Success") {
-      const result = await repository.updateSettings({
-        ...context.state.settings,
-        autoRunAnalysis: !context.state.settings.autoRunAnalysis,
-      });
-
-      if (result.type === "Ok") {
-        context.state = {
-          ...context.state,
-          settings: result.settings,
-        }
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    }
-  };
-
-  const toggleAutoCaptureRequests = async () => {
-    if (context.state.type === "Success") {
-      const result = await repository.updateSettings({
-        ...context.state.settings,
-        autoCaptureRequests: !context.state.settings.autoCaptureRequests,
-      });
-
-      if (result.type === "Ok") {
-        context.state = {
-          ...context.state,
-          settings: result.settings,
-        }
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    }
-  };
-
-  return {
-    getState,
-    initialize,
-    toggleAutoRunAnalysis,
-    toggleAutoCaptureRequests,
-  };
+  return { getState, send };
 });
+
+const processIdle = (state: SettingsState & { type: "Idle" }, message: Message): SettingsState => {
+  switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
+    case "Error":
+    case "Success":
+    case "UpdateSettings":
+      return state;
+  }
+}
+
+const processError = (state: SettingsState & { type: "Error" }, message: Message): SettingsState => {
+  switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
+    case "Error":
+    case "Success":
+    case "UpdateSettings":
+      return state;
+  }
+}
+
+const processSuccess = (state: SettingsState & { type: "Success" }, message: Message): SettingsState => {
+  switch (message.type) {
+    case "UpdateSettings":
+      return {
+        ...state,
+        settings: message.settings,
+      }
+
+    case "Start":
+    case "Error":
+    case "Success":
+      return state;
+  }
+}
+
+const processLoading = (state: SettingsState & { type: "Loading" }, message: Message): SettingsState => {
+  switch (message.type) {
+    case "Error":
+      return { type: "Error", error: message.error };
+    case "Success":
+      return { type: "Success", settings: message.settings };
+    case "Start":
+    case "UpdateSettings":
+      return state;
+  }
+}

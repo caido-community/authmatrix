@@ -1,107 +1,110 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
 import type { RoleState } from "@/types";
-import { useRoleRepository } from "@/repositories/roles";
 import { Role } from "shared";
-import { useSDK } from "@/plugins/sdk";
 
 type Context = {
   state: RoleState;
 };
 
+type Message =
+  | { type: "Start" }
+  | { type: "Error", error: string }
+  | { type: "Success", roles: Role[] }
+  | { type: "AddRole", role: Role }
+  | { type: "UpdateRole", role: Role }
+  | { type: "DeleteRole", id: string };
+
 export const useRoleStore = defineStore("stores.roles", () => {
-  const sdk = useSDK();
-  const repository = useRoleRepository();
   const context: Context = reactive({
     state: { type: "Idle" },
   });
 
   const getState = () => context.state;
 
-  const initialize = async () => {
-    switch (context.state.type) {
+  const send = (message: Message) => {
+    const currState = context.state;
+
+    switch (currState.type) {
       case "Idle":
+        context.state = processIdle(currState, message);
+        break;
       case "Error":
-      case "Success": {
-        context.state = { type: "Loading" };
-        const result = await repository.getRoles();
-
-        if (result.type === "Ok") {
-          context.state = { type: "Success", roles: result.roles };
-        } else {
-          context.state = { type: "Error", error: result.error };
-        }
+        context.state = processError(currState, message);
         break;
-      }
+      case "Success":
+        context.state = processSuccess(currState, message);
+        break;
       case "Loading":
+        context.state = processLoading(currState, message);
         break;
     }
-  };
+  }
 
-  const addRole = async (name: string) => {
-    if (context.state.type === "Success") {
-      const result = await repository.addRole(name);
-      if (result.type === "Ok") {
-        context.state = {
-          ...context.state,
-          roles: [...context.state.roles, result.role],
-        };
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    }
-  };
-
-  const updateRole = async (id: string, fields: Omit<Role, "id">) => {
-    if (context.state.type === "Success") {
-      const result = await repository.updateRole(id, fields);
-
-      if (result.type === "Ok") {
-        const newRole = result.role;
-        const newRoles = context.state.roles.map((role) => {
-          return role.id === newRole.id ? newRole : role
-        });
-
-        context.state = {
-          ...context.state,
-          roles: newRoles,
-        };
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    }
-  };
-
-  const deleteRole = async (id: string) => {
-
-    if (context.state.type === "Success") {
-      const result = await repository.deleteRole(id);
-      if (result.type === "Ok") {
-        const newRoles = context.state.roles.filter((role) => role.id !== id);
-
-        context.state = {
-          ...context.state,
-          roles: newRoles,
-        };
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    }
-  };
-
-
-
-  return {
-    getState,
-    initialize,
-    addRole,
-    updateRole,
-    deleteRole,
-  };
+  return { getState, send };
 });
+
+const processIdle = (state: RoleState & { type: "Idle" }, message: Message): RoleState => {
+  switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
+    case "Error":
+    case "Success":
+    case "AddRole":
+    case "UpdateRole":
+    case "DeleteRole":
+      return state;
+  }
+}
+
+const processError = (state: RoleState & { type: "Error" }, message: Message): RoleState => {
+  switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
+    case "Error":
+    case "Success":
+    case "AddRole":
+    case "UpdateRole":
+    case "DeleteRole":
+      return state;
+  }
+}
+
+const processSuccess = (state: RoleState & { type: "Success" }, message: Message): RoleState => {
+  switch (message.type) {
+    case "AddRole":
+      return {
+        ...state,
+        roles: [...state.roles, message.role],
+      }
+    case "UpdateRole":
+      return {
+        ...state,
+        roles: state.roles.map((role) => role.id === message.role.id ? message.role : role),
+      }
+    case "DeleteRole":
+      return {
+        ...state,
+        roles: state.roles.filter((role) => role.id !== message.id),
+      }
+
+    case "Start":
+    case "Error":
+    case "Success":
+      return state;
+  }
+}
+
+const processLoading = (state: RoleState & { type: "Loading" }, message: Message): RoleState => {
+  switch (message.type) {
+    case "Error":
+      return { type: "Error", error: message.error };
+    case "Success":
+      return { type: "Success", roles: message.roles };
+    case "Start":
+    case "AddRole":
+    case "UpdateRole":
+    case "DeleteRole":
+      return state;
+  }
+}

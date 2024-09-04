@@ -47,7 +47,7 @@ export type UserState =
   | { type: "Idle" }
   | { type: "Loading" }
   | { type: "Error", error: string }
-  | { type: "Success"; users: User[] };
+  | { type: "Success"; users: User[], selectedUserId: string | undefined };
 
 export type SettingsState =
   | { type: "Idle" }
