@@ -17,6 +17,10 @@ export type SelectionState =
         id: string;
         raw: string;
       };
+      response?: {
+        id: string;
+        raw: string;
+      }
     };
 
 export type AnalysisState = { type: "Idle" } | { type: "Analyzing" };

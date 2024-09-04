@@ -6,23 +6,33 @@ import { UserStore } from "../stores/users";
 import { RequestSpec } from "caido:utils";
 import type { AnalysisResult, Template, User } from "shared";
 import { AnalysisStore } from "../stores/analysis";
+import {Uint8ArrayToString} from "../utils";
 
 export const getResults = (_sdk: SDK): AnalysisResult[] => {
   const store = AnalysisStore.get();
   return store.getResults();
 };
 
-export const getRequest = async (sdk: SDK, id: string) => {
-  return {
-    id,
-    raw: "hello from request",
-  };
-};
+export const getRequestResponse = async (sdk: SDK, requestId: string) => {
 
-export const getResponse = async (sdk: SDK, id: string) => {
+  const result = await sdk.requests.get(requestId);
+
+  if (!result) {
+    return { type: "Err" as const, message: "Request not found" };
+  }
+
+  const { request, response } = result;
+
   return {
-    id,
-    raw: "hello from response",
+    type: "Ok" as const,
+    request: {
+      id: request.getId(),
+      raw: Uint8ArrayToString(request.toSpecRaw().getRaw()),
+    },
+    response: response ? {
+      id: response.getId(),
+      raw: "Test",
+    } : undefined,
   };
 };
 
@@ -45,11 +55,11 @@ export const runAnalysis = async (sdk: SDK) => {
   await Promise.all(promises);
 };
 
-const analyzeRequest = async (sdk: SDK, request: Template, user: User) => {
+const analyzeRequest = async (sdk: SDK, template: Template, user: User) => {
   // Retrieve RequestSpec given an ID
   // Here we mock this behavior as we don't have a real implementation yet
-  const protocol = request.meta.isTls ? "https" : "http";
-  const connectionURL = `${protocol}://${request.meta.host}:${request.meta.port}`;
+  const protocol = template.meta.isTls ? "https" : "http";
+  const connectionURL = `${protocol}://${template.meta.host}:${template.meta.port}`;
   const spec = new RequestSpec(connectionURL);
 
   const newHeaders = user.attributes.filter((attr) => attr.kind === "Header");

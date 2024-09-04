@@ -31,8 +31,8 @@ importers:
         version: link:../shared
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.40.1-beta.5
-        version: 0.40.1-beta.5
+        specifier: 0.40.1-beta.6
+        version: 0.40.1-beta.6
 
   packages/frontend:
     dependencies:
@@ -62,8 +62,8 @@ importers:
         version: 3.4.37(typescript@5.5.4)
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.40.1-beta.5
-        version: 0.40.1-beta.5
+        specifier: 0.40.1-beta.6
+        version: 0.40.1-beta.6
       '@vitejs/plugin-vue':
         specifier: 5.1.2
         version: 5.1.2(vite@5.2.7)(vue@3.4.37(typescript@5.5.4))
@@ -168,11 +168,11 @@ packages:
   '@caido/primevue@0.0.3':
     resolution: {integrity: sha512-kJEamKSUDx5VESYFJq/X2PJFdFkKLavk/vIUxA4PxN2DUHGxt52K95j8DHF83FEdb7VRJHcYO3cw3zo/oQrX5w==}
 
-  '@caido/quickjs-types@0.4.0':
-    resolution: {integrity: sha512-E+1QNCEiIdK6tkqhVhBLcOXdZ2qpEGpwvNPxdUFo2ucK5KWhfTsOH+iDV6WInSQXg/if1IPykuKAUYL4Q4JULQ==}
+  '@caido/quickjs-types@0.5.0':
+    resolution: {integrity: sha512-2Aq72WZR2a8+NfQKB+UyKu2WvGV6Vs4vNJQ4zMPXgEl3msWlMX7JV1WAW1/PrkDXtZWzIQec41ceMAip1ddonQ==}
 
-  '@caido/sdk-backend@0.40.1-beta.5':
-    resolution: {integrity: sha512-qyqdlmM3c1qTGW3IJ56zsVkdKl1aLGauXNaA3ip+yQ+Z2UVqEapUd3gQx87JpuW+IsayRspLk+mOyViw5s0c0Q==}
+  '@caido/sdk-backend@0.40.1-beta.6':
+    resolution: {integrity: sha512-s29Hnp5/hes08FSt5VwTKs0b+w+7pFd9PVOoGDy24oykZVoIVDBB20tgGmFJTcVZOm/5pAC2xTSdkWsA8T7ZDA==}
 
   '@caido/sdk-frontend@0.40.1-beta.3':
     resolution: {integrity: sha512-iuj8ypYrH+chYDy6y8fcNRn5Dl8We7AxldQ7mKEfqezfFdepSrcBVGWWMesHNNJRvFpIvPC59twrzUy+4rG0DA==}
@@ -1183,13 +1183,13 @@ snapshots:
     dependencies:
       '@primevue/themes': 4.0.4
 
-  '@caido/quickjs-types@0.4.0':
+  '@caido/quickjs-types@0.5.0':
     dependencies:
       prettier: 3.3.2
 
-  '@caido/sdk-backend@0.40.1-beta.5':
+  '@caido/sdk-backend@0.40.1-beta.6':
     dependencies:
-      '@caido/quickjs-types': 0.4.0
+      '@caido/quickjs-types': 0.5.0
       '@caido/sdk-shared': 0.1.0
 
   '@caido/sdk-frontend@0.40.1-beta.3(@codemirror/view@6.33.0)':

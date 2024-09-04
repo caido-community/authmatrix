@@ -1,5 +1,5 @@
 import type { DefineAPI, SDK } from "caido:plugin";
-import { getRequest, getResults, runAnalysis } from "./services/analysis";
+import { getRequestResponse, getResults, runAnalysis } from "./services/analysis";
 import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { getSettings, updateSettings } from "./services/settings";
 import {
@@ -41,7 +41,7 @@ export type API = DefineAPI<{
   // Analysis endpoints
   runAnalysis: typeof runAnalysis;
   getResults: typeof getResults;
-  getRequest: typeof getRequest;
+  getRequestResponse: typeof getRequestResponse;
 }>;
 
 export function init(sdk: SDK<API>) {
@@ -71,7 +71,7 @@ export function init(sdk: SDK<API>) {
   // Analysis function
   sdk.api.register("runAnalysis", runAnalysis);
   sdk.api.register("getResults", getResults);
-  sdk.api.register("getRequest", getRequest);
+  sdk.api.register("getRequestResponse", getRequestResponse);
 
   // Events
   registerTemplateEvents(sdk);

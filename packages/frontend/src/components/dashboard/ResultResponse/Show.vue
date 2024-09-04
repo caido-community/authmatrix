@@ -16,13 +16,12 @@ onMounted(() => {
   root.value.appendChild(editor.getElement());
 
   const view = editor.getEditorView();
-  console.log(view);
 
   view.dispatch({
     changes: {
       from: 0,
       to: view.state.doc.length,
-      insert: props.selectionState.request.raw,
+      insert: props.selectionState.response?.raw,
     },
   });
 });

@@ -107,16 +107,28 @@ export const useTemplates = (context: Context) => {
         };
 
         try {
-          const result = await sdk.backend.getRequest(newTemplate.requestId);
-          context.state = {
-            ...context.state,
-            selectionState: {
-              type: "Success",
-              templateId: newTemplate.id,
-              userId: undefined,
-              request: result,
-            },
-          };
+          const result = await sdk.backend.getRequestResponse(newTemplate.requestId);
+          if (result.type === "Ok") {
+            context.state = {
+              ...context.state,
+              selectionState: {
+                type: "Success",
+                templateId: newTemplate.id,
+                userId: undefined,
+                request: result.request,
+                response: result.response,
+              },
+            };
+          } else {
+            context.state = {
+              ...context.state,
+              selectionState: {
+                type: "Error",
+                templateId: newTemplate.id,
+                userId: undefined,
+              },
+            };
+          }
         } catch {
           context.state = {
             ...context.state,
@@ -152,16 +164,29 @@ export const useTemplates = (context: Context) => {
         };
 
         try {
-          const request = await sdk.backend.getRequest(result.requestId);
-          context.state = {
-            ...state,
-            selectionState: {
-              type: "Success",
-              templateId,
-              userId,
-              request,
-            },
-          };
+          const getResult = await sdk.backend.getRequestResponse(result.requestId);
+
+          if (getResult.type === "Ok") {
+            context.state = {
+              ...state,
+              selectionState: {
+                type: "Success",
+                templateId,
+                userId,
+                request: getResult.request,
+                response: getResult.response,
+              },
+            };
+          } else {
+            context.state = {
+              ...state,
+              selectionState: {
+                type: "Error",
+                templateId,
+                userId,
+              },
+            };
+          }
         } catch {
           context.state = {
             ...state,
@@ -190,17 +215,28 @@ export const useTemplates = (context: Context) => {
         };
 
         try {
-          const request = await sdk.backend.getRequest(requestId);
+          const getResult = await sdk.backend.getRequestResponse(requestId);
 
-          context.state = {
-            ...state,
-            selectionState: {
-              type: "Success",
-              templateId,
-              userId,
-              request,
-            },
-          };
+          if (getResult.type === "Ok") {
+            context.state = {
+              ...state,
+              selectionState: {
+                type: "Success",
+                templateId,
+                userId,
+                request: getResult.request,
+              },
+            }
+          } else {
+            context.state = {
+              ...state,
+              selectionState: {
+                type: "Error",
+                templateId,
+                userId,
+              },
+            };
+          }
         } catch {
           context.state = {
             ...state,

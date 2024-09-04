@@ -16,7 +16,6 @@ onMounted(() => {
   root.value.appendChild(editor.getElement());
 
   const view = editor.getEditorView();
-  console.log(view);
 
   view.dispatch({
     changes: {

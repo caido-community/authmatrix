@@ -21,7 +21,7 @@
     "vue": "3.4.37"
   },
   "devDependencies": {
-    "@caido/sdk-backend": "0.40.1-beta.5",
+    "@caido/sdk-backend": "0.40.1-beta.6",
     "@vitejs/plugin-vue": "5.1.2",
     "backend": "workspace:*",
     "postcss-prefixwrap": "1.51.0",
