@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUserStore } from "@/stores/users";
+import { useUserService } from "@/services/users";
 import { useCloned } from "@vueuse/core";
 import Button from "primevue/button";
 import Card from "primevue/card";
@@ -20,9 +20,9 @@ const isDirty = computed(() => {
   return JSON.stringify(props.user) !== JSON.stringify(cloned.value);
 });
 
-const userStore = useUserStore();
+const service = useUserService();
 const onSaveClick = () => {
-  userStore.updateUser(props.user.id, cloned.value);
+  service.updateUser(props.user.id, cloned.value);
 };
 
 const onResetClick = () => {

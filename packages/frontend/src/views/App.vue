@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useRoleStore } from "@/stores/roles";
-import { useSettingsStore } from "@/stores/settings";
-import { useTemplateStore } from "@/stores/templates";
-import { useUserStore } from "@/stores/users";
+import { useAnalysisService } from "@/services/analysis";
+import { useRoleService } from "@/services/roles";
+import { useSettingsService } from "@/services/settings";
+import { useTemplateService } from "@/services/templates";
+import { useUserService } from "@/services/users";
 import MenuBar from "primevue/menubar";
 import { computed, ref } from "vue";
 import { onMounted } from "vue";
@@ -34,16 +35,18 @@ const component = computed(() => {
   }
 });
 
-const roleStore = useRoleStore();
-const userStore = useUserStore();
-const templateStore = useTemplateStore();
-const settingsStore = useSettingsStore();
+const roleService = useRoleService();
+const userService = useUserService();
+const templateService = useTemplateService();
+const settingsService = useSettingsService();
+const analysisService = useAnalysisService();
 
 onMounted(() => {
-  roleStore.initialize();
-  userStore.initialize();
-  templateStore.initialize();
-  settingsStore.initialize();
+  roleService.initialize();
+  userService.initialize();
+  templateService.initialize();
+  settingsService.initialize();
+  analysisService.initialize();
 });
 </script>
 

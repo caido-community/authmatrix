@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUserStore } from "@/stores/users";
+import { useUserService } from "@/services/users";
 import { RoleState } from "@/types";
 import { UserState } from "@/types";
 import Button from "primevue/button";
@@ -12,11 +12,13 @@ defineProps<{
   roleState: RoleState & { type: "Success" };
 }>();
 
-const selection = defineModel<User | null>("selection", { required: true });
+const selection = defineModel<User | undefined>("selection", {
+  required: true,
+});
 
-const store = useUserStore();
+const service = useUserService();
 const onAddUser = () => {
-  store.addUser("New user");
+  service.addUser("New user");
 };
 </script>
 

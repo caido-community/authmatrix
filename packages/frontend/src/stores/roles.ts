@@ -1,7 +1,7 @@
-import { defineStore } from "pinia";
-import { reactive } from "vue";
 import type { RoleState } from "@/types";
-import { Role } from "shared";
+import { defineStore } from "pinia";
+import type { Role } from "shared";
+import { reactive } from "vue";
 
 type Context = {
   state: RoleState;
@@ -9,11 +9,11 @@ type Context = {
 
 type Message =
   | { type: "Start" }
-  | { type: "Error", error: string }
-  | { type: "Success", roles: Role[] }
-  | { type: "AddRole", role: Role }
-  | { type: "UpdateRole", role: Role }
-  | { type: "DeleteRole", id: string };
+  | { type: "Error"; error: string }
+  | { type: "Success"; roles: Role[] }
+  | { type: "AddRole"; role: Role }
+  | { type: "UpdateRole"; role: Role }
+  | { type: "DeleteRole"; id: string };
 
 export const useRoleStore = defineStore("stores.roles", () => {
   const context: Context = reactive({
@@ -39,12 +39,15 @@ export const useRoleStore = defineStore("stores.roles", () => {
         context.state = processLoading(currState, message);
         break;
     }
-  }
+  };
 
   return { getState, send };
 });
 
-const processIdle = (state: RoleState & { type: "Idle" }, message: Message): RoleState => {
+const processIdle = (
+  state: RoleState & { type: "Idle" },
+  message: Message,
+): RoleState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -55,9 +58,12 @@ const processIdle = (state: RoleState & { type: "Idle" }, message: Message): Rol
     case "DeleteRole":
       return state;
   }
-}
+};
 
-const processError = (state: RoleState & { type: "Error" }, message: Message): RoleState => {
+const processError = (
+  state: RoleState & { type: "Error" },
+  message: Message,
+): RoleState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -68,34 +74,42 @@ const processError = (state: RoleState & { type: "Error" }, message: Message): R
     case "DeleteRole":
       return state;
   }
-}
+};
 
-const processSuccess = (state: RoleState & { type: "Success" }, message: Message): RoleState => {
+const processSuccess = (
+  state: RoleState & { type: "Success" },
+  message: Message,
+): RoleState => {
   switch (message.type) {
     case "AddRole":
       return {
         ...state,
         roles: [...state.roles, message.role],
-      }
+      };
     case "UpdateRole":
       return {
         ...state,
-        roles: state.roles.map((role) => role.id === message.role.id ? message.role : role),
-      }
+        roles: state.roles.map((role) =>
+          role.id === message.role.id ? message.role : role,
+        ),
+      };
     case "DeleteRole":
       return {
         ...state,
         roles: state.roles.filter((role) => role.id !== message.id),
-      }
+      };
 
     case "Start":
     case "Error":
     case "Success":
       return state;
   }
-}
+};
 
-const processLoading = (state: RoleState & { type: "Loading" }, message: Message): RoleState => {
+const processLoading = (
+  state: RoleState & { type: "Loading" },
+  message: Message,
+): RoleState => {
   switch (message.type) {
     case "Error":
       return { type: "Error", error: message.error };
@@ -107,4 +121,4 @@ const processLoading = (state: RoleState & { type: "Loading" }, message: Message
     case "DeleteRole":
       return state;
   }
-}
+};

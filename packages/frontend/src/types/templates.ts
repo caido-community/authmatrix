@@ -7,5 +7,5 @@ export type CaidoSDK = Caido<API>;
 export type TemplateState =
   | { type: "Idle" }
   | { type: "Loading" }
-  | { type: "Error", error: string }
-  | { type: "Success"; templates: Template[]; };
+  | { type: "Error"; error: string }
+  | { type: "Success"; templates: Template[] };

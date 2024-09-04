@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { RoleList, UserList, UserShow } from "@/components/users-roles";
-import { useRoleStore } from "@/stores/roles";
-import { useUserStore } from "@/stores/users";
+import { useRoleService } from "@/services/roles";
+import { useUserService } from "@/services/users";
 import { computed } from "vue";
 
-const roleStore = useRoleStore();
-const userStore = useUserStore();
+const roleService = useRoleService();
+const userService = useUserService();
 
-const roleState = computed(() => roleStore.getState());
-const userState = computed(() => userStore.getState());
+const roleState = computed(() => roleService.getState());
+const userState = computed(() => userService.getState());
 </script>
 
 <template>
@@ -17,7 +17,7 @@ const userState = computed(() => userStore.getState());
       <div class="h-1/2">
         <UserList
         v-if="roleState.type === 'Success' && userState.type === 'Success'"
-        v-model:selection="userStore.userSelection"
+        v-model:selection="userService.userSelection"
         :state="userState"
         :role-state="roleState" />
       </div>
@@ -27,7 +27,7 @@ const userState = computed(() => userStore.getState());
     </div>
 
     <div class="h-full w-1/2">
-      <UserShow v-if="userStore.userSelection" :user="userStore.userSelection"/>
+      <UserShow v-if="userService.userSelection" :user="userService.userSelection"/>
     </div>
   </div>
 </template>

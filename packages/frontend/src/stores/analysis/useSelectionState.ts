@@ -1,20 +1,26 @@
-import { reactive } from "vue";
 import type { AnalysisSelectionState } from "@/types";
+import { reactive } from "vue";
 
 type Context = {
   state: AnalysisSelectionState;
 };
 
 type Message =
-  | { type: "Start", templateId: string, userId: string | undefined }
-  | { type: "Error", templateId: string, userId: string | undefined, error: string }
+  | { type: "Reset" }
+  | { type: "Start"; templateId: string; userId: string | undefined }
   | {
-    type: "Success",
-    templateId: string,
-    userId: string | undefined,
-    request: { id: string, raw: string },
-    response?: { id: string, raw: string }
-  };
+      type: "Error";
+      templateId: string;
+      userId: string | undefined;
+      error: string;
+    }
+  | {
+      type: "Success";
+      templateId: string;
+      userId: string | undefined;
+      request: { id: string; raw: string };
+      response?: { id: string; raw: string };
+    };
 
 export const useSelectionState = () => {
   const context: Context = reactive({
@@ -40,53 +46,93 @@ export const useSelectionState = () => {
         context.state = processSuccess(currState, message);
         break;
     }
-  }
+  };
 
   return {
     selectionState: {
       getState,
-      send
-    }
+      send,
+    },
+  };
+};
+
+const processIdle = (
+  state: AnalysisSelectionState & { type: "None" },
+  message: Message,
+): AnalysisSelectionState => {
+  switch (message.type) {
+    case "Start":
+      return {
+        type: "Loading",
+        templateId: message.templateId,
+        userId: message.userId,
+      };
+    case "Reset":
+    case "Error":
+    case "Success":
+      return state;
   }
 };
 
-const processIdle = (state: AnalysisSelectionState & { type: "None" }, message: Message): AnalysisSelectionState => {
+const processLoading = (
+  state: AnalysisSelectionState & { type: "Loading" },
+  message: Message,
+): AnalysisSelectionState => {
   switch (message.type) {
-    case "Start":
-      return { type: "Loading", templateId: message.templateId, userId: message.userId };
     case "Error":
+      return {
+        type: "Error",
+        templateId: message.templateId,
+        userId: message.userId,
+      };
     case "Success":
+      return {
+        type: "Success",
+        templateId: message.templateId,
+        userId: message.userId,
+        request: message.request,
+      };
+    case "Reset":
+      return { type: "None" };
+    case "Start":
       return state;
   }
-}
+};
 
-const processLoading = (state: AnalysisSelectionState & { type: "Loading" }, message: Message): AnalysisSelectionState => {
+const processError = (
+  state: AnalysisSelectionState & { type: "Error" },
+  message: Message,
+): AnalysisSelectionState => {
   switch (message.type) {
-    case "Error":
-      return { type: "Error", templateId: message.templateId, userId: message.userId };
-    case "Success":
-      return { type: "Success", templateId: message.templateId, userId: message.userId, request: message.request };
     case "Start":
+      return {
+        type: "Loading",
+        templateId: message.templateId,
+        userId: message.userId,
+      };
+    case "Reset":
+      return { type: "None" };
+    case "Error":
+    case "Success":
       return state;
   }
-}
+};
 
-const processError = (state: AnalysisSelectionState & { type: "Error" }, message: Message): AnalysisSelectionState => {
+const processSuccess = (
+  state: AnalysisSelectionState & { type: "Success" },
+  message: Message,
+): AnalysisSelectionState => {
   switch (message.type) {
     case "Start":
-      return { type: "Loading", templateId: message.templateId, userId: message.userId };
+      return {
+        type: "Loading",
+        templateId: message.templateId,
+        userId: message.userId,
+      };
+    case "Reset":
+      return { type: "None" };
     case "Error":
     case "Success":
       return state;
   }
-}
-
-const processSuccess = (state: AnalysisSelectionState & { type: "Success" }, message: Message): AnalysisSelectionState => {
-  switch (message.type) {
-    case "Start":
-      return { type: "Loading", templateId: message.templateId, userId: message.userId };
-    case "Error":
-    case "Success":
-      return state;
-  }
-}
+};

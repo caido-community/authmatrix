@@ -1,8 +1,9 @@
-import {useSDK} from "@/plugins/sdk";
-import {useTemplateRepository} from "@/repositories/template";
-import {useTemplateStore} from "@/stores/templates";
+import { useSDK } from "@/plugins/sdk";
+import { useTemplateRepository } from "@/repositories/template";
+import { useTemplateStore } from "@/stores/templates";
+import { defineStore } from "pinia";
 
-export const useTemplateService = () => {
+export const useTemplateService = defineStore("services.templates", () => {
   const sdk = useSDK();
   const repository = useTemplateRepository();
   const store = useTemplateStore();
@@ -81,4 +82,4 @@ export const useTemplateService = () => {
     addTemplate,
     deleteTemplate,
   };
-};
+});

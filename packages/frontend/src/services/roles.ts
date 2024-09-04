@@ -1,9 +1,10 @@
-import { useRoleRepository } from "@/repositories/roles";
-import { Role } from "shared";
 import { useSDK } from "@/plugins/sdk";
-import {useRoleStore} from "@/stores/roles";
+import { useRoleRepository } from "@/repositories/roles";
+import { useRoleStore } from "@/stores/roles";
+import { defineStore } from "pinia";
+import type { Role } from "shared";
 
-export const useRoleService = () => {
+export const useRoleService = defineStore("services.roles", () => {
   const sdk = useSDK();
   const repository = useRoleRepository();
   const store = useRoleStore();
@@ -63,4 +64,4 @@ export const useRoleService = () => {
     updateRole,
     deleteRole,
   };
-};
+});

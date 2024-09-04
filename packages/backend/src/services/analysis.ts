@@ -6,7 +6,7 @@ import { UserStore } from "../stores/users";
 import { RequestSpec } from "caido:utils";
 import type { AnalysisResult, Template, User } from "shared";
 import { AnalysisStore } from "../stores/analysis";
-import {Uint8ArrayToString} from "../utils";
+import { Uint8ArrayToString } from "../utils";
 
 export const getResults = (_sdk: SDK): AnalysisResult[] => {
   const store = AnalysisStore.get();
@@ -14,7 +14,6 @@ export const getResults = (_sdk: SDK): AnalysisResult[] => {
 };
 
 export const getRequestResponse = async (sdk: SDK, requestId: string) => {
-
   const result = await sdk.requests.get(requestId);
 
   if (!result) {
@@ -29,10 +28,12 @@ export const getRequestResponse = async (sdk: SDK, requestId: string) => {
       id: request.getId(),
       raw: Uint8ArrayToString(request.toSpecRaw().getRaw()),
     },
-    response: response ? {
-      id: response.getId(),
-      raw: "Test",
-    } : undefined,
+    response: response
+      ? {
+          id: response.getId(),
+          raw: "Test",
+        }
+      : undefined,
   };
 };
 

@@ -1,5 +1,5 @@
-import { Caido } from "@caido/sdk-frontend";
-import { API } from "backend";
+import type { Caido } from "@caido/sdk-frontend";
+import type { API } from "backend";
 
 export * from "./analysis";
 export * from "./roles";

@@ -1,7 +1,7 @@
-import { defineStore } from "pinia";
-import { reactive } from "vue";
 import type { SettingsState } from "@/types";
-import { Settings } from "shared";
+import { defineStore } from "pinia";
+import type { Settings } from "shared";
+import { reactive } from "vue";
 
 type Context = {
   state: SettingsState;
@@ -9,9 +9,9 @@ type Context = {
 
 type Message =
   | { type: "Start" }
-  | { type: "Error", error: string }
-  | { type: "Success", settings: Settings }
-  | { type: "UpdateSettings", settings: Settings }
+  | { type: "Error"; error: string }
+  | { type: "Success"; settings: Settings }
+  | { type: "UpdateSettings"; settings: Settings };
 
 export const useSettingsStore = defineStore("stores.settings", () => {
   const context: Context = reactive({
@@ -37,12 +37,15 @@ export const useSettingsStore = defineStore("stores.settings", () => {
         context.state = processLoading(currState, message);
         break;
     }
-  }
+  };
 
   return { getState, send };
 });
 
-const processIdle = (state: SettingsState & { type: "Idle" }, message: Message): SettingsState => {
+const processIdle = (
+  state: SettingsState & { type: "Idle" },
+  message: Message,
+): SettingsState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -51,9 +54,12 @@ const processIdle = (state: SettingsState & { type: "Idle" }, message: Message):
     case "UpdateSettings":
       return state;
   }
-}
+};
 
-const processError = (state: SettingsState & { type: "Error" }, message: Message): SettingsState => {
+const processError = (
+  state: SettingsState & { type: "Error" },
+  message: Message,
+): SettingsState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -62,24 +68,30 @@ const processError = (state: SettingsState & { type: "Error" }, message: Message
     case "UpdateSettings":
       return state;
   }
-}
+};
 
-const processSuccess = (state: SettingsState & { type: "Success" }, message: Message): SettingsState => {
+const processSuccess = (
+  state: SettingsState & { type: "Success" },
+  message: Message,
+): SettingsState => {
   switch (message.type) {
     case "UpdateSettings":
       return {
         ...state,
         settings: message.settings,
-      }
+      };
 
     case "Start":
     case "Error":
     case "Success":
       return state;
   }
-}
+};
 
-const processLoading = (state: SettingsState & { type: "Loading" }, message: Message): SettingsState => {
+const processLoading = (
+  state: SettingsState & { type: "Loading" },
+  message: Message,
+): SettingsState => {
   switch (message.type) {
     case "Error":
       return { type: "Error", error: message.error };
@@ -89,4 +101,4 @@ const processLoading = (state: SettingsState & { type: "Loading" }, message: Mes
     case "UpdateSettings":
       return state;
   }
-}
+};

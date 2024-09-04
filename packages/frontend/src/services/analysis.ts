@@ -1,9 +1,11 @@
-import {useSDK} from "@/plugins/sdk";
-import {useAnalysisRepository} from "@/repositories/analysis";
-import {useAnalysisStore} from "@/stores/analysis";
-import {useTemplateStore} from "@/stores/templates";
+import { useSDK } from "@/plugins/sdk";
+import { useAnalysisRepository } from "@/repositories/analysis";
+import { useAnalysisStore } from "@/stores/analysis";
+import { useTemplateStore } from "@/stores/templates";
+import { defineStore } from "pinia";
+import { computed } from "vue";
 
-export const useAnalysisService = () => {
+export const useAnalysisService = defineStore("services.analysis", () => {
   const sdk = useSDK();
   const store = useAnalysisStore();
   const templateStore = useTemplateStore();
@@ -20,7 +22,7 @@ export const useAnalysisService = () => {
         variant: "error",
       });
     }
-  }
+  };
 
   const initialize = async () => {
     store.resultState.send({ type: "Start" });
@@ -31,19 +33,29 @@ export const useAnalysisService = () => {
     } else {
       store.resultState.send({ type: "Error", error: result.error });
     }
-  }
+  };
 
-  const selectResult = async (templateId: string, userId: string | undefined) => {
+  const selectResult = async (templateId?: string, userId?: string) => {
     const resultState = store.resultState.getState();
     const templateState = templateStore.getState();
 
-    if (resultState.type !== "Success" || templateState.type !== "Success") return;
+    if (resultState.type !== "Success" || templateState.type !== "Success")
+      return;
 
-    const analysisResult = resultState.results.find(r => r.templateId === templateId && r.userId === userId);
+    if (!templateId) {
+      store.selectionState.send({ type: "Reset" });
+      return;
+    }
+
+    const analysisResult = resultState.results.find(
+      (r) => r.templateId === templateId && r.userId === userId,
+    );
 
     if (analysisResult) {
       store.selectionState.send({ type: "Start", templateId, userId });
-      const result = await repository.getRequestResponse(analysisResult.requestId);
+      const result = await repository.getRequestResponse(
+        analysisResult.requestId,
+      );
 
       if (result.type === "Ok") {
         store.selectionState.send({
@@ -51,21 +63,21 @@ export const useAnalysisService = () => {
           templateId,
           userId,
           request: result.request,
-          response: result.response
+          response: result.response,
         });
       } else {
         store.selectionState.send({
           type: "Error",
           templateId,
           userId,
-          error: result.error
+          error: result.error,
         });
       }
 
       return;
     }
 
-    const template = templateState.templates.find(t => t.id === templateId);
+    const template = templateState.templates.find((t) => t.id === templateId);
     if (template && !userId) {
       store.selectionState.send({ type: "Start", templateId, userId });
       const result = await repository.getRequestResponse(template.requestId);
@@ -76,22 +88,29 @@ export const useAnalysisService = () => {
           templateId,
           userId,
           request: result.request,
-          response: result.response
+          response: result.response,
         });
       } else {
         store.selectionState.send({
           type: "Error",
           templateId,
           userId,
-          error: result.error
+          error: result.error,
         });
       }
     }
-  }
+  };
+
+  const selectionState = computed(() => store.selectionState.getState());
+  const jobState = computed(() => store.jobState.getState());
+  const resultState = computed(() => store.resultState.getState());
 
   return {
     initialize,
     runAnalysis,
-    selectResult
+    selectResult,
+    selectionState,
+    resultState,
+    jobState,
   };
-}
+});

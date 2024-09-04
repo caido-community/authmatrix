@@ -1,5 +1,9 @@
 import type { DefineAPI, SDK } from "caido:plugin";
-import { getRequestResponse, getResults, runAnalysis } from "./services/analysis";
+import {
+  getRequestResponse,
+  getResults,
+  runAnalysis,
+} from "./services/analysis";
 import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { getSettings, updateSettings } from "./services/settings";
 import {

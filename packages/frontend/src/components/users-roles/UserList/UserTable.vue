@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUserStore } from "@/stores/users";
+import { useUserService } from "@/services/users";
 import { RoleState } from "@/types";
 import { UserState } from "@/types";
 import Button from "primevue/button";
@@ -17,17 +17,18 @@ const getRoleValue = (user: User, role: Role) => {
   return user.roleIds.some((roleId) => roleId === role.id);
 };
 
-const store = useUserStore();
+const service = useUserService();
+const { userSelection } = service;
 const toggleRole = (user: User, role: Role) => {
   const isEnabled = user.roleIds.some((roleId) => roleId === role.id);
 
   if (isEnabled) {
-    store.updateUser(user.id, {
+    service.updateUser(user.id, {
       ...user,
       roleIds: user.roleIds.filter((roleId) => roleId !== role.id),
     });
   } else {
-    store.updateUser(user.id, {
+    service.updateUser(user.id, {
       ...user,
       roleIds: [...user.roleIds, role.id],
     });
@@ -35,7 +36,7 @@ const toggleRole = (user: User, role: Role) => {
 };
 
 const onDeleteUser = (user: User) => {
-  store.deleteUser(user.id);
+  service.deleteUser(user.id);
 };
 </script>
 
@@ -43,7 +44,7 @@ const onDeleteUser = (user: User) => {
 <template>
   <DataTable
     :value="state.users"
-    v-model:selection="store.userSelection"
+    v-model:selection="userSelection"
     data-key="id"
     striped-rows
     scrollable

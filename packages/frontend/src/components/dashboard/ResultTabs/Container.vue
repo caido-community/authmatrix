@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { useTemplateStore } from "@/stores/templates";
-import { TemplateState, UserState } from "@/types";
+import { useAnalysisService } from "@/services/analysis";
+import {
+  AnalysisResultState,
+  AnalysisSelectionState,
+  TemplateState,
+  UserState,
+} from "@/types";
 import Card from "primevue/card";
 import SelectButton from "primevue/selectbutton";
 import { computed } from "vue";
@@ -8,10 +13,12 @@ import { computed } from "vue";
 const props = defineProps<{
   templateState: TemplateState & { type: "Success" };
   userState: UserState & { type: "Success" };
+  resultState: AnalysisResultState & { type: "Success" };
+  selectionState: AnalysisSelectionState;
 }>();
 
 const options = computed(() => {
-  const selection = props.templateState.selectionState;
+  const selection = props.selectionState;
   if (selection.type === "None") return ["Original"];
 
   const users = props.userState.users.map((user) => user.id);
@@ -26,28 +33,30 @@ const getLabel = (option: string) => {
 };
 
 const isDisabled = (option: string) => {
-  if (props.templateState.selectionState.type === "None") return true;
+  if (props.selectionState.type === "None") return true;
   if (option === "Original") return false;
 
-  const template = props.templateState.selectionState.templateId;
-  const hasResult = props.templateState.results.some((result) => {
+  const template = props.selectionState.templateId;
+  const hasResult = props.resultState.results.some((result) => {
     return result.templateId === template && result.userId === option;
   });
 
   return !hasResult;
 };
 
-const store = useTemplateStore();
+const analysisService = useAnalysisService();
 const selection = computed({
   get: () => {
-    if (props.templateState.selectionState.type === "None") return "Original";
-    return props.templateState.selectionState.userId ?? "Original";
+    if (props.selectionState.type === "None") return "Original";
+    return props.selectionState.userId ?? "Original";
   },
   set: (option) => {
-    if (option === "Original") {
-      store.setSelectionUser(undefined);
-    } else {
-      store.setSelectionUser(option);
+    if (props.selectionState.type === "Success") {
+      if (option === "Original") {
+        analysisService.selectResult(props.selectionState.templateId);
+      } else {
+        analysisService.selectResult(props.selectionState.templateId, option);
+      }
     }
   },
 });

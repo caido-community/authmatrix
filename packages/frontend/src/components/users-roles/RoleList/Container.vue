@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoleStore } from "@/stores/roles";
+import { useRoleService } from "@/services/roles";
 import { RoleState } from "@/types";
 import Button from "primevue/button";
 import Card from "primevue/card";
@@ -9,9 +9,9 @@ defineProps<{
   state: RoleState & { type: "Success" };
 }>();
 
-const store = useRoleStore();
+const service = useRoleService();
 const onAddRole = () => {
-  store.addRole("New role");
+  service.addRole("New role");
 };
 </script>
 

@@ -1,13 +1,11 @@
-import { reactive } from "vue";
 import type { AnalysisJobState } from "@/types";
+import { reactive } from "vue";
 
 type Context = {
   state: AnalysisJobState;
 };
 
-type Message =
-  | { type: "Start" }
-  | { type: "Done" };
+type Message = { type: "Start" } | { type: "Done" };
 
 export const useJobState = () => {
   const context: Context = reactive({
@@ -27,29 +25,36 @@ export const useJobState = () => {
         context.state = processAnalyzing(currState, message);
         break;
     }
-  }
+  };
 
   return {
     jobState: {
-      getState, send
-    }
-  }
+      getState,
+      send,
+    },
+  };
 };
 
-const processIdle = (state: AnalysisJobState & { type: "Idle" }, message: Message): AnalysisJobState => {
+const processIdle = (
+  state: AnalysisJobState & { type: "Idle" },
+  message: Message,
+): AnalysisJobState => {
   switch (message.type) {
     case "Start":
       return { type: "Analyzing" };
     case "Done":
       return state;
   }
-}
+};
 
-const processAnalyzing = (state: AnalysisJobState & { type: "Analyzing" }, message: Message): AnalysisJobState => {
+const processAnalyzing = (
+  state: AnalysisJobState & { type: "Analyzing" },
+  message: Message,
+): AnalysisJobState => {
   switch (message.type) {
     case "Done":
       return { type: "Idle" };
     case "Start":
       return state;
   }
-}
+};

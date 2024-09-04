@@ -1,11 +1,12 @@
 import { computed } from "vue";
 
+import { useSDK } from "@/plugins/sdk";
+import { useUserRepository } from "@/repositories/users";
+import { useUserStore } from "@/stores/users";
+import { defineStore } from "pinia";
 import type { User } from "shared";
-import {useSDK} from "@/plugins/sdk";
-import {useUserRepository} from "@/repositories/users";
-import {useUserStore} from "@/stores/users";
 
-export const useUserService = () => {
+export const useUserService = defineStore("services.users", () => {
   const sdk = useSDK();
   const repository = useUserRepository();
   const store = useUserStore();
@@ -41,10 +42,6 @@ export const useUserService = () => {
 
     if (result.type === "Ok") {
       store.send({ type: "UpdateUser", user: result.user });
-
-      if (context.selection?.id === id) {
-        context.selection = result.user;
-      }
     } else {
       sdk.window.showToast(result.error, {
         variant: "error",
@@ -79,7 +76,6 @@ export const useUserService = () => {
     },
   });
 
-
   return {
     initialize,
     getState,
@@ -88,4 +84,4 @@ export const useUserService = () => {
     deleteUser,
     userSelection,
   };
-};
+});

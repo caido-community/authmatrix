@@ -14,4 +14,4 @@ export const Uint8ArrayToString = (data: Uint8Array) => {
   }
 
   return output;
-}
+};

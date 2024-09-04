@@ -1,6 +1,6 @@
-import { reactive } from "vue";
 import type { AnalysisResultState } from "@/types";
-import {AnalysisResult} from "shared";
+import type { AnalysisResult } from "shared";
+import { reactive } from "vue";
 
 type Context = {
   state: AnalysisResultState;
@@ -8,8 +8,8 @@ type Context = {
 
 type Message =
   | { type: "Start" }
-  | { type: "Error", error: string }
-  | { type: "Success", results: AnalysisResult[] };
+  | { type: "Error"; error: string }
+  | { type: "Success"; results: AnalysisResult[] };
 
 export const useResultState = () => {
   const context: Context = reactive({
@@ -35,17 +35,20 @@ export const useResultState = () => {
         context.state = processSuccess(currState, message);
         break;
     }
-  }
+  };
 
   return {
     resultState: {
       getState,
-      send
-    }
-  }
+      send,
+    },
+  };
 };
 
-const processIdle = (state: AnalysisResultState & { type: "Idle" }, message: Message): AnalysisResultState => {
+const processIdle = (
+  state: AnalysisResultState & { type: "Idle" },
+  message: Message,
+): AnalysisResultState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -54,9 +57,12 @@ const processIdle = (state: AnalysisResultState & { type: "Idle" }, message: Mes
     case "Success":
       return state;
   }
-}
+};
 
-const processLoading = (state: AnalysisResultState & { type: "Loading" }, message: Message): AnalysisResultState => {
+const processLoading = (
+  state: AnalysisResultState & { type: "Loading" },
+  message: Message,
+): AnalysisResultState => {
   switch (message.type) {
     case "Error":
       return { type: "Error", error: message.error };
@@ -65,9 +71,12 @@ const processLoading = (state: AnalysisResultState & { type: "Loading" }, messag
     case "Start":
       return state;
   }
-}
+};
 
-const processError = (state: AnalysisResultState & { type: "Error" }, message: Message): AnalysisResultState => {
+const processError = (
+  state: AnalysisResultState & { type: "Error" },
+  message: Message,
+): AnalysisResultState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -75,13 +84,16 @@ const processError = (state: AnalysisResultState & { type: "Error" }, message: M
     case "Success":
       return state;
   }
-}
+};
 
-const processSuccess = (state: AnalysisResultState & { type: "Success" }, message: Message): AnalysisResultState => {
+const processSuccess = (
+  state: AnalysisResultState & { type: "Success" },
+  message: Message,
+): AnalysisResultState => {
   switch (message.type) {
     case "Start":
     case "Error":
     case "Success":
       return state;
   }
-}
+};

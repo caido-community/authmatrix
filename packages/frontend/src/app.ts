@@ -1,7 +1,7 @@
-import { createApp } from "vue";
 import { ClassicTheme, ClassicThemePassthrough } from "@caido/primevue";
 import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
+import { createApp } from "vue";
 
 import App from "./views/App.vue";
 

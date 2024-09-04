@@ -1,8 +1,9 @@
-import {useSDK} from "@/plugins/sdk";
-import {useSettingsRepository} from "@/repositories/settings";
-import {useSettingsStore} from "@/stores/settings";
+import { useSDK } from "@/plugins/sdk";
+import { useSettingsRepository } from "@/repositories/settings";
+import { useSettingsStore } from "@/stores/settings";
+import { defineStore } from "pinia";
 
-export const useSettingsService = () => {
+export const useSettingsService = defineStore("services.settings", () => {
   const sdk = useSDK();
   const repository = useSettingsRepository();
   const store = useSettingsStore();
@@ -10,7 +11,7 @@ export const useSettingsService = () => {
   const getState = () => store.getState();
 
   const initialize = async () => {
-    store.send({type: "Start"});
+    store.send({ type: "Start" });
 
     const result = await repository.getSettings();
 
@@ -63,4 +64,4 @@ export const useSettingsService = () => {
     toggleAutoRunAnalysis,
     toggleAutoCaptureRequests,
   };
-};
+});

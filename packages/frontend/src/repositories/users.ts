@@ -1,5 +1,5 @@
-import { useSDK } from "@/plugins/sdk"
-import {User} from "shared";
+import { useSDK } from "@/plugins/sdk";
+import type { User } from "shared";
 
 export const useUserRepository = () => {
   const sdk = useSDK();
@@ -8,30 +8,30 @@ export const useUserRepository = () => {
       const users = await sdk.backend.getUsers();
       return {
         type: "Ok" as const,
-        users
-      }
+        users,
+      };
     } catch {
       return {
         type: "Err" as const,
-        error: "Failed to get users"
-      }
+        error: "Failed to get users",
+      };
     }
-  }
+  };
 
   const addUser = async (name: string) => {
     try {
       const newUser = await sdk.backend.addUser(name);
       return {
         type: "Ok" as const,
-        user: newUser
-      }
+        user: newUser,
+      };
     } catch {
       return {
         type: "Err" as const,
-        error: "Failed to add user"
-      }
+        error: "Failed to add user",
+      };
     }
-  }
+  };
 
   const updateUser = async (id: string, fields: Omit<User, "id">) => {
     try {
@@ -40,42 +40,40 @@ export const useUserRepository = () => {
       if (newUser) {
         return {
           type: "Ok" as const,
-          user: newUser
-        }
-      } else {
-        return {
-          type: "Err" as const,
-          error: "User not found"
-        }
+          user: newUser,
+        };
       }
 
+      return {
+        type: "Err" as const,
+        error: "User not found",
+      };
     } catch {
       return {
         type: "Err" as const,
-        error: "Failed to update user"
-      }
+        error: "Failed to update user",
+      };
     }
-  }
+  };
 
   const deleteUser = async (id: string) => {
     try {
       await sdk.backend.deleteUser(id);
       return {
-        type: "Ok" as const
-      }
+        type: "Ok" as const,
+      };
     } catch {
       return {
         type: "Err" as const,
-        error: "Failed to delete user"
-      }
+        error: "Failed to delete user",
+      };
     }
-  }
-
+  };
 
   return {
     getUsers,
     addUser,
     updateUser,
     deleteUser,
-  }
-}
+  };
+};

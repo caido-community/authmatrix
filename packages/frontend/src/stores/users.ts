@@ -1,7 +1,7 @@
-import { defineStore } from "pinia";
-import { reactive } from "vue";
 import type { UserState } from "@/types";
-import { User } from "shared";
+import { defineStore } from "pinia";
+import type { User } from "shared";
+import { reactive } from "vue";
 
 type Context = {
   state: UserState;
@@ -9,12 +9,12 @@ type Context = {
 
 type Message =
   | { type: "Start" }
-  | { type: "Error", error: string }
-  | { type: "Success", users: User[] }
-  | { type: "AddUser", user: User }
-  | { type: "UpdateUser", user: User }
-  | { type: "DeleteUser", id: string }
-  | { type: "SelectUser", id: string | undefined };
+  | { type: "Error"; error: string }
+  | { type: "Success"; users: User[] }
+  | { type: "AddUser"; user: User }
+  | { type: "UpdateUser"; user: User }
+  | { type: "DeleteUser"; id: string }
+  | { type: "SelectUser"; id: string | undefined };
 
 export const useUserStore = defineStore("stores.users", () => {
   const context: Context = reactive({
@@ -40,12 +40,15 @@ export const useUserStore = defineStore("stores.users", () => {
         context.state = processLoading(currState, message);
         break;
     }
-  }
+  };
 
   return { getState, send };
 });
 
-const processIdle = (state: UserState & { type: "Idle" }, message: Message): UserState => {
+const processIdle = (
+  state: UserState & { type: "Idle" },
+  message: Message,
+): UserState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -57,9 +60,12 @@ const processIdle = (state: UserState & { type: "Idle" }, message: Message): Use
     case "SelectUser":
       return state;
   }
-}
+};
 
-const processError = (state: UserState & { type: "Error" }, message: Message): UserState => {
+const processError = (
+  state: UserState & { type: "Error" },
+  message: Message,
+): UserState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -71,45 +77,57 @@ const processError = (state: UserState & { type: "Error" }, message: Message): U
     case "SelectUser":
       return state;
   }
-}
+};
 
-const processSuccess = (state: UserState & { type: "Success" }, message: Message): UserState => {
+const processSuccess = (
+  state: UserState & { type: "Success" },
+  message: Message,
+): UserState => {
   switch (message.type) {
     case "AddUser":
       return {
         ...state,
         users: [...state.users, message.user],
-      }
+      };
     case "UpdateUser":
       return {
         ...state,
-        users: state.users.map((user) => user.id === message.user.id ? message.user : user),
-      }
+        users: state.users.map((user) =>
+          user.id === message.user.id ? message.user : user,
+        ),
+      };
     case "DeleteUser":
       return {
         ...state,
         users: state.users.filter((user) => user.id !== message.id),
-      }
+      };
 
     case "SelectUser":
       return {
         ...state,
         selectedUserId: message.id,
-      }
+      };
 
     case "Start":
     case "Error":
     case "Success":
       return state;
   }
-}
+};
 
-const processLoading = (state: UserState & { type: "Loading" }, message: Message): UserState => {
+const processLoading = (
+  state: UserState & { type: "Loading" },
+  message: Message,
+): UserState => {
   switch (message.type) {
     case "Error":
       return { type: "Error", error: message.error };
     case "Success":
-      return { type: "Success", users: message.users, selectedUserId: message.users[0]?.id };
+      return {
+        type: "Success",
+        users: message.users,
+        selectedUserId: message.users[0]?.id,
+      };
     case "Start":
     case "AddUser":
     case "UpdateUser":
@@ -117,4 +135,4 @@ const processLoading = (state: UserState & { type: "Loading" }, message: Message
     case "SelectUser":
       return state;
   }
-}
+};

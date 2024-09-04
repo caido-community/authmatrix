@@ -1,5 +1,5 @@
-import { useSDK } from "@/plugins/sdk"
-import {Settings} from "shared";
+import { useSDK } from "@/plugins/sdk";
+import type { Settings } from "shared";
 
 export const useSettingsRepository = () => {
   const sdk = useSDK();
@@ -8,33 +8,33 @@ export const useSettingsRepository = () => {
       const settings = await sdk.backend.getSettings();
       return {
         type: "Ok" as const,
-        settings
-      }
+        settings,
+      };
     } catch {
       return {
         type: "Err" as const,
-        error: "Failed to get settings"
-      }
+        error: "Failed to get settings",
+      };
     }
-  }
+  };
 
   const updateSettings = async (newSettings: Settings) => {
     try {
       const settings = await sdk.backend.updateSettings(newSettings);
       return {
         type: "Ok" as const,
-        settings
-      }
+        settings,
+      };
     } catch {
       return {
         type: "Err" as const,
-        error: "Failed to update settings"
-      }
+        error: "Failed to update settings",
+      };
     }
-  }
+  };
 
   return {
     getSettings,
     updateSettings,
-  }
-}
+  };
+};

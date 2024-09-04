@@ -1,7 +1,7 @@
-import { defineStore } from "pinia";
-import { reactive } from "vue";
 import type { TemplateState } from "@/types";
-import { Template } from "shared";
+import { defineStore } from "pinia";
+import type { Template } from "shared";
+import { reactive } from "vue";
 
 type Context = {
   state: TemplateState;
@@ -9,11 +9,11 @@ type Context = {
 
 type Message =
   | { type: "Start" }
-  | { type: "Error", error: string }
-  | { type: "Success", templates: Template[] }
-  | { type: "AddTemplate", template: Template }
-  | { type: "UpdateTemplate", template: Template }
-  | { type: "DeleteTemplate", id: string };
+  | { type: "Error"; error: string }
+  | { type: "Success"; templates: Template[] }
+  | { type: "AddTemplate"; template: Template }
+  | { type: "UpdateTemplate"; template: Template }
+  | { type: "DeleteTemplate"; id: string };
 
 export const useTemplateStore = defineStore("stores.templates", () => {
   const context: Context = reactive({
@@ -39,12 +39,15 @@ export const useTemplateStore = defineStore("stores.templates", () => {
         context.state = processLoading(currState, message);
         break;
     }
-  }
+  };
 
   return { getState, send };
 });
 
-const processIdle = (state: TemplateState & { type: "Idle" }, message: Message): TemplateState => {
+const processIdle = (
+  state: TemplateState & { type: "Idle" },
+  message: Message,
+): TemplateState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -55,9 +58,12 @@ const processIdle = (state: TemplateState & { type: "Idle" }, message: Message):
     case "DeleteTemplate":
       return state;
   }
-}
+};
 
-const processError = (state: TemplateState & { type: "Error" }, message: Message): TemplateState => {
+const processError = (
+  state: TemplateState & { type: "Error" },
+  message: Message,
+): TemplateState => {
   switch (message.type) {
     case "Start":
       return { type: "Loading" };
@@ -68,38 +74,50 @@ const processError = (state: TemplateState & { type: "Error" }, message: Message
     case "DeleteTemplate":
       return state;
   }
-}
+};
 
-const processSuccess = (state: TemplateState & { type: "Success" }, message: Message): TemplateState => {
+const processSuccess = (
+  state: TemplateState & { type: "Success" },
+  message: Message,
+): TemplateState => {
   switch (message.type) {
     case "AddTemplate":
-      if (state.templates.some((template) => template.id === message.template.id)) {
+      if (
+        state.templates.some((template) => template.id === message.template.id)
+      ) {
         return state;
       }
 
       return {
         ...state,
         templates: [...state.templates, message.template],
-      }
+      };
     case "UpdateTemplate":
       return {
         ...state,
-        templates: state.templates.map((template) => template.id === message.template.id ? message.template : template),
-      }
+        templates: state.templates.map((template) =>
+          template.id === message.template.id ? message.template : template,
+        ),
+      };
     case "DeleteTemplate":
       return {
         ...state,
-        templates: state.templates.filter((template) => template.id !== message.id),
-      }
+        templates: state.templates.filter(
+          (template) => template.id !== message.id,
+        ),
+      };
 
     case "Start":
     case "Error":
     case "Success":
       return state;
   }
-}
+};
 
-const processLoading = (state: TemplateState & { type: "Loading" }, message: Message): TemplateState => {
+const processLoading = (
+  state: TemplateState & { type: "Loading" },
+  message: Message,
+): TemplateState => {
   switch (message.type) {
     case "Error":
       return { type: "Error", error: message.error };
@@ -111,4 +129,4 @@ const processLoading = (state: TemplateState & { type: "Loading" }, message: Mes
     case "DeleteTemplate":
       return state;
   }
-}
+};

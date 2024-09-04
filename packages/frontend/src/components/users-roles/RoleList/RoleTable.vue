@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoleStore } from "@/stores/roles";
+import { useRoleService } from "@/services/roles";
 import { RoleState } from "@/types";
 import Button from "primevue/button";
 import Column from "primevue/column";
@@ -16,13 +16,13 @@ const columns = [
   { field: "description", header: "Description" },
 ];
 
-const store = useRoleStore();
+const service = useRoleService();
 const onDeleteRole = (role: Role) => {
-  store.deleteRole(role.id);
+  service.deleteRole(role.id);
 };
 
 const onRoleUpdate = (role: Role, field: keyof Role, value: string) => {
-  store.updateRole(role.id, {
+  service.updateRole(role.id, {
     ...role,
     [field]: value,
   });

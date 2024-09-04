@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useSettingsStore } from "@/stores/settings";
-import { useTemplateStore } from "@/stores/templates";
+import { useAnalysisService } from "@/services/analysis";
+import { useSettingsService } from "@/services/settings";
+import { useTemplateService } from "@/services/templates";
 import { SettingsState, TemplateState } from "@/types";
 import { RoleState } from "@/types";
 import { UserState } from "@/types";
@@ -30,41 +31,47 @@ const getUserValue = (request: Template, user: User) => {
   return request.userIds.some((userId) => userId === user.id);
 };
 
-const store = useTemplateStore();
+const service = useTemplateService();
 const toggleRole = (request: Template, role: Role) => {
-  store.toggleTemplateRole(request.id, role.id);
+  service.toggleTemplateRole(request.id, role.id);
 };
 
 const toggleUser = (request: Template, user: User) => {
-  store.toggleTemplateUser(request.id, user.id);
+  service.toggleTemplateUser(request.id, user.id);
 };
 
 const deleteTemplate = (request: Template) => {
-  store.deleteTemplate(request.id);
+  service.deleteTemplate(request.id);
 };
 
-const settingsStore = useSettingsStore();
+const settingsService = useSettingsService();
 const toggleAutoCaptureRequests = () => {
-  settingsStore.toggleAutoCaptureRequests();
+  settingsService.toggleAutoCaptureRequests();
 };
 
 const toggleAutoRunAnalysis = () => {
-  settingsStore.toggleAutoRunAnalysis();
+  settingsService.toggleAutoRunAnalysis();
 };
 
+const analysisService = useAnalysisService();
 const runAnalysis = () => {
-  store.runAnalysis();
+  analysisService.runAnalysis();
 };
 
 const selection = computed({
   get: () => {
-    if (props.state.selectionState.type === "None") return undefined;
-    const templateId = props.state.selectionState.templateId;
+    const selectionState = analysisService.selectionState;
+    if (selectionState.type === "None") return undefined;
+    const templateId = selectionState.templateId;
     return props.state.templates.find((t) => t.id === templateId);
   },
   set: (template) => {
-    store.setSelection(template);
+    analysisService.selectResult(template?.id);
   },
+});
+
+const isAnalyzing = computed(() => {
+  return analysisService.jobState.type === "Analyzing";
 });
 </script>
 
@@ -106,7 +113,7 @@ const selection = computed({
             <Button
               v-tooltip="'Manually run the analysis on the selected request.'"
               label="Analyze"
-              :loading="state.analysisState.type === 'Analyzing'"
+              :loading="isAnalyzing"
               @click="runAnalysis" />
           </div>
         </div>

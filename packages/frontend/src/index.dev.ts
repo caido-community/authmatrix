@@ -168,10 +168,17 @@ const backend: API & Record<string, unknown> = {
   getResults: () => {
     return results;
   },
-  getRequest: async (id) => {
+  getRequestResponse: async (id) => {
     return {
-      id,
-      raw: "hello",
+      type: "Ok",
+      request: {
+        id,
+        raw: "hello",
+      },
+      response: {
+        id,
+        raw: "hello",
+      },
     };
   },
 };
