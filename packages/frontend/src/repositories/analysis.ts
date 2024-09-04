@@ -32,8 +32,32 @@ export const useAnalysisRepository = () => {
     }
   }
 
+  const getRequestResponse = async (requestId: string) => {
+    try {
+      const result = await sdk.backend.getRequestResponse(requestId);
+      if (result.type === "Ok") {
+        return {
+          type: "Ok" as const,
+          request: result.request,
+          response: result.response
+        }
+      } else {
+        return {
+          type: "Err" as const,
+          error: result.message
+        }
+      }
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to get request & response"
+      }
+    }
+  }
+
   return {
     getAnalysisResults,
-    runAnalysis
+    runAnalysis,
+    getRequestResponse
   }
 }
