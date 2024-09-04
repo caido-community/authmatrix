@@ -28,7 +28,7 @@ export type AnalysisState = { type: "Idle" } | { type: "Analyzing" };
 export type TemplateState =
   | { type: "Idle" }
   | { type: "Loading" }
-  | { type: "Error" }
+  | { type: "Error", error: string }
   | {
       type: "Success";
       templates: Template[];
@@ -40,17 +40,17 @@ export type TemplateState =
 export type RoleState =
   | { type: "Idle" }
   | { type: "Loading" }
-  | { type: "Error" }
+  | { type: "Error"; error: string }
   | { type: "Success"; roles: Role[] };
 
 export type UserState =
   | { type: "Idle" }
   | { type: "Loading" }
-  | { type: "Error" }
+  | { type: "Error", error: string }
   | { type: "Success"; users: User[] };
 
 export type SettingsState =
   | { type: "Idle" }
   | { type: "Loading" }
-  | { type: "Error" }
+  | { type: "Error", error: string }
   | { type: "Success"; settings: Settings };

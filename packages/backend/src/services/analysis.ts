@@ -95,7 +95,7 @@ const analyzeRequest = async (sdk: SDK, template: Template, user: User) => {
 
   sdk.console.debug(`Sending request ${spec}`);
   const result = await sdk.requests.send(spec);
-  const hasAccess = request.roleIds.some((roleId) => {
+  const hasAccess = template.roleIds.some((roleId) => {
     return user.roleIds.includes(roleId);
   });
 
