@@ -6,23 +6,35 @@ import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import type { User, UserAttribute } from "shared";
+import { useUserService } from "@/services/users";
 
-const user = defineModel<User>("user", { required: true });
+const props = defineProps<{
+  user: User;
+}>();
 
+const service = useUserService();
 const onAddAttribute = () => {
-  const id = generateID();
-  user.value.attributes.push({
-    id,
-    name: "My attribute",
-    value: "My value",
-    kind: "Cookie",
+  service.updateUser(props.user.id, {
+    ...props.user,
+    attributes: [
+      ...props.user.attributes,
+      {
+        id: generateID(),
+        name: "My attribute",
+        value: "My value",
+        kind: "Cookie",
+      }
+    ]
   });
 };
 
 const onRemoveAttribute = (attribute: UserAttribute) => {
-  user.value.attributes = user.value.attributes.filter(
-    (attr) => attr.id !== attribute.id,
-  );
+  service.updateUser(props.user.id, {
+    ...props.user,
+    attributes: props.user.attributes.filter(
+      (attr) => attr.id !== attribute.id,
+    ),
+  });
 };
 
 const onAttributeUpdate = (
@@ -35,12 +47,15 @@ const onAttributeUpdate = (
     [field]: value,
   };
 
-  user.value.attributes = user.value.attributes.map((attr) => {
-    if (attr.id === attribute.id) {
-      return newAttribute;
-    }
+  service.updateUser(props.user.id, {
+    ...props.user,
+    attributes: props.user.attributes.map((attr) => {
+      if (attr.id === attribute.id) {
+        return newAttribute;
+      }
 
-    return attr;
+      return attr;
+    }),
   });
 };
 </script>

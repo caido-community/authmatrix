@@ -188,9 +188,11 @@ const app = defineApp({
   ui: {
     httpRequestEditor: () => ({
       getElement: () => document.createElement("div"),
+      getEditorView: () => ({}),
     }),
     httpResponseEditor: () => ({
       getElement: () => document.createElement("div"),
+      getEditorView: () => ({}),
     }),
   },
 } as unknown as CaidoSDK);

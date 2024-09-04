@@ -84,11 +84,14 @@ const processSuccess = (
   message: Message,
 ): UserState => {
   switch (message.type) {
-    case "AddUser":
+    case "AddUser": {
+      const selectedUserId = state.selectedUserId ?? message.user.id;
       return {
         ...state,
+        selectedUserId,
         users: [...state.users, message.user],
       };
+    }
     case "UpdateUser":
       return {
         ...state,
@@ -96,11 +99,14 @@ const processSuccess = (
           user.id === message.user.id ? message.user : user,
         ),
       };
-    case "DeleteUser":
+    case "DeleteUser": {
+      const selectedUserId = message.id === state.selectedUserId ? undefined : state.selectedUserId;
       return {
         ...state,
+        selectedUserId,
         users: state.users.filter((user) => user.id !== message.id),
       };
+    }
 
     case "SelectUser":
       return {
