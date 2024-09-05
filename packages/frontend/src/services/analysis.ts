@@ -40,6 +40,7 @@ export const useAnalysisService = defineStore("services.analysis", () => {
 
     sdk.backend.onEvent("results:clear", () => {
       store.resultState.send({ type: "Clear" });
+      store.selectionState.send({ type: "Reset" });
     });
   };
 

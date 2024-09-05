@@ -10,8 +10,6 @@ import Card from "primevue/card";
 import Checkbox from "primevue/checkbox";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import IconField from "primevue/iconfield";
-import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import type { Role, Template, User } from "shared";
 import { computed } from "vue";
@@ -62,10 +60,6 @@ const toggleAutoCaptureRequests = () => {
   settingsService.toggleAutoCaptureRequests();
 };
 
-/*const toggleAutoRunAnalysis = () => {
-  settingsService.toggleAutoRunAnalysis();
-};*/
-
 const analysisService = useAnalysisService();
 const runAnalysis = () => {
   analysisService.runAnalysis();
@@ -100,14 +94,7 @@ const onTemplateUpdate = (template: Template, field: string, newValue: unknown) 
 
       <template #header>
         <div class="px-4 pt-4 flex justify-between gap-8">
-          <div class="flex flex-col gap-2">
-            <IconField>
-              <InputIcon class="fas fa-magnifying-glass"/>
-              <InputText placeholder="Search" />
-            </IconField>
-          </div>
-
-
+          <div class="flex flex-col gap-2"></div>
           <div class="flex items-center gap-4">
             <div
               class="flex gap-2"
@@ -118,15 +105,6 @@ const onTemplateUpdate = (template: Template, field: string, newValue: unknown) 
                 :model-value="settingsState.settings.autoCaptureRequests"
                 @update:model-value="() => toggleAutoCaptureRequests()" />
             </div>
-            <!-- <div -->
-            <!--   class="flex gap-2" -->
-            <!--   v-tooltip="'Automatically trigger the analysis as soon as the request is added to the testing queue.'"> -->
-            <!--   <label>Auto-run analysis</label> -->
-            <!--   <Checkbox -->
-            <!--     binary -->
-            <!--     :model-value="settingsState.settings.autoRunAnalysis" -->
-            <!--     @update:model-value="() => toggleAutoRunAnalysis()" /> -->
-            <!-- </div> -->
             <Button
               v-tooltip="'Run the analysis on the current requests.'"
               label="Analyze"

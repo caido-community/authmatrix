@@ -44,8 +44,7 @@ const settingsState = computed(() => settingsService.getState());
         v-if="roleState.type === 'Success' &&
               userState.type === 'Success' &&
               templateState.type === 'Success' &&
-              analysisService.resultState.type === 'Success' &&
-              analysisService.selectionState.type === 'Success'"
+              analysisService.resultState.type === 'Success'"
         :template-state="templateState"
         :user-state="userState"
         :role-state="roleState"
