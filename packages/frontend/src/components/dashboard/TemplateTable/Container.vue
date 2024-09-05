@@ -15,6 +15,7 @@ import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import type { Role, Template, User } from "shared";
 import { computed } from "vue";
+import RuleStatus from "./RuleStatus.vue";
 
 const props = defineProps<{
   state: TemplateState & { type: "Success" };
@@ -43,8 +44,6 @@ const getUserStatus = (template: Template, user: User) => {
   return rule?.status ?? "Untested";
 };
 
-
-
 const service = useTemplateService();
 const toggleRole = (template: Template, role: Role) => {
   service.toggleTemplateRole(template.id, role.id);
@@ -63,9 +62,9 @@ const toggleAutoCaptureRequests = () => {
   settingsService.toggleAutoCaptureRequests();
 };
 
-const toggleAutoRunAnalysis = () => {
+/*const toggleAutoRunAnalysis = () => {
   settingsService.toggleAutoRunAnalysis();
-};
+};*/
 
 const analysisService = useAnalysisService();
 const runAnalysis = () => {
@@ -119,17 +118,17 @@ const onTemplateUpdate = (template: Template, field: string, newValue: unknown) 
                 :model-value="settingsState.settings.autoCaptureRequests"
                 @update:model-value="() => toggleAutoCaptureRequests()" />
             </div>
-            <div
-              class="flex gap-2"
-              v-tooltip="'Automatically trigger the analysis as soon as the request is added to the testing queue.'">
-              <label>Auto-run analysis</label>
-              <Checkbox
-                binary
-                :model-value="settingsState.settings.autoRunAnalysis"
-                @update:model-value="() => toggleAutoRunAnalysis()" />
-            </div>
+            <!-- <div -->
+            <!--   class="flex gap-2" -->
+            <!--   v-tooltip="'Automatically trigger the analysis as soon as the request is added to the testing queue.'"> -->
+            <!--   <label>Auto-run analysis</label> -->
+            <!--   <Checkbox -->
+            <!--     binary -->
+            <!--     :model-value="settingsState.settings.autoRunAnalysis" -->
+            <!--     @update:model-value="() => toggleAutoRunAnalysis()" /> -->
+            <!-- </div> -->
             <Button
-              v-tooltip="'Manually run the analysis on the selected request.'"
+              v-tooltip="'Run the analysis on the current requests.'"
               label="Analyze"
               :loading="isAnalyzing"
               @click="runAnalysis" />
@@ -165,26 +164,27 @@ const onTemplateUpdate = (template: Template, field: string, newValue: unknown) 
 
           <Column v-for="role in roleState.roles" key="id" :header="role.name">
             <template #body="{ data }">
-              <Checkbox
-                v-tooltip="'Check this box if this role should have access to this resource.'"
-                :model-value="getRoleValue(data, role)"
-                binary
-                @change="() => toggleRole(data, role)" />
-
-                {{ getRoleStatus(data, role) }}
-
+              <div class="flex items-center gap-4">
+                <Checkbox
+                  v-tooltip="'Check this box if this role should have access to this resource.'"
+                  :model-value="getRoleValue(data, role)"
+                  binary
+                  @change="() => toggleRole(data, role)" />
+                <RuleStatus :status="getRoleStatus(data, role)" />
+              </div>
             </template>
           </Column>
 
           <Column v-for="user of userState.users" :key="user.id" :header="user.name">
             <template #body="{ data }">
-              <Checkbox
-                v-tooltip="'Check this box if this user should have access to this resource.'"
-                :model-value="getUserValue(data, user)"
-                binary
-                @change="() => toggleUser(data, user)" />
-
-                {{ getUserStatus(data, user) }}
+              <div class="flex items-center gap-4">
+                <Checkbox
+                  v-tooltip="'Check this box if this user should have access to this resource.'"
+                  :model-value="getUserValue(data, user)"
+                  binary
+                  @change="() => toggleUser(data, user)" />
+                <RuleStatus :status="getUserStatus(data, user)" />
+              </div>
             </template>
           </Column>
 

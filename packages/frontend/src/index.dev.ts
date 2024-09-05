@@ -19,8 +19,49 @@ const templates: Template[] = [
       port: 80,
       isTls: false,
     },
-    rules: []
+    rules: [{
+      type: "UserRule",
+      userId: "1",
+      hasAccess: true,
+      status: "Unexpected"
+    }]
   },
+{
+    id: "2",
+    requestId: "1",
+    authSuccessRegex: "HTTP/1[.]1 200",
+    meta: {
+      method: "GET",
+      host: "localhost",
+      path: "/",
+      port: 80,
+      isTls: false,
+    },
+    rules: [{
+      type: "UserRule",
+      userId: "1",
+      hasAccess: true,
+      status: "Bypassed"
+    }]
+  },
+{
+    id: "3",
+    requestId: "1",
+    authSuccessRegex: "HTTP/1[.]1 200",
+    meta: {
+      method: "GET",
+      host: "localhost",
+      path: "/",
+      port: 80,
+      isTls: false,
+    },
+    rules: [{
+      type: "UserRule",
+      userId: "1",
+      hasAccess: true,
+      status: "Enforced"
+    }]
+  }
 ];
 
 const results: AnalysisResult[] = [

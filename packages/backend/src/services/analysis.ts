@@ -62,14 +62,11 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
     for (const user of users) {
       const analysisResult = await sendRequest(sdk, template, user);
       if (analysisResult) {
-        console.log(`Adding ${analysisResult.id} - ${analysisResult.requestId}`);
         analysisStore.addResult(analysisResult);
         sdk.api.send("results:created", analysisResult);
       }
     }
   }
-
-  console.log(analysisStore.getResults().length);
 
   const roles = roleStore.getRoles();
   for (const template of templates) {
@@ -248,7 +245,6 @@ const generateUserRuleStatus = async (sdk: SDK, template: Template, userId: stri
   const results = store.getResults().filter((result) => {
     return result.templateId === template.id && result.userId === userId;
   });
-  sdk.console.log(`Results: ${results.length} for template ${template.id} and user ${userId}`);
 
   // Get the rule for the user
   const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === userId) ?? {
@@ -261,7 +257,6 @@ const generateUserRuleStatus = async (sdk: SDK, template: Template, userId: stri
   // Get all result responses
   const responses = await Promise.all(results.map(async (result) => {
     const { response } = await sdk.requests.get(result.requestId) ?? {};
-    sdk.console.log(`Response: ${response?.getId()}`);
     return response;
   }));
 
