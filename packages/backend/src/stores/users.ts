@@ -17,6 +17,10 @@ export class UserStore {
     return UserStore._store;
   }
 
+  getUser(id: string) {
+    return this.users.get(id);
+  }
+
   getUsers() {
     return [...this.users.values()];
   }

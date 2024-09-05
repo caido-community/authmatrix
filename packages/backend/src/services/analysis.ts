@@ -98,7 +98,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
         status: "Untested",
       };
 
-      const status = await generateUserRuleStatus(sdk, template, user.id);
+      const status = await generateUserRuleStatus(sdk, template, user);
       return { ...currentRule, status };
     });
 
@@ -238,21 +238,22 @@ const generateRoleRuleStatus = async (sdk: SDK, template: Template, roleId: stri
   return "Unexpected";
 }
 
-const generateUserRuleStatus = async (sdk: SDK, template: Template, userId: string): Promise<RuleStatus> => {
+const generateUserRuleStatus = async (sdk: SDK, template: Template, user: User): Promise<RuleStatus> => {
   const store = AnalysisStore.get();
 
   // Get all results for this template and matching user
   const results = store.getResults().filter((result) => {
-    return result.templateId === template.id && result.userId === userId;
+    return result.templateId === template.id && result.userId === user.id;
   });
 
-  // Get the rule for the user
-  const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === userId) ?? {
-    type: "UserRule",
-    userId: userId,
-    hasAccess: false,
-    status: "Untested",
-  };
+  // Check if user should have access to this resource
+  const hasAccess = template.rules.some((rule) => {
+    if (rule.type === "RoleRule") {
+      return rule.hasAccess && user.roleIds.includes(rule.roleId)
+    }
+
+    return rule.hasAccess && rule.userId === user.id;
+  })
 
   // Get all result responses
   const responses = await Promise.all(results.map(async (result) => {
@@ -273,17 +274,17 @@ const generateUserRuleStatus = async (sdk: SDK, template: Template, userId: stri
   });
 
   // If all access states match the rule, return "Enforced"
-  if (accessStates.every((hasAccess) => hasAccess === rule.hasAccess)) {
+  if (accessStates.every((resultAccess) => resultAccess === hasAccess)) {
     return "Enforced";
   }
 
   // If any access state is false, but the rule is true, return "Unexpected"
-  if (rule.hasAccess && accessStates.some((hasAccess) => !hasAccess)) {
+  if (hasAccess && accessStates.some((hasAccess) => !hasAccess)) {
     return "Unexpected";
   }
 
   // If any access state is true, but the rule is false, return "Bypassed"
-  if (!rule.hasAccess && accessStates.some((hasAccess) => hasAccess)) {
+  if (!hasAccess && accessStates.some((hasAccess) => hasAccess)) {
     return "Bypassed";
   }
 
