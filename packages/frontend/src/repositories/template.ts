@@ -1,4 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
+import {Template} from "shared";
 
 export const useTemplateRepository = () => {
   const sdk = useSDK();
@@ -99,11 +100,34 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const updateTemplate = async (id: string, fields: Omit<Template, "id">) => {
+    try {
+      const newTemplate = await sdk.backend.updateTemplate(id, fields);
+      if (newTemplate) {
+        return {
+          type: "Ok" as const,
+          template: newTemplate,
+        };
+      }
+
+      return {
+        type: "Err" as const,
+        error: "Template not found",
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to update template",
+      };
+    }
+  }
+
   return {
     getTemplates,
     toggleTemplateRole,
     toggleTemplateUser,
     addTemplate,
+    updateTemplate,
     deleteTemplate,
   };
 };

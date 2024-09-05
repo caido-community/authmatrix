@@ -20,8 +20,8 @@ export type AnalysisSelectionState =
         id: string;
         raw: string;
       };
-      response?: {
+      response: {
         id: string;
         raw: string;
-      };
+      } | undefined;
     };

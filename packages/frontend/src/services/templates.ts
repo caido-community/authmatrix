@@ -2,6 +2,7 @@ import { useSDK } from "@/plugins/sdk";
 import { useTemplateRepository } from "@/repositories/template";
 import { useTemplateStore } from "@/stores/templates";
 import { defineStore } from "pinia";
+import type {Template} from "shared";
 
 export const useTemplateService = defineStore("services.templates", () => {
   const sdk = useSDK();
@@ -44,6 +45,18 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
+  const updateTemplate = async (id: string, fields: Omit<Template, "id">) => {
+    const result = await repository.updateTemplate(id, fields);
+
+    if (result.type === "Ok") {
+      store.send({ type: "UpdateTemplate", template: result.template });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  }
+
   const deleteTemplate = async (id: string) => {
     const result = await repository.deleteTemplate(id);
 
@@ -84,6 +97,7 @@ export const useTemplateService = defineStore("services.templates", () => {
     toggleTemplateRole,
     toggleTemplateUser,
     addTemplate,
+    updateTemplate,
     deleteTemplate,
   };
 });

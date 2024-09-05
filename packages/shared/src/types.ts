@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const ruleStatusSchema = z.enum(["Untested", "Enforced", "Bypassed", "Unexpected"]);
+export type RuleStatus = z.infer<typeof ruleStatusSchema>;
+
 export const templateSchema = z.object({
   id: z.string(),
   authSuccessRegex: z.string(),
@@ -8,12 +11,12 @@ export const templateSchema = z.object({
       type: z.literal("RoleRule"),
       roleId: z.string(),
       hasAccess: z.boolean(),
-      status: z.enum(["Untested", "Enforced", "Bypassed", "Unexpected"]),
+      status: ruleStatusSchema,
     }).or(z.object({
       type: z.literal("UserRule"),
       userId: z.string(),
       hasAccess: z.boolean(),
-      status: z.enum(["Untested", "Enforced", "Bypassed", "Unexpected"]),
+      status: ruleStatusSchema,
     })),
   ),
   requestId: z.string(),

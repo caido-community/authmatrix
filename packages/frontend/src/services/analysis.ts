@@ -37,6 +37,10 @@ export const useAnalysisService = defineStore("services.analysis", () => {
     sdk.backend.onEvent("results:created", (result) => {
       store.resultState.send({ type: "AddResult", result });
     });
+
+    sdk.backend.onEvent("results:clear", () => {
+      store.resultState.send({ type: "Clear" });
+    });
   };
 
   const selectResult = async (templateId?: string, userId?: string) => {

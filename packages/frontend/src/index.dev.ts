@@ -100,6 +100,24 @@ const backend: API & Record<string, unknown> = {
 
     return newTemplate;
   },
+  updateTemplate: (id, fields) => {
+    const template = templates.find((template) => template.id === id);
+
+    if (template) {
+      const newTemplate = clone({
+        ...template,
+        ...fields,
+      });
+
+      templates.splice(
+        templates.findIndex((template) => template.id === id),
+        1,
+        newTemplate,
+      );
+
+      return newTemplate;
+    }
+  },
   deleteTemplate: (id) => {
     const index = templates.findIndex((request) => request.id === id);
     if (index !== -1) {

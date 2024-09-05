@@ -11,6 +11,7 @@ type Message =
   | { type: "Error"; error: string }
   | { type: "Success"; results: AnalysisResult[] }
   | { type: "AddResult"; result: AnalysisResult }
+  | { type: "Clear" };
 
 export const useResultState = () => {
   const context: Context = reactive({
@@ -55,6 +56,7 @@ const processIdle = (
       return { type: "Loading" };
     case "Error":
     case "Success":
+    case "Clear":
     case "AddResult":
       return state;
   }
@@ -70,6 +72,7 @@ const processLoading = (
     case "Success":
       return { type: "Success", results: message.results };
     case "Start":
+    case "Clear":
     case "AddResult":
       return state;
   }
@@ -84,6 +87,7 @@ const processError = (
       return { type: "Loading" };
     case "Error":
     case "Success":
+    case "Clear":
     case "AddResult":
       return state;
   }
@@ -99,6 +103,11 @@ const processSuccess = (
         type: "Success",
         results: [...state.results, message.result],
       };
+    case "Clear":
+      return {
+        type: "Success",
+        results: [],
+      }
     case "Start":
     case "Error":
     case "Success":

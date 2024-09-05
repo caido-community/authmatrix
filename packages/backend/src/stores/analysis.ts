@@ -28,4 +28,8 @@ export class AnalysisStore {
   deleteResult(resultId: string) {
     this.results.delete(resultId);
   }
+
+  clearResults() {
+    this.results.clear();
+  }
 }

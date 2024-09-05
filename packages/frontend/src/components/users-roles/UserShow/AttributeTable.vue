@@ -78,15 +78,15 @@ const onAttributeUpdate = (
         striped-rows
         @cell-edit-complete="({ data, field, newValue }) => onAttributeUpdate(data, field, newValue)"
         >
-        <Column field="name" header="Name">
-          <template #editor="{data}">
-            <InputText v-model="data.name" />
-          </template>
-        </Column>
-
         <Column field="kind" header="Kind">
           <template #editor="{data}">
             <Select :options="['Cookie', 'Header']" v-model="data.kind" />
+          </template>
+        </Column>
+
+        <Column field="name" header="Name">
+          <template #editor="{data}">
+            <InputText v-model="data.name" />
           </template>
         </Column>
 

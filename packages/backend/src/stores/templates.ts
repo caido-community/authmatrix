@@ -25,6 +25,14 @@ export class TemplateStore {
     this.templates.set(template.id, template);
   }
 
+  updateTemplate(id: string, fields: Omit<Template, "id">) {
+    const template = this.templates.get(id);
+    if (template) {
+      Object.assign(template, fields);
+      return template;
+    }
+  }
+
   deleteTemplate(templateId: string) {
     this.templates.delete(templateId);
   }

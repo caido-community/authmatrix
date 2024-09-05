@@ -39,6 +39,17 @@ export const deleteTemplate = (_sdk: SDK, requestId: string) => {
   store.deleteTemplate(requestId);
 };
 
+export const updateTemplate = (
+  sdk: SDK<never, BackendEvents>,
+  id: string,
+  fields: Omit<Template, "id">,
+) => {
+  const store = TemplateStore.get();
+  const newTemplate = store.updateTemplate(id, fields);
+  sdk.api.send("templates:updated", newTemplate);
+  return newTemplate;
+}
+
 export const toggleTemplateRole = (
   sdk: SDK<never, BackendEvents>,
   requestId: string,

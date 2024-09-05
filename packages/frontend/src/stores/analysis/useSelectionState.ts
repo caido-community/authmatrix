@@ -19,7 +19,7 @@ type Message =
       templateId: string;
       userId: string | undefined;
       request: { id: string; raw: string };
-      response?: { id: string; raw: string };
+      response: { id: string; raw: string } | undefined;
     };
 
 export const useSelectionState = () => {
@@ -91,6 +91,7 @@ const processLoading = (
         templateId: message.templateId,
         userId: message.userId,
         request: message.request,
+        response: message.response,
       };
     case "Reset":
       return { type: "None" };

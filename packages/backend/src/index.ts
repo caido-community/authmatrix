@@ -13,6 +13,7 @@ import {
   registerTemplateEvents,
   toggleTemplateRole,
   toggleTemplateUser,
+  updateTemplate,
 } from "./services/templates";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
 
@@ -34,6 +35,7 @@ export type API = DefineAPI<{
   // Template endpoints
   getTemplates: typeof getTemplates;
   addTemplate: typeof addTemplate;
+  updateTemplate: typeof updateTemplate;
   deleteTemplate: typeof deleteTemplate;
   toggleTemplateRole: typeof toggleTemplateRole;
   toggleTemplateUser: typeof toggleTemplateUser;
@@ -64,6 +66,7 @@ export function init(sdk: SDK<API>) {
   // Template endpoints
   sdk.api.register("getTemplates", getTemplates);
   sdk.api.register("addTemplate", addTemplate);
+  sdk.api.register("updateTemplate", updateTemplate);
   sdk.api.register("deleteTemplate", deleteTemplate);
   sdk.api.register("toggleTemplateRole", toggleTemplateRole);
   sdk.api.register("toggleTemplateUser", toggleTemplateUser);

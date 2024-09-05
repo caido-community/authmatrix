@@ -28,10 +28,22 @@ const getRoleValue = (template: Template, role: Role) => {
   return rule?.hasAccess ?? false;
 };
 
+const getRoleStatus = (template: Template, role: Role) => {
+  const rule = template.rules.find((rule) => rule.type === "RoleRule" && rule.roleId === role.id);
+  return rule?.status ?? "Untested";
+};
+
 const getUserValue = (template: Template, user: User) => {
   const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === user.id);
   return rule?.hasAccess ?? false;
 };
+
+const getUserStatus = (template: Template, user: User) => {
+  const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === user.id);
+  return rule?.status ?? "Untested";
+};
+
+
 
 const service = useTemplateService();
 const toggleRole = (template: Template, role: Role) => {
@@ -75,6 +87,10 @@ const selection = computed({
 const isAnalyzing = computed(() => {
   return analysisService.jobState.type === "Analyzing";
 });
+
+const onTemplateUpdate = (template: Template, field: string, newValue: unknown) => {
+  service.updateTemplate(template.id, { ...template, [field]: newValue });
+};
 </script>
 
 <template>
@@ -132,6 +148,7 @@ const isAnalyzing = computed(() => {
           selection-mode="single"
           data-key="id"
           v-model:selection="selection"
+          @cell-edit-complete="({ data, field, newValue }) => onTemplateUpdate(data, field, newValue)"
         >
           <Column header="URL">
             <template #body="{ data }">
@@ -153,6 +170,9 @@ const isAnalyzing = computed(() => {
                 :model-value="getRoleValue(data, role)"
                 binary
                 @change="() => toggleRole(data, role)" />
+
+                {{ getRoleStatus(data, role) }}
+
             </template>
           </Column>
 
@@ -163,6 +183,8 @@ const isAnalyzing = computed(() => {
                 :model-value="getUserValue(data, user)"
                 binary
                 @change="() => toggleUser(data, user)" />
+
+                {{ getUserStatus(data, user) }}
             </template>
           </Column>
 

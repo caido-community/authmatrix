@@ -4,11 +4,12 @@ import type { RequestSpec } from "caido:utils";
 import { TemplateStore } from "../stores/templates";
 import { UserStore } from "../stores/users";
 
-import type { AnalysisResult, Template, User, UserAttribute } from "shared";
+import type { AnalysisResult, RuleStatus, Template, User, UserAttribute } from "shared";
 import { AnalysisStore } from "../stores/analysis";
-import { Uint8ArrayToString } from "../utils";
+import { Uint8ArrayToString, isPresent } from "../utils";
 
 import type {BackendEvents} from "../types";
+import {RoleStore} from "../stores/roles";
 
 export const getResults = (_sdk: SDK): AnalysisResult[] => {
   const store = AnalysisStore.get();
@@ -42,24 +43,82 @@ export const getRequestResponse = async (sdk: SDK, requestId: string) => {
 export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   const templateStore = TemplateStore.get();
   const userStore = UserStore.get();
+  const roleStore = RoleStore.get();
+  const analysisStore = AnalysisStore.get()
 
-  const users = userStore.getUsers();
+  // Clear current results
+  analysisStore.clearResults();
+  sdk.api.send("results:clear");
+
+  // Send requests
   const templates = templateStore.getTemplates();
+  const users = userStore.getUsers();
 
   sdk.console.debug(
     `Analyzing ${templates.length} templates with ${users.length} users`,
   );
 
-  const promises = templates.map((template) => {
-    return users.map((user) => {
-      return analyzeRequest(sdk, template, user);
-    });
-  });
+  for (const template of templates) {
+    for (const user of users) {
+      const analysisResult = await sendRequest(sdk, template, user);
+      if (analysisResult) {
+        console.log(`Adding ${analysisResult.id} - ${analysisResult.requestId}`);
+        analysisStore.addResult(analysisResult);
+        sdk.api.send("results:created", analysisResult);
+      }
+    }
+  }
 
-  await Promise.all(promises);
+  console.log(analysisStore.getResults().length);
+
+  const roles = roleStore.getRoles();
+  for (const template of templates) {
+    const newRules: Template["rules"] = [];
+
+    // Generate role rule statuses in parallel
+    const rolePromises = roles.map(async (role) => {
+      const currentRule = template.rules.find(
+        (rule) => rule.type === "RoleRule" && rule.roleId === role.id
+      ) ?? {
+        type: "RoleRule",
+        roleId: role.id,
+        hasAccess: false,
+        status: "Untested",
+      };
+
+      const status = await generateRoleRuleStatus(sdk, template, role.id);
+      return { ...currentRule, status };
+    });
+
+    // Generate user rule statuses in parallel
+    const userPromises = users.map(async (user) => {
+      const currentRule = template.rules.find(
+        (rule) => rule.type === "UserRule" && rule.userId === user.id
+      ) ?? {
+        type: "UserRule",
+        userId: user.id,
+        hasAccess: false,
+        status: "Untested",
+      };
+
+      const status = await generateUserRuleStatus(sdk, template, user.id);
+      return { ...currentRule, status };
+    });
+
+    // Await all role and user statuses
+    const roleResults = await Promise.all(rolePromises);
+    const userResults = await Promise.all(userPromises);
+
+    // Combine results
+    newRules.push(...roleResults, ...userResults);
+
+    template.rules = newRules;
+    templateStore.updateTemplate(template.id, template);
+    sdk.api.send("templates:updated", template);
+  }
 };
 
-const analyzeRequest = async (sdk: SDK<never, BackendEvents>, template: Template, user: User) => {
+const sendRequest = async (sdk: SDK, template: Template, user: User) => {
   const { request: baseRequest } = await sdk.requests.get(template.requestId) ?? {};
 
   if (!baseRequest) {
@@ -67,13 +126,11 @@ const analyzeRequest = async (sdk: SDK<never, BackendEvents>, template: Template
     return;
   }
 
-  const spec = setAttributes(baseRequest.toSpec(), user.attributes);
+  const spec = baseRequest.toSpec();
+  setCookies(spec, user.attributes);
+  setHeaders(spec, user.attributes);
 
-  sdk.console.debug(`Sending request ${spec}`);
-  const { request, response } = await sdk.requests.send(spec);
-  const shouldHaveAccess = template.rules.some((rule) => {
-    return (rule.type === "UserRule" && rule.userId === user.id && rule.hasAccess) || (rule.type === "RoleRule" && user.roleIds.includes(rule.roleId) && rule.hasAccess);
-  });
+  const { request } = await sdk.requests.send(spec);
 
   const requestId = request.getId();
   const analysisResult: AnalysisResult = {
@@ -81,37 +138,13 @@ const analyzeRequest = async (sdk: SDK<never, BackendEvents>, template: Template
     templateId: template.id,
     userId: user.id,
     requestId,
-    //status: "Unexpected"
   }
 
-  const responseRaw = response.getRaw().toText();
-  const hasAccess = responseRaw.match(template.authSuccessRegex);
-
-  const store = AnalysisStore.get();
-  if (!shouldHaveAccess && hasAccess) {
-    //analysisResult.status = "Bypassed";
-    store.addResult(analysisResult);
-    sdk.api.send("results:created", analysisResult);
-    return;
-  }
-
-  if ((shouldHaveAccess && hasAccess) || (!shouldHaveAccess && !hasAccess)) {
-    //analysisResult.status = "Enforced";
-    store.addResult(analysisResult);
-    sdk.api.send("results:created", analysisResult);
-    return;
-  }
-
-  if (shouldHaveAccess && !hasAccess) {
-    //analysisResult.status = "Unexpected";
-    store.addResult(analysisResult);
-    sdk.api.send("results:created", analysisResult);
-    return;
-  }
+  return analysisResult;
 };
 
-const setAttributes = (spec: RequestSpec, attributes: UserAttribute[]) => {
-  const newHeaders = attributes.filter((attr) => attr.kind === "Header");
+
+const setCookies = (spec: RequestSpec, attributes: UserAttribute[]) => {
   const newCookies = attributes.filter((attr) => attr.kind === "Cookie");
 
   // Set cookies
@@ -137,10 +170,127 @@ const setAttributes = (spec: RequestSpec, attributes: UserAttribute[]) => {
 
   spec.setHeader("Cookie", newCookieString);
 
+  return spec;
+}
+
+const setHeaders = (spec: RequestSpec, attributes: UserAttribute[]) => {
+  const newHeaders = attributes.filter((attr) => attr.kind === "Header");
+
   // Set headers
   for (const newHeader of newHeaders) {
     spec.setHeader(newHeader.name, newHeader.value);
   }
 
   return spec;
+}
+
+const generateRoleRuleStatus = async (sdk: SDK, template: Template, roleId: string): Promise<RuleStatus> => {
+  const store = AnalysisStore.get();
+  const userStore = UserStore.get();
+
+  // Get all users with the role
+  const users = userStore.getUsers().filter((user) => user.roleIds.includes(roleId));
+
+  // Get all results for this template and matching users
+  const results = store.getResults();
+  const templateResults = results.filter((result) => {
+    return result.templateId === template.id && users.some((user) => user.id === result.userId)
+  });
+
+  // Get the rule for the role
+  const rule = template.rules.find((rule) => rule.type === "RoleRule" && rule.roleId === roleId) ?? {
+    type: "RoleRule",
+    roleId,
+    hasAccess: false,
+    status: "Untested",
+  };
+
+  // Get all result responses
+  const responses = await Promise.all(templateResults.map(async (result) => {
+    const { response } = await sdk.requests.get(result.requestId) ?? {};
+    return response;
+  }));
+
+  // If any response is not found, return "Unexpected"
+  const filteredResponses = responses.filter(isPresent);
+  if (filteredResponses.length !== responses.length) {
+    return "Unexpected";
+  }
+
+  // Get all responses access state
+  const regex = new RegExp(template.authSuccessRegex);
+  const accessStates = filteredResponses.map((response) => {
+    return regex.test(response.getRaw().toText());
+  });
+
+  // If all access states match the rule, return "Enforced"
+  if (accessStates.every((hasAccess) => hasAccess === rule.hasAccess)) {
+    return "Enforced";
+  }
+
+  // If any access state is false, but the rule is true, return "Unexpected"
+  if (rule.hasAccess && accessStates.some((hasAccess) => !hasAccess)) {
+    return "Unexpected";
+  }
+
+  // If any access state is true, but the rule is false, return "Bypassed"
+  if (!rule.hasAccess && accessStates.some((hasAccess) => hasAccess)) {
+    return "Bypassed";
+  }
+
+  return "Unexpected";
+}
+
+const generateUserRuleStatus = async (sdk: SDK, template: Template, userId: string): Promise<RuleStatus> => {
+  const store = AnalysisStore.get();
+
+  // Get all results for this template and matching user
+  const results = store.getResults().filter((result) => {
+    return result.templateId === template.id && result.userId === userId;
+  });
+  sdk.console.log(`Results: ${results.length} for template ${template.id} and user ${userId}`);
+
+  // Get the rule for the user
+  const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === userId) ?? {
+    type: "UserRule",
+    userId: userId,
+    hasAccess: false,
+    status: "Untested",
+  };
+
+  // Get all result responses
+  const responses = await Promise.all(results.map(async (result) => {
+    const { response } = await sdk.requests.get(result.requestId) ?? {};
+    sdk.console.log(`Response: ${response?.getId()}`);
+    return response;
+  }));
+
+  // If any response is not found, return "Unexpected"
+  const filteredResponses = responses.filter(isPresent);
+  if (filteredResponses.length !== responses.length) {
+    return "Unexpected";
+  }
+
+  // Get all responses access state
+  const regex = new RegExp(template.authSuccessRegex);
+  const accessStates = filteredResponses.map((response) => {
+    return regex.test(response.getRaw().toText());
+  });
+
+  // If all access states match the rule, return "Enforced"
+  if (accessStates.every((hasAccess) => hasAccess === rule.hasAccess)) {
+    return "Enforced";
+  }
+
+  // If any access state is false, but the rule is true, return "Unexpected"
+  if (rule.hasAccess && accessStates.some((hasAccess) => !hasAccess)) {
+    return "Unexpected";
+  }
+
+  // If any access state is true, but the rule is false, return "Bypassed"
+  if (!rule.hasAccess && accessStates.some((hasAccess) => hasAccess)) {
+    return "Bypassed";
+  }
+
+  return "Unexpected";
 }
