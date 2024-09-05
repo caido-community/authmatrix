@@ -6,6 +6,7 @@ import { TemplateStore } from "../stores/templates";
 import { generateID } from "../utils";
 
 import type { BackendEvents } from "../types";
+import {SettingsStore} from "../stores/settings";
 
 export const getTemplates = (_sdk: SDK): Template[] => {
   const store = TemplateStore.get();
@@ -77,11 +78,15 @@ export const onInterceptResponse = async (
   request: Request,
   response: Response,
 ) => {
+  const settingsStore = SettingsStore.get();
+  const settings = settingsStore.getSettings();
 
-  const store = TemplateStore.get();
-  const template = toTemplate(request, response);
-  store.addTemplate(template);
-  sdk.api.send("templates:created", template);
+  if (settings.autoCaptureRequests) {
+    const store = TemplateStore.get();
+    const template = toTemplate(request, response);
+    store.addTemplate(template);
+    sdk.api.send("templates:created", template);
+  }
 };
 
 export const registerTemplateEvents = (sdk: SDK) => {
