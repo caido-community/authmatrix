@@ -51,7 +51,7 @@ export class TemplateStore {
           type: "RoleRule",
           roleId,
           hasAccess: true,
-          status: "Untested"
+          status: "Untested",
         });
       }
     }
@@ -73,7 +73,7 @@ export class TemplateStore {
           type: "UserRule",
           userId,
           hasAccess: true,
-          status: "Untested"
+          status: "Untested",
         });
       }
     }

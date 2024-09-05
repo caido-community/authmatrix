@@ -1,5 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
-import {Template} from "shared";
+import type { Template } from "shared";
 
 export const useTemplateRepository = () => {
   const sdk = useSDK();
@@ -120,7 +120,7 @@ export const useTemplateRepository = () => {
         error: "Failed to update template",
       };
     }
-  }
+  };
 
   return {
     getTemplates,

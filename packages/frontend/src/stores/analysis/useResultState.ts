@@ -107,7 +107,7 @@ const processSuccess = (
       return {
         type: "Success",
         results: [],
-      }
+      };
     case "Start":
     case "Error":
     case "Success":

@@ -2,7 +2,7 @@ import { useSDK } from "@/plugins/sdk";
 import { useTemplateRepository } from "@/repositories/template";
 import { useTemplateStore } from "@/stores/templates";
 import { defineStore } from "pinia";
-import type {Template} from "shared";
+import type { Template } from "shared";
 
 export const useTemplateService = defineStore("services.templates", () => {
   const sdk = useSDK();
@@ -55,7 +55,7 @@ export const useTemplateService = defineStore("services.templates", () => {
         variant: "error",
       });
     }
-  }
+  };
 
   const deleteTemplate = async (id: string) => {
     const result = await repository.deleteTemplate(id);

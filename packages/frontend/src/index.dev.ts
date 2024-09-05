@@ -1,8 +1,8 @@
+import { EditorView } from "@codemirror/view";
 import type { API } from "backend";
 import type { AnalysisResult, Template, User } from "shared";
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
-import { EditorView } from "@codemirror/view";
 import { clone } from "./utils";
 
 // This is a mock backend for the SDK
@@ -19,14 +19,16 @@ const templates: Template[] = [
       port: 80,
       isTls: false,
     },
-    rules: [{
-      type: "UserRule",
-      userId: "1",
-      hasAccess: true,
-      status: "Unexpected"
-    }]
+    rules: [
+      {
+        type: "UserRule",
+        userId: "1",
+        hasAccess: true,
+        status: "Unexpected",
+      },
+    ],
   },
-{
+  {
     id: "2",
     requestId: "1",
     authSuccessRegex: "HTTP/1[.]1 200",
@@ -37,14 +39,16 @@ const templates: Template[] = [
       port: 80,
       isTls: false,
     },
-    rules: [{
-      type: "UserRule",
-      userId: "1",
-      hasAccess: true,
-      status: "Bypassed"
-    }]
+    rules: [
+      {
+        type: "UserRule",
+        userId: "1",
+        hasAccess: true,
+        status: "Bypassed",
+      },
+    ],
   },
-{
+  {
     id: "3",
     requestId: "1",
     authSuccessRegex: "HTTP/1[.]1 200",
@@ -55,13 +59,15 @@ const templates: Template[] = [
       port: 80,
       isTls: false,
     },
-    rules: [{
-      type: "UserRule",
-      userId: "1",
-      hasAccess: true,
-      status: "Enforced"
-    }]
-  }
+    rules: [
+      {
+        type: "UserRule",
+        userId: "1",
+        hasAccess: true,
+        status: "Enforced",
+      },
+    ],
+  },
 ];
 
 const results: AnalysisResult[] = [
@@ -134,7 +140,7 @@ const backend: API & Record<string, unknown> = {
         port: 80,
         isTls: false,
       },
-      rules: []
+      rules: [],
     };
 
     templates.push(newTemplate);
@@ -181,7 +187,7 @@ const backend: API & Record<string, unknown> = {
           type: "RoleRule",
           roleId,
           hasAccess: true,
-          status: "Untested"
+          status: "Untested",
         });
       }
 
@@ -210,7 +216,7 @@ const backend: API & Record<string, unknown> = {
           type: "UserRule",
           userId,
           hasAccess: true,
-          status: "Untested"
+          status: "Untested",
         });
       }
 

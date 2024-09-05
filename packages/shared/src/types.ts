@@ -1,23 +1,32 @@
 import { z } from "zod";
 
-export const ruleStatusSchema = z.enum(["Untested", "Enforced", "Bypassed", "Unexpected"]);
+export const ruleStatusSchema = z.enum([
+  "Untested",
+  "Enforced",
+  "Bypassed",
+  "Unexpected",
+]);
 export type RuleStatus = z.infer<typeof ruleStatusSchema>;
 
 export const templateSchema = z.object({
   id: z.string(),
   authSuccessRegex: z.string(),
   rules: z.array(
-    z.object({
-      type: z.literal("RoleRule"),
-      roleId: z.string(),
-      hasAccess: z.boolean(),
-      status: ruleStatusSchema,
-    }).or(z.object({
-      type: z.literal("UserRule"),
-      userId: z.string(),
-      hasAccess: z.boolean(),
-      status: ruleStatusSchema,
-    })),
+    z
+      .object({
+        type: z.literal("RoleRule"),
+        roleId: z.string(),
+        hasAccess: z.boolean(),
+        status: ruleStatusSchema,
+      })
+      .or(
+        z.object({
+          type: z.literal("UserRule"),
+          userId: z.string(),
+          hasAccess: z.boolean(),
+          status: ruleStatusSchema,
+        }),
+      ),
   ),
   requestId: z.string(),
   meta: z.object({

@@ -4,12 +4,18 @@ import type { RequestSpec } from "caido:utils";
 import { TemplateStore } from "../stores/templates";
 import { UserStore } from "../stores/users";
 
-import type { AnalysisResult, RuleStatus, Template, User, UserAttribute } from "shared";
+import type {
+  AnalysisResult,
+  RuleStatus,
+  Template,
+  User,
+  UserAttribute,
+} from "shared";
 import { AnalysisStore } from "../stores/analysis";
 import { Uint8ArrayToString, isPresent } from "../utils";
 
-import type {BackendEvents} from "../types";
-import {RoleStore} from "../stores/roles";
+import { RoleStore } from "../stores/roles";
+import type { BackendEvents } from "../types";
 
 export const getResults = (_sdk: SDK): AnalysisResult[] => {
   const store = AnalysisStore.get();
@@ -44,7 +50,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   const templateStore = TemplateStore.get();
   const userStore = UserStore.get();
   const roleStore = RoleStore.get();
-  const analysisStore = AnalysisStore.get()
+  const analysisStore = AnalysisStore.get();
 
   // Clear current results
   analysisStore.clearResults();
@@ -75,7 +81,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
     // Generate role rule statuses in parallel
     const rolePromises = roles.map(async (role) => {
       const currentRule = template.rules.find(
-        (rule) => rule.type === "RoleRule" && rule.roleId === role.id
+        (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
       ) ?? {
         type: "RoleRule",
         roleId: role.id,
@@ -90,7 +96,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
     // Generate user rule statuses in parallel
     const userPromises = users.map(async (user) => {
       const currentRule = template.rules.find(
-        (rule) => rule.type === "UserRule" && rule.userId === user.id
+        (rule) => rule.type === "UserRule" && rule.userId === user.id,
       ) ?? {
         type: "UserRule",
         userId: user.id,
@@ -116,7 +122,8 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
 };
 
 const sendRequest = async (sdk: SDK, template: Template, user: User) => {
-  const { request: baseRequest } = await sdk.requests.get(template.requestId) ?? {};
+  const { request: baseRequest } =
+    (await sdk.requests.get(template.requestId)) ?? {};
 
   if (!baseRequest) {
     sdk.console.error(`Request not found for template ${template.id}`);
@@ -135,11 +142,10 @@ const sendRequest = async (sdk: SDK, template: Template, user: User) => {
     templateId: template.id,
     userId: user.id,
     requestId,
-  }
+  };
 
   return analysisResult;
 };
-
 
 const setCookies = (spec: RequestSpec, attributes: UserAttribute[]) => {
   const newCookies = attributes.filter((attr) => attr.kind === "Cookie");
@@ -168,7 +174,7 @@ const setCookies = (spec: RequestSpec, attributes: UserAttribute[]) => {
   spec.setHeader("Cookie", newCookieString);
 
   return spec;
-}
+};
 
 const setHeaders = (spec: RequestSpec, attributes: UserAttribute[]) => {
   const newHeaders = attributes.filter((attr) => attr.kind === "Header");
@@ -179,23 +185,34 @@ const setHeaders = (spec: RequestSpec, attributes: UserAttribute[]) => {
   }
 
   return spec;
-}
+};
 
-const generateRoleRuleStatus = async (sdk: SDK, template: Template, roleId: string): Promise<RuleStatus> => {
+const generateRoleRuleStatus = async (
+  sdk: SDK,
+  template: Template,
+  roleId: string,
+): Promise<RuleStatus> => {
   const store = AnalysisStore.get();
   const userStore = UserStore.get();
 
   // Get all users with the role
-  const users = userStore.getUsers().filter((user) => user.roleIds.includes(roleId));
+  const users = userStore
+    .getUsers()
+    .filter((user) => user.roleIds.includes(roleId));
 
   // Get all results for this template and matching users
   const results = store.getResults();
   const templateResults = results.filter((result) => {
-    return result.templateId === template.id && users.some((user) => user.id === result.userId)
+    return (
+      result.templateId === template.id &&
+      users.some((user) => user.id === result.userId)
+    );
   });
 
   // Get the rule for the role
-  const rule = template.rules.find((rule) => rule.type === "RoleRule" && rule.roleId === roleId) ?? {
+  const rule = template.rules.find(
+    (rule) => rule.type === "RoleRule" && rule.roleId === roleId,
+  ) ?? {
     type: "RoleRule",
     roleId,
     hasAccess: false,
@@ -203,10 +220,12 @@ const generateRoleRuleStatus = async (sdk: SDK, template: Template, roleId: stri
   };
 
   // Get all result responses
-  const responses = await Promise.all(templateResults.map(async (result) => {
-    const { response } = await sdk.requests.get(result.requestId) ?? {};
-    return response;
-  }));
+  const responses = await Promise.all(
+    templateResults.map(async (result) => {
+      const { response } = (await sdk.requests.get(result.requestId)) ?? {};
+      return response;
+    }),
+  );
 
   // If any response is not found, return "Unexpected"
   const filteredResponses = responses.filter(isPresent);
@@ -236,9 +255,13 @@ const generateRoleRuleStatus = async (sdk: SDK, template: Template, roleId: stri
   }
 
   return "Unexpected";
-}
+};
 
-const generateUserRuleStatus = async (sdk: SDK, template: Template, user: User): Promise<RuleStatus> => {
+const generateUserRuleStatus = async (
+  sdk: SDK,
+  template: Template,
+  user: User,
+): Promise<RuleStatus> => {
   const store = AnalysisStore.get();
 
   // Get all results for this template and matching user
@@ -249,17 +272,19 @@ const generateUserRuleStatus = async (sdk: SDK, template: Template, user: User):
   // Check if user should have access to this resource
   const hasAccess = template.rules.some((rule) => {
     if (rule.type === "RoleRule") {
-      return rule.hasAccess && user.roleIds.includes(rule.roleId)
+      return rule.hasAccess && user.roleIds.includes(rule.roleId);
     }
 
     return rule.hasAccess && rule.userId === user.id;
-  })
+  });
 
   // Get all result responses
-  const responses = await Promise.all(results.map(async (result) => {
-    const { response } = await sdk.requests.get(result.requestId) ?? {};
-    return response;
-  }));
+  const responses = await Promise.all(
+    results.map(async (result) => {
+      const { response } = (await sdk.requests.get(result.requestId)) ?? {};
+      return response;
+    }),
+  );
 
   // If any response is not found, return "Unexpected"
   const filteredResponses = responses.filter(isPresent);
@@ -289,4 +314,4 @@ const generateUserRuleStatus = async (sdk: SDK, template: Template, user: User):
   }
 
   return "Unexpected";
-}
+};

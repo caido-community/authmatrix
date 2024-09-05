@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useUserService } from "@/services/users";
 import { generateID } from "@/utils";
 import Button from "primevue/button";
 import Column from "primevue/column";
@@ -6,7 +7,6 @@ import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import type { User, UserAttribute } from "shared";
-import { useUserService } from "@/services/users";
 
 const props = defineProps<{
   user: User;
@@ -23,8 +23,8 @@ const onAddAttribute = () => {
         name: "My attribute",
         value: "My value",
         kind: "Cookie",
-      }
-    ]
+      },
+    ],
   });
 };
 

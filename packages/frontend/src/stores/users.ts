@@ -100,7 +100,8 @@ const processSuccess = (
         ),
       };
     case "DeleteUser": {
-      const selectedUserId = message.id === state.selectedUserId ? undefined : state.selectedUserId;
+      const selectedUserId =
+        message.id === state.selectedUserId ? undefined : state.selectedUserId;
       return {
         ...state,
         selectedUserId,

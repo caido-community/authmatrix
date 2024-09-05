@@ -23,22 +23,30 @@ const props = defineProps<{
 }>();
 
 const getRoleValue = (template: Template, role: Role) => {
-  const rule = template.rules.find((rule) => rule.type === "RoleRule" && rule.roleId === role.id);
+  const rule = template.rules.find(
+    (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
+  );
   return rule?.hasAccess ?? false;
 };
 
 const getRoleStatus = (template: Template, role: Role) => {
-  const rule = template.rules.find((rule) => rule.type === "RoleRule" && rule.roleId === role.id);
+  const rule = template.rules.find(
+    (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
+  );
   return rule?.status ?? "Untested";
 };
 
 const getUserValue = (template: Template, user: User) => {
-  const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === user.id);
+  const rule = template.rules.find(
+    (rule) => rule.type === "UserRule" && rule.userId === user.id,
+  );
   return rule?.hasAccess ?? false;
 };
 
 const getUserStatus = (template: Template, user: User) => {
-  const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === user.id);
+  const rule = template.rules.find(
+    (rule) => rule.type === "UserRule" && rule.userId === user.id,
+  );
   return rule?.status ?? "Untested";
 };
 
@@ -81,7 +89,11 @@ const isAnalyzing = computed(() => {
   return analysisService.jobState.type === "Analyzing";
 });
 
-const onTemplateUpdate = (template: Template, field: string, newValue: unknown) => {
+const onTemplateUpdate = (
+  template: Template,
+  field: string,
+  newValue: unknown,
+) => {
   service.updateTemplate(template.id, { ...template, [field]: newValue });
 };
 </script>

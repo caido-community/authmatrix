@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type {RuleStatus} from 'shared';
-import Chip from 'primevue/chip';
+import Chip from "primevue/chip";
+import type { RuleStatus } from "shared";
 
 defineProps<{
   status: RuleStatus;

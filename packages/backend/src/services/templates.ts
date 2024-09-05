@@ -5,8 +5,8 @@ import type { Template } from "shared";
 import { TemplateStore } from "../stores/templates";
 import { generateID } from "../utils";
 
+import { SettingsStore } from "../stores/settings";
 import type { BackendEvents } from "../types";
-import {SettingsStore} from "../stores/settings";
 
 export const getTemplates = (_sdk: SDK): Template[] => {
   const store = TemplateStore.get();
@@ -49,7 +49,7 @@ export const updateTemplate = (
   const newTemplate = store.updateTemplate(id, fields);
   sdk.api.send("templates:updated", newTemplate);
   return newTemplate;
-}
+};
 
 export const toggleTemplateRole = (
   sdk: SDK<never, BackendEvents>,
@@ -107,4 +107,4 @@ const toTemplate = (request: Request, response: Response): Template => {
       path: request.getPath(),
     },
   };
-}
+};

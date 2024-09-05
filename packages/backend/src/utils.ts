@@ -18,4 +18,4 @@ export const Uint8ArrayToString = (data: Uint8Array) => {
 
 export const isPresent = <T>(value: T | undefined): value is T => {
   return value !== undefined;
-}
+};

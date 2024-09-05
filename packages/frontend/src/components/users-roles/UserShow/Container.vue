@@ -23,8 +23,6 @@ const onFocusOut = () => {
 watch(user, () => {
   sync();
 });
-
-
 </script>
 
 <template>
