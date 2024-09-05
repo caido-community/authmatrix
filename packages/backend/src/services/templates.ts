@@ -40,21 +40,25 @@ export const deleteTemplate = (_sdk: SDK, requestId: string) => {
 };
 
 export const toggleTemplateRole = (
-  _sdk: SDK,
+  sdk: SDK<never, BackendEvents>,
   requestId: string,
   roleId: string,
 ) => {
   const store = TemplateStore.get();
-  return store.toggleTemplateRole(requestId, roleId);
+  const newTemplate = store.toggleTemplateRole(requestId, roleId);
+  sdk.api.send("templates:updated", newTemplate);
+  return newTemplate;
 };
 
 export const toggleTemplateUser = (
-  _sdk: SDK,
+  sdk: SDK<never, BackendEvents>,
   requestId: string,
   userId: string,
 ) => {
   const store = TemplateStore.get();
-  return store.toggleTemplateUser(requestId, userId);
+  const newTemplate = store.toggleTemplateUser(requestId, userId);
+  sdk.api.send("templates:updated", newTemplate);
+  return newTemplate;
 };
 
 export const onInterceptResponse = async (

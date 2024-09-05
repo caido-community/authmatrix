@@ -19,8 +19,7 @@ const templates: Template[] = [
       port: 80,
       isTls: false,
     },
-    roleIds: [],
-    userIds: [],
+    rules: []
   },
 ];
 
@@ -30,7 +29,6 @@ const results: AnalysisResult[] = [
     userId: "1",
     requestId: "1",
     templateId: "1",
-    status: "Enforced",
   },
 ];
 
@@ -95,8 +93,7 @@ const backend: API & Record<string, unknown> = {
         port: 80,
         isTls: false,
       },
-      roleIds: [],
-      userIds: [],
+      rules: []
     };
 
     templates.push(newTemplate);
@@ -109,21 +106,28 @@ const backend: API & Record<string, unknown> = {
       templates.splice(index, 1);
     }
   },
-  toggleTemplateRole: (requestId, roleId) => {
-    const request = templates.find((request) => request.id === requestId);
+  toggleTemplateRole: (templateId, roleId) => {
+    const template = templates.find((template) => template.id === templateId);
 
-    if (request) {
-      const newTemplate = clone(request);
-      const isEnabled = newTemplate.roleIds.includes(roleId);
+    if (template) {
+      const newTemplate = clone(template);
+      const currRule = newTemplate.rules.find((rule) => {
+        return rule.type === "RoleRule" && rule.roleId === roleId;
+      });
 
-      if (isEnabled) {
-        newTemplate.roleIds = newTemplate.roleIds.filter((id) => id !== roleId);
+      if (currRule) {
+        currRule.hasAccess = !currRule.hasAccess;
       } else {
-        newTemplate.roleIds.push(roleId);
+        newTemplate.rules.push({
+          type: "RoleRule",
+          roleId,
+          hasAccess: true,
+          status: "Untested"
+        });
       }
 
       templates.splice(
-        templates.findIndex((request) => request.id === requestId),
+        templates.findIndex((template) => template.id === templateId),
         1,
         newTemplate,
       );
@@ -132,20 +136,27 @@ const backend: API & Record<string, unknown> = {
     }
   },
   toggleTemplateUser: (requestId, userId) => {
-    const request = templates.find((request) => request.id === requestId);
+    const template = templates.find((template) => template.id === requestId);
 
-    if (request) {
-      const newTemplate = clone(request);
-      const isEnabled = newTemplate.userIds.includes(userId);
+    if (template) {
+      const newTemplate = clone(template);
+      const currRule = newTemplate.rules.find((rule) => {
+        return rule.type === "UserRule" && rule.userId === userId;
+      });
 
-      if (isEnabled) {
-        newTemplate.userIds = newTemplate.userIds.filter((id) => id !== userId);
+      if (currRule) {
+        currRule.hasAccess = !currRule.hasAccess;
       } else {
-        newTemplate.userIds.push(userId);
+        newTemplate.rules.push({
+          type: "UserRule",
+          userId,
+          hasAccess: true,
+          status: "Untested"
+        });
       }
 
       templates.splice(
-        templates.findIndex((request) => request.id === requestId),
+        templates.findIndex((template) => template.id === requestId),
         1,
         newTemplate,
       );

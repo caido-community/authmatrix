@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useUserService } from "@/services/users";
 import { useCloned } from "@vueuse/core";
-import Button from "primevue/button";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
 import type { User } from "shared";

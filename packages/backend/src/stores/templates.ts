@@ -32,26 +32,44 @@ export class TemplateStore {
   toggleTemplateRole(templateId: string, roleId: string) {
     const template = this.templates.get(templateId);
     if (template) {
-      if (template.roleIds.includes(roleId)) {
-        template.roleIds = template.roleIds.filter((id) => id !== roleId);
-      } else {
-        template.roleIds.push(roleId);
-      }
+      const currRule = template.rules.find((rule) => {
+        return rule.type === "RoleRule" && rule.roleId === roleId;
+      });
 
-      return template;
+      if (currRule) {
+        currRule.hasAccess = !currRule.hasAccess;
+      } else {
+        template.rules.push({
+          type: "RoleRule",
+          roleId,
+          hasAccess: true,
+          status: "Untested"
+        });
+      }
     }
+
+    return template;
   }
 
   toggleTemplateUser(templateId: string, userId: string) {
     const template = this.templates.get(templateId);
     if (template) {
-      if (template.userIds.includes(userId)) {
-        template.userIds = template.userIds.filter((id) => id !== userId);
-      } else {
-        template.userIds.push(userId);
-      }
+      const currRule = template.rules.find((rule) => {
+        return rule.type === "UserRule" && rule.userId === userId;
+      });
 
-      return template;
+      if (currRule) {
+        currRule.hasAccess = !currRule.hasAccess;
+      } else {
+        template.rules.push({
+          type: "UserRule",
+          userId,
+          hasAccess: true,
+          status: "Untested"
+        });
+      }
     }
+
+    return template;
   }
 }

@@ -72,7 +72,7 @@ const analyzeRequest = async (sdk: SDK<never, BackendEvents>, template: Template
   sdk.console.debug(`Sending request ${spec}`);
   const { request, response } = await sdk.requests.send(spec);
   const shouldHaveAccess = template.rules.some((rule) => {
-    return user.roleIds.includes(roleId);
+    return (rule.type === "UserRule" && rule.userId === user.id && rule.hasAccess) || (rule.type === "RoleRule" && user.roleIds.includes(rule.roleId) && rule.hasAccess);
   });
 
   const requestId = request.getId();

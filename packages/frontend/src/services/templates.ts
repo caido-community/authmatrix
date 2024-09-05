@@ -70,6 +70,10 @@ export const useTemplateService = defineStore("services.templates", () => {
     sdk.backend.onEvent("templates:created", (template) => {
       store.send({ type: "AddTemplate", template });
     });
+
+    sdk.backend.onEvent("templates:updated", (template) => {
+      store.send({ type: "UpdateTemplate", template });
+    });
   };
 
   const getState = () => store.getState();

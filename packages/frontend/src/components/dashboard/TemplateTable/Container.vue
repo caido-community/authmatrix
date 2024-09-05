@@ -23,25 +23,27 @@ const props = defineProps<{
   settingsState: SettingsState & { type: "Success" };
 }>();
 
-const getRoleValue = (request: Template, role: Role) => {
-  return request.roleIds.some((roleId) => roleId === role.id);
+const getRoleValue = (template: Template, role: Role) => {
+  const rule = template.rules.find((rule) => rule.type === "RoleRule" && rule.roleId === role.id);
+  return rule?.hasAccess ?? false;
 };
 
-const getUserValue = (request: Template, user: User) => {
-  return request.userIds.some((userId) => userId === user.id);
+const getUserValue = (template: Template, user: User) => {
+  const rule = template.rules.find((rule) => rule.type === "UserRule" && rule.userId === user.id);
+  return rule?.hasAccess ?? false;
 };
 
 const service = useTemplateService();
-const toggleRole = (request: Template, role: Role) => {
-  service.toggleTemplateRole(request.id, role.id);
+const toggleRole = (template: Template, role: Role) => {
+  service.toggleTemplateRole(template.id, role.id);
 };
 
-const toggleUser = (request: Template, user: User) => {
-  service.toggleTemplateUser(request.id, user.id);
+const toggleUser = (template: Template, user: User) => {
+  service.toggleTemplateUser(template.id, user.id);
 };
 
-const deleteTemplate = (request: Template) => {
-  service.deleteTemplate(request.id);
+const deleteTemplate = (template: Template) => {
+  service.deleteTemplate(template.id);
 };
 
 const settingsService = useSettingsService();
