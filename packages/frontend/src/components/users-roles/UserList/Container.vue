@@ -1,0 +1,43 @@
+<script setup lang="ts">
+import { useUserService } from "@/services/users";
+import { RoleState } from "@/types";
+import { UserState } from "@/types";
+import Button from "primevue/button";
+import Card from "primevue/card";
+import type { User } from "shared";
+import UserTable from "./UserTable.vue";
+
+defineProps<{
+  state: UserState & { type: "Success" };
+  roleState: RoleState & { type: "Success" };
+}>();
+
+const selection = defineModel<User | undefined>("selection", {
+  required: true,
+});
+
+const service = useUserService();
+const onAddUser = () => {
+  service.addUser("New user");
+};
+</script>
+
+
+<template>
+  <Card class="h-full" :pt="{ body: { class: 'h-full' }, content: { class: 'flex-1 min-h-0' } } ">
+    <template #title>
+      <div class="flex justify-between items-center w-full">
+        <h1>User List</h1>
+        <Button label="+ Add User" @click="onAddUser" />
+      </div>
+    </template>
+
+    <template #content>
+      <UserTable
+        :state="state"
+        :role-state="roleState"
+        v-model:selection="selection" />
+
+    </template>
+  </Card>
+</template>

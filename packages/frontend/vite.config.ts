@@ -1,12 +1,14 @@
-import { defineConfig } from "vite";
 import { resolve } from "path";
+import {mergeConfig} from "vite";
 
-export default defineConfig({
+import baseConfig from "./vite.config.base";
+
+export default mergeConfig(baseConfig, {
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "plugin-template-frontend",
-      fileName: (format) => "script.js",
+      fileName: () => "script.js",
       formats: ["es"],
     },
     outDir: "../../dist/frontend",
@@ -16,4 +18,6 @@ export default defineConfig({
       },
     },
   },
+  define: { 'process.env.NODE_ENV': '"production"' }
 });
+

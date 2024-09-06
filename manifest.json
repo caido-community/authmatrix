@@ -1,28 +1,28 @@
 {
-  "id": "starterkit-plugin",
-  "name": "StarterKit Plugin",
+  "id": "authmatrix",
+  "name": "AuthMatrix",
   "version": "0.1.0",
-  "description": "This is a starterkit plugin",
+  "description": "Grid-based authorization testing across multiple users and roles.",
   "author": {
     "name": "Caido Labs Inc.",
     "email": "dev@caido.io",
-    "url": "https://github.com/caido/starterkit-plugin"
+    "url": "https://github.com/caido-community/authmatrix"
   },
   "plugins": [
     {
       "kind": "frontend",
-      "id": "caido-extra-commands",
-      "name": "Extra Commands",
+      "id": "authmatrix-frontend",
+      "name": "Authmatrix Frontend",
       "entrypoint": "frontend/script.js",
       "style": "frontend/style.css",
       "backend": {
-        "id": "caido-extra-commands-backend"
+        "id": "authmatrix-backend"
       }
     },
     {
       "kind": "backend",
-      "id": "caido-extra-commands-backend",
-      "name": "Extra Commands Backend",
+      "id": "authmatrix-backend",
+      "name": "Authmatrix Backend",
       "runtime": "javascript",
       "entrypoint": "backend/script.js"
     }
