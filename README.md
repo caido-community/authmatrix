@@ -18,6 +18,6 @@
   <hr />
 </div>
 
-# 🔰 Authmatrix
+# 🔰 AuthMatrix
 
 Grid-based authorization testing across multiple users and roles.
