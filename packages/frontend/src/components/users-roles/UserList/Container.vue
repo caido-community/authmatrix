@@ -26,9 +26,14 @@ const onAddUser = () => {
 <template>
   <Card class="h-full" :pt="{ body: { class: 'h-full' }, content: { class: 'flex-1 min-h-0' } } ">
     <template #title>
-      <div class="flex justify-between items-center w-full">
-        <h1>User List</h1>
-        <Button label="+ Add User" @click="onAddUser" />
+      <div class="flex justify-between">
+        <div class="flex flex-col w-full">
+          <h1>Users</h1>
+          <p class="text-sm text-gray-400">Manage users and their access to the system</p>
+        </div>
+        <div class="min-w-max">
+          <Button label="+ Add User" @click="onAddUser" />
+        </div>
       </div>
     </template>
 

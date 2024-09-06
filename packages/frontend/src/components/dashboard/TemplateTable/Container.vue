@@ -106,7 +106,14 @@ const onTemplateUpdate = (
 
       <template #header>
         <div class="px-4 pt-4 flex justify-between gap-8">
-          <div class="flex flex-col gap-2"></div>
+          <div class="flex flex-col">
+            <h2 class="text-lg font-semibold">Templates</h2>
+            <p class="text-sm text-gray-400">Add template requests to the queue for analysis.</p>
+            <p class="text-sm text-gray-400">
+              Specify which roles and users should have access to each resource.
+              Configure a regex to determine if the authentication was successful.
+            </p>
+          </div>
           <div class="flex items-center gap-4">
             <div
               class="flex gap-2"

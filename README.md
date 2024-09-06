@@ -18,16 +18,6 @@
   <hr />
 </div>
 
-# 🔰 StarterKit Plugin
+# 🔰 Authmatrix
 
-This is the starter kit for the Caido plugin system.
-
-This template is full-stack, with both a backend and frontend plugin.
-For frontend only use the [frontend](https://github.com/caido/starterkit-plugin-frontend) starterkit.
-
-## 🏎️ Usage
-
-1. `pnpm install`
-1. Make some modifications in `src`
-1. `pnpm build`
-1. Upload the plugin.zip in the `dist` folder to your Caido instance
+Grid-based authorization testing across multiple users and roles.
