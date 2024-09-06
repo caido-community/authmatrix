@@ -1,6 +1,6 @@
 import { useSDK } from "@/plugins/sdk";
 import { useTemplateRepository } from "@/repositories/template";
-import {useAnalysisStore} from "@/stores/analysis";
+import { useAnalysisStore } from "@/stores/analysis";
 import { useTemplateStore } from "@/stores/templates";
 import { defineStore } from "pinia";
 import type { Template } from "shared";
@@ -69,7 +69,6 @@ export const useTemplateService = defineStore("services.templates", () => {
       if (analysisState.type !== "None" && analysisState.templateId === id) {
         analysisStore.selectionState.send({ type: "Reset" });
       }
-
     } else {
       sdk.window.showToast(result.error, {
         variant: "error",
