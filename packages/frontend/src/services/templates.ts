@@ -1,5 +1,6 @@
 import { useSDK } from "@/plugins/sdk";
 import { useTemplateRepository } from "@/repositories/template";
+import {useAnalysisStore} from "@/stores/analysis";
 import { useTemplateStore } from "@/stores/templates";
 import { defineStore } from "pinia";
 import type { Template } from "shared";
@@ -57,11 +58,18 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
+  const analysisStore = useAnalysisStore();
   const deleteTemplate = async (id: string) => {
     const result = await repository.deleteTemplate(id);
 
     if (result.type === "Ok") {
       store.send({ type: "DeleteTemplate", id });
+      const analysisState = analysisStore.selectionState.getState();
+
+      if (analysisState.type !== "None" && analysisState.templateId === id) {
+        analysisStore.selectionState.send({ type: "Reset" });
+      }
+
     } else {
       sdk.window.showToast(result.error, {
         variant: "error",
