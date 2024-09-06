@@ -1,4 +1,4 @@
-@layer tailwind-base, autorize, tailwind-utilities;
+@layer tailwind-base, authmatrix, tailwind-utilities;
 
 @layer tailwind-base {
     @tailwind base;

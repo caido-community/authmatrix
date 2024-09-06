@@ -51,7 +51,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="plugin--autorize">
+  <div id="plugin--authmatrix">
     <div class="h-full flex flex-col gap-1">
       <MenuBar :model="items" breakpoint="320px" />
       <div class="flex-1 min-h-0">
@@ -62,7 +62,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-#plugin--autorize {
+#plugin--authmatrix {
   height: 100%;
 }
 </style>

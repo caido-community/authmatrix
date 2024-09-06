@@ -12,9 +12,9 @@ export const init = (sdk: CaidoSDK) => {
 
   app.mount(root);
 
-  sdk.navigation.addPage("/autorize", {
+  sdk.navigation.addPage("/authmatrix", {
     body: root,
   });
 
-  sdk.sidebar.registerItem("Autorize", "/autorize");
+  sdk.sidebar.registerItem("Authmatrix", "/authmatrix");
 };

@@ -20,7 +20,7 @@ export default defineConfig({
     postcss: {
       plugins: [
         tailwindcss(),
-        prefixwrap("#plugin--autorize"),
+        prefixwrap("#plugin--authmatrix"),
       ],
     }
   },
