@@ -1,6 +1,6 @@
 import type { TemplateState } from "@/types";
 import { defineStore } from "pinia";
-import type { Template } from "shared";
+import type { TemplateDTO } from "shared";
 import { reactive } from "vue";
 
 type Context = {
@@ -10,9 +10,9 @@ type Context = {
 type Message =
   | { type: "Start" }
   | { type: "Error"; error: string }
-  | { type: "Success"; templates: Template[] }
-  | { type: "AddTemplate"; template: Template }
-  | { type: "UpdateTemplate"; template: Template }
+  | { type: "Success"; templates: TemplateDTO[] }
+  | { type: "AddTemplate"; template: TemplateDTO }
+  | { type: "UpdateTemplate"; template: TemplateDTO }
   | { type: "DeleteTemplate"; id: string };
 
 export const useTemplateStore = defineStore("stores.templates", () => {

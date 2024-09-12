@@ -5,7 +5,7 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
-import type { Role } from "shared";
+import type { RoleDTO } from "shared";
 
 const props = defineProps<{
   state: RoleState & { type: "Success" };
@@ -17,11 +17,11 @@ const columns = [
 ];
 
 const service = useRoleService();
-const onDeleteRole = (role: Role) => {
+const onDeleteRole = (role: RoleDTO) => {
   service.deleteRole(role.id);
 };
 
-const onRoleUpdate = (role: Role, field: keyof Role, value: string) => {
+const onRoleUpdate = (role: RoleDTO, field: keyof RoleDTO, value: string) => {
   service.updateRole(role.id, {
     ...role,
     [field]: value,

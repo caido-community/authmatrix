@@ -6,10 +6,10 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
-import type { User, UserAttribute } from "shared";
+import type { UserDTO, UserAttributeDTO } from "shared";
 
 const props = defineProps<{
-  user: User;
+  user: UserDTO;
 }>();
 
 const service = useUserService();
@@ -28,7 +28,7 @@ const onAddAttribute = () => {
   });
 };
 
-const onRemoveAttribute = (attribute: UserAttribute) => {
+const onRemoveAttribute = (attribute: UserAttributeDTO) => {
   service.updateUser(props.user.id, {
     ...props.user,
     attributes: props.user.attributes.filter(
@@ -38,8 +38,8 @@ const onRemoveAttribute = (attribute: UserAttribute) => {
 };
 
 const onAttributeUpdate = (
-  attribute: UserAttribute,
-  field: keyof UserAttribute,
+  attribute: UserAttributeDTO,
+  field: keyof UserAttributeDTO,
   value: string,
 ) => {
   const newAttribute = {

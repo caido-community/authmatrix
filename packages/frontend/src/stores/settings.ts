@@ -1,6 +1,6 @@
 import type { SettingsState } from "@/types";
 import { defineStore } from "pinia";
-import type { Settings } from "shared";
+import type { SettingsDTO } from "shared";
 import { reactive } from "vue";
 
 type Context = {
@@ -10,8 +10,8 @@ type Context = {
 type Message =
   | { type: "Start" }
   | { type: "Error"; error: string }
-  | { type: "Success"; settings: Settings }
-  | { type: "UpdateSettings"; settings: Settings };
+  | { type: "Success"; settings: SettingsDTO }
+  | { type: "UpdateSettings"; settings: SettingsDTO };
 
 export const useSettingsStore = defineStore("stores.settings", () => {
   const context: Context = reactive({

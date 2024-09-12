@@ -1,9 +1,9 @@
-import type { User } from "shared";
+import type { UserDTO } from "shared";
 
 export class UserStore {
   private static _store?: UserStore;
 
-  private users: Map<string, User>;
+  private users: Map<string, UserDTO>;
 
   private constructor() {
     this.users = new Map();
@@ -25,19 +25,19 @@ export class UserStore {
     return [...this.users.values()];
   }
 
-  addUser(role: User) {
-    this.users.set(role.id, role);
+  addUser(user: UserDTO) {
+    this.users.set(user.id, user);
   }
 
   deleteUser(requestId: string) {
     this.users.delete(requestId);
   }
 
-  updateUser(id: string, fields: Omit<User, "id">) {
-    const role = this.users.get(id);
-    if (role) {
-      Object.assign(role, fields);
-      return role;
+  updateUser(id: string, fields: Omit<UserDTO, "id">) {
+    const user = this.users.get(id);
+    if (user) {
+      Object.assign(user, fields);
+      return user;
     }
   }
 }

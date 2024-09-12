@@ -4,7 +4,7 @@ import { useSDK } from "@/plugins/sdk";
 import { useUserRepository } from "@/repositories/users";
 import { useUserStore } from "@/stores/users";
 import { defineStore } from "pinia";
-import type { User } from "shared";
+import type { UserDTO } from "shared";
 
 export const useUserService = defineStore("services.users", () => {
   const sdk = useSDK();
@@ -37,7 +37,7 @@ export const useUserService = defineStore("services.users", () => {
     }
   };
 
-  const updateUser = async (id: string, fields: Omit<User, "id">) => {
+  const updateUser = async (id: string, fields: Omit<UserDTO, "id">) => {
     const result = await repository.updateUser(id, fields);
 
     if (result.type === "Ok") {

@@ -1,9 +1,9 @@
 import type { DefineEvents } from "caido:plugin";
-import type { AnalysisResult, Template } from "shared";
+import type { AnalysisRequestDTO, TemplateDTO } from "shared";
 
 export type BackendEvents = DefineEvents<{
-  "templates:created": (template: Template) => void;
-  "templates:updated": (template: Template) => void;
-  "results:created": (result: AnalysisResult) => void;
+  "templates:created": (template: TemplateDTO) => void;
+  "templates:updated": (template: TemplateDTO) => void;
+  "results:created": (result: AnalysisRequestDTO) => void;
   "results:clear": () => void;
 }>;

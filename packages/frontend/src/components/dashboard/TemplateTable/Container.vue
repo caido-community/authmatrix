@@ -11,7 +11,7 @@ import Checkbox from "primevue/checkbox";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
-import type { Role, Template, User } from "shared";
+import type { RoleDTO, TemplateDTO, UserDTO } from "shared";
 import { computed } from "vue";
 import RuleStatus from "./RuleStatus.vue";
 
@@ -22,28 +22,28 @@ const props = defineProps<{
   settingsState: SettingsState & { type: "Success" };
 }>();
 
-const getRoleValue = (template: Template, role: Role) => {
+const getRoleValue = (template: TemplateDTO, role: RoleDTO) => {
   const rule = template.rules.find(
     (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
   );
   return rule?.hasAccess ?? false;
 };
 
-const getRoleStatus = (template: Template, role: Role) => {
+const getRoleStatus = (template: TemplateDTO, role: RoleDTO) => {
   const rule = template.rules.find(
     (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
   );
   return rule?.status ?? "Untested";
 };
 
-const getUserValue = (template: Template, user: User) => {
+const getUserValue = (template: TemplateDTO, user: UserDTO) => {
   const rule = template.rules.find(
     (rule) => rule.type === "UserRule" && rule.userId === user.id,
   );
   return rule?.hasAccess ?? false;
 };
 
-const getUserStatus = (template: Template, user: User) => {
+const getUserStatus = (template: TemplateDTO, user: UserDTO) => {
   const rule = template.rules.find(
     (rule) => rule.type === "UserRule" && rule.userId === user.id,
   );
@@ -51,15 +51,15 @@ const getUserStatus = (template: Template, user: User) => {
 };
 
 const service = useTemplateService();
-const toggleRole = (template: Template, role: Role) => {
+const toggleRole = (template: TemplateDTO, role: RoleDTO) => {
   service.toggleTemplateRole(template.id, role.id);
 };
 
-const toggleUser = (template: Template, user: User) => {
+const toggleUser = (template: TemplateDTO, user: UserDTO) => {
   service.toggleTemplateUser(template.id, user.id);
 };
 
-const deleteTemplate = (template: Template) => {
+const deleteTemplate = (template: TemplateDTO) => {
   service.deleteTemplate(template.id);
 };
 
@@ -90,7 +90,7 @@ const isAnalyzing = computed(() => {
 });
 
 const onTemplateUpdate = (
-  template: Template,
+  template: TemplateDTO,
   field: string,
   newValue: unknown,
 ) => {

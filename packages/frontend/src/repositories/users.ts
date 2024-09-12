@@ -1,5 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
-import type { User } from "shared";
+import type { UserDTO } from "shared";
 
 export const useUserRepository = () => {
   const sdk = useSDK();
@@ -33,7 +33,7 @@ export const useUserRepository = () => {
     }
   };
 
-  const updateUser = async (id: string, fields: Omit<User, "id">) => {
+  const updateUser = async (id: string, fields: Omit<UserDTO, "id">) => {
     try {
       const newUser = await sdk.backend.updateUser(id, fields);
 
@@ -46,7 +46,7 @@ export const useUserRepository = () => {
 
       return {
         type: "Err" as const,
-        error: "User not found",
+        error: "UserDTO not found",
       };
     } catch {
       return {

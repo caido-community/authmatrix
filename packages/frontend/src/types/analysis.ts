@@ -1,4 +1,4 @@
-import type { AnalysisResult } from "shared";
+import type { AnalysisRequestDTO } from "shared";
 
 export type AnalysisJobState = { type: "Idle" } | { type: "Analyzing" };
 
@@ -6,7 +6,7 @@ export type AnalysisResultState =
   | { type: "Idle" }
   | { type: "Loading" }
   | { type: "Error"; error: string }
-  | { type: "Success"; results: AnalysisResult[] };
+  | { type: "Success"; results: AnalysisRequestDTO[] };
 
 export type AnalysisSelectionState =
   | { type: "None" }

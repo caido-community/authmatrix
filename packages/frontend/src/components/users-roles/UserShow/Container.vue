@@ -3,13 +3,13 @@ import { useUserService } from "@/services/users";
 import { useCloned } from "@vueuse/core";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
-import type { User } from "shared";
+import type { UserDTO } from "shared";
 import { toRefs, watch } from "vue";
 
 import AttributeTable from "./AttributeTable.vue";
 
 const props = defineProps<{
-  user: User;
+  user: UserDTO;
 }>();
 
 const { user } = toRefs(props);

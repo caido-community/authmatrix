@@ -1,6 +1,6 @@
 import type { SDK } from "caido:plugin";
 import type { Request, Response } from "caido:utils";
-import type { Template } from "shared";
+import type { TemplateDTO } from "shared";
 
 import { TemplateStore } from "../stores/templates";
 import { generateID } from "../utils";
@@ -8,13 +8,13 @@ import { generateID } from "../utils";
 import { SettingsStore } from "../stores/settings";
 import type { BackendEvents } from "../types";
 
-export const getTemplates = (_sdk: SDK): Template[] => {
+export const getTemplates = (_sdk: SDK): TemplateDTO[] => {
   const store = TemplateStore.get();
   return store.getTemplates();
 };
 
 export const addTemplate = (sdk: SDK<never, BackendEvents>) => {
-  const newTemplate: Template = {
+  const newTemplate: TemplateDTO = {
     id: generateID(),
     requestId: generateID(),
     authSuccessRegex: "HTTP/1[.]1 200",
@@ -43,7 +43,7 @@ export const deleteTemplate = (_sdk: SDK, requestId: string) => {
 export const updateTemplate = (
   sdk: SDK<never, BackendEvents>,
   id: string,
-  fields: Omit<Template, "id">,
+  fields: Omit<TemplateDTO, "id">,
 ) => {
   const store = TemplateStore.get();
   const newTemplate = store.updateTemplate(id, fields);
@@ -93,7 +93,7 @@ export const registerTemplateEvents = (sdk: SDK) => {
   sdk.events.onInterceptResponse(onInterceptResponse);
 };
 
-const toTemplate = (request: Request, response: Response): Template => {
+const toTemplate = (request: Request, response: Response): TemplateDTO => {
   return {
     id: generateID(),
     requestId: request.getId(),

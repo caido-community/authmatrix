@@ -2,7 +2,7 @@ import { useSDK } from "@/plugins/sdk";
 import { useRoleRepository } from "@/repositories/roles";
 import { useRoleStore } from "@/stores/roles";
 import { defineStore } from "pinia";
-import type { Role } from "shared";
+import type { RoleDTO } from "shared";
 
 export const useRoleService = defineStore("services.roles", () => {
   const sdk = useSDK();
@@ -31,7 +31,7 @@ export const useRoleService = defineStore("services.roles", () => {
     }
   };
 
-  const updateRole = async (id: string, fields: Omit<Role, "id">) => {
+  const updateRole = async (id: string, fields: Omit<RoleDTO, "id">) => {
     const result = await repository.updateRole(id, fields);
 
     if (result.type === "Ok") {
