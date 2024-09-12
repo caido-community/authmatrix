@@ -5,11 +5,11 @@ import { TemplateStore } from "../stores/templates";
 import { UserStore } from "../stores/users";
 
 import type {
-  AnalysisResult,
-  RuleStatus,
-  Template,
-  User,
-  UserAttribute,
+  AnalysisRequestDTO,
+  RuleStatusDTO,
+  TemplateDTO,
+  UserDTO,
+  UserAttributeDTO,
 } from "shared";
 import { AnalysisStore } from "../stores/analysis";
 import { Uint8ArrayToString, isPresent } from "../utils";
@@ -17,7 +17,7 @@ import { Uint8ArrayToString, isPresent } from "../utils";
 import { RoleStore } from "../stores/roles";
 import type { BackendEvents } from "../types";
 
-export const getResults = (_sdk: SDK): AnalysisResult[] => {
+export const getResults = (_sdk: SDK): AnalysisRequestDTO[] => {
   const store = AnalysisStore.get();
   return store.getResults();
 };
@@ -53,7 +53,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   const analysisStore = AnalysisStore.get();
 
   // Clear current results
-  analysisStore.clearResults();
+  analysisStore.clearRequests();
   sdk.api.send("results:clear");
 
   // Send requests
@@ -66,17 +66,17 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
 
   for (const template of templates) {
     for (const user of users) {
-      const analysisResult = await sendRequest(sdk, template, user);
-      if (analysisResult) {
-        analysisStore.addResult(analysisResult);
-        sdk.api.send("results:created", analysisResult);
+      const analysisRequest = await sendRequest(sdk, template, user);
+      if (analysisRequest) {
+        analysisStore.addRequest(analysisRequest);
+        sdk.api.send("results:created", analysisRequest);
       }
     }
   }
 
   const roles = roleStore.getRoles();
   for (const template of templates) {
-    const newRules: Template["rules"] = [];
+    const newRules: TemplateDTO["rules"] = [];
 
     // Generate role rule statuses in parallel
     const rolePromises = roles.map(async (role) => {
@@ -121,7 +121,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   }
 };
 
-const sendRequest = async (sdk: SDK, template: Template, user: User) => {
+const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
   const { request: baseRequest } =
     (await sdk.requests.get(template.requestId)) ?? {};
 
@@ -137,17 +137,17 @@ const sendRequest = async (sdk: SDK, template: Template, user: User) => {
   const { request } = await sdk.requests.send(spec);
 
   const requestId = request.getId();
-  const analysisResult: AnalysisResult = {
+  const analysisRequest: AnalysisRequestDTO = {
     id: `${template.id}-${user.id}-${requestId}`,
     templateId: template.id,
     userId: user.id,
     requestId,
   };
 
-  return analysisResult;
+  return analysisRequest;
 };
 
-const setCookies = (spec: RequestSpec, attributes: UserAttribute[]) => {
+const setCookies = (spec: RequestSpec, attributes: UserAttributeDTO[]) => {
   const newCookies = attributes.filter((attr) => attr.kind === "Cookie");
 
   // Set cookies
@@ -176,7 +176,7 @@ const setCookies = (spec: RequestSpec, attributes: UserAttribute[]) => {
   return spec;
 };
 
-const setHeaders = (spec: RequestSpec, attributes: UserAttribute[]) => {
+const setHeaders = (spec: RequestSpec, attributes: UserAttributeDTO[]) => {
   const newHeaders = attributes.filter((attr) => attr.kind === "Header");
 
   // Set headers
@@ -189,9 +189,9 @@ const setHeaders = (spec: RequestSpec, attributes: UserAttribute[]) => {
 
 const generateRoleRuleStatus = async (
   sdk: SDK,
-  template: Template,
+  template: TemplateDTO,
   roleId: string,
-): Promise<RuleStatus> => {
+): Promise<RuleStatusDTO> => {
   const store = AnalysisStore.get();
   const userStore = UserStore.get();
 
@@ -259,9 +259,9 @@ const generateRoleRuleStatus = async (
 
 const generateUserRuleStatus = async (
   sdk: SDK,
-  template: Template,
-  user: User,
-): Promise<RuleStatus> => {
+  template: TemplateDTO,
+  user: UserDTO,
+): Promise<RuleStatusDTO> => {
   const store = AnalysisStore.get();
 
   // Get all results for this template and matching user

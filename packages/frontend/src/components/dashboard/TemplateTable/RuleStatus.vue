@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Chip from "primevue/chip";
-import type { RuleStatus } from "shared";
+import type { RuleStatusDTO } from "shared";
 
 defineProps<{
-  status: RuleStatus;
+  status: RuleStatusDTO;
 }>();
 </script>
 

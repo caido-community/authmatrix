@@ -1,5 +1,5 @@
 import type { AnalysisResultState } from "@/types";
-import type { AnalysisResult } from "shared";
+import type { AnalysisRequestDTO } from "shared";
 import { reactive } from "vue";
 
 type Context = {
@@ -9,8 +9,8 @@ type Context = {
 type Message =
   | { type: "Start" }
   | { type: "Error"; error: string }
-  | { type: "Success"; results: AnalysisResult[] }
-  | { type: "AddResult"; result: AnalysisResult }
+  | { type: "Success"; results: AnalysisRequestDTO[] }
+  | { type: "AddResult"; result: AnalysisRequestDTO }
   | { type: "Clear" };
 
 export const useResultState = () => {

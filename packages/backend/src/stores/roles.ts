@@ -1,9 +1,9 @@
-import type { Role } from "shared";
+import type { RoleDTO } from "shared";
 
 export class RoleStore {
   private static _store?: RoleStore;
 
-  private roles: Map<string, Role>;
+  private roles: Map<string, RoleDTO>;
 
   private constructor() {
     this.roles = new Map();
@@ -21,7 +21,7 @@ export class RoleStore {
     return [...this.roles.values()];
   }
 
-  addRole(role: Role) {
+  addRole(role: RoleDTO) {
     this.roles.set(role.id, role);
   }
 
@@ -29,7 +29,7 @@ export class RoleStore {
     this.roles.delete(requestId);
   }
 
-  updateRole(id: string, fields: Omit<Role, "id">) {
+  updateRole(id: string, fields: Omit<RoleDTO, "id">) {
     const role = this.roles.get(id);
     if (role) {
       Object.assign(role, fields);

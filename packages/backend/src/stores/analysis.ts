@@ -1,12 +1,12 @@
-import type { AnalysisResult } from "shared";
+import type { AnalysisRequestDTO } from "shared";
 
 export class AnalysisStore {
   private static _store?: AnalysisStore;
 
-  private results: Map<string, AnalysisResult>;
+  private requests: Map<string, AnalysisRequestDTO>;
 
   private constructor() {
-    this.results = new Map();
+    this.requests = new Map();
   }
 
   static get(): AnalysisStore {
@@ -18,18 +18,18 @@ export class AnalysisStore {
   }
 
   getResults() {
-    return [...this.results.values()];
+    return [...this.requests.values()];
   }
 
-  addResult(result: AnalysisResult) {
-    this.results.set(result.id, result);
+  addRequest(result: AnalysisRequestDTO) {
+    this.requests.set(result.id, result);
   }
 
-  deleteResult(resultId: string) {
-    this.results.delete(resultId);
+  deleteRequest(requestId: string) {
+    this.requests.delete(requestId);
   }
 
-  clearResults() {
-    this.results.clear();
+  clearRequests() {
+    this.requests.clear();
   }
 }

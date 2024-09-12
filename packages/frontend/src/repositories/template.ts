@@ -1,5 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
-import type { Template } from "shared";
+import type { TemplateDTO } from "shared";
 
 export const useTemplateRepository = () => {
   const sdk = useSDK();
@@ -61,7 +61,7 @@ export const useTemplateRepository = () => {
 
       return {
         type: "Err" as const,
-        error: "Template or user not found",
+        error: "TemplateDTO or user not found",
       };
     } catch {
       return {
@@ -100,7 +100,7 @@ export const useTemplateRepository = () => {
     }
   };
 
-  const updateTemplate = async (id: string, fields: Omit<Template, "id">) => {
+  const updateTemplate = async (id: string, fields: Omit<TemplateDTO, "id">) => {
     try {
       const newTemplate = await sdk.backend.updateTemplate(id, fields);
       if (newTemplate) {
@@ -112,7 +112,7 @@ export const useTemplateRepository = () => {
 
       return {
         type: "Err" as const,
-        error: "Template not found",
+        error: "TemplateDTO not found",
       };
     } catch {
       return {

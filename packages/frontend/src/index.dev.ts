@@ -1,13 +1,13 @@
 import { EditorView } from "@codemirror/view";
 import type { API } from "backend";
-import type { AnalysisResult, Template, User } from "shared";
+import type { AnalysisRequestDTO, TemplateDTO, UserDTO } from "shared";
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
 import { clone } from "./utils";
 
 // This is a mock backend for the SDK
 // This is only for development purposes
-const templates: Template[] = [
+const templates: TemplateDTO[] = [
   {
     id: "1",
     requestId: "1",
@@ -70,7 +70,7 @@ const templates: Template[] = [
   },
 ];
 
-const results: AnalysisResult[] = [
+const results: AnalysisRequestDTO[] = [
   {
     id: "1",
     userId: "1",
@@ -79,7 +79,7 @@ const results: AnalysisResult[] = [
   },
 ];
 
-const users: User[] = [
+const users: UserDTO[] = [
   {
     id: "1",
     name: "admin",

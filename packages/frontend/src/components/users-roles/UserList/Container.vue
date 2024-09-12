@@ -4,7 +4,7 @@ import { RoleState } from "@/types";
 import { UserState } from "@/types";
 import Button from "primevue/button";
 import Card from "primevue/card";
-import type { User } from "shared";
+import type { UserDTO } from "shared";
 import UserTable from "./UserTable.vue";
 
 defineProps<{
@@ -12,7 +12,7 @@ defineProps<{
   roleState: RoleState & { type: "Success" };
 }>();
 
-const selection = defineModel<User | undefined>("selection", {
+const selection = defineModel<UserDTO | undefined>("selection", {
   required: true,
 });
 

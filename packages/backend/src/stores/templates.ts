@@ -1,9 +1,9 @@
-import type { Template } from "shared";
+import type { TemplateDTO } from "shared";
 
 export class TemplateStore {
   private static _store?: TemplateStore;
 
-  private templates: Map<string, Template>;
+  private templates: Map<string, TemplateDTO>;
 
   private constructor() {
     this.templates = new Map();
@@ -21,11 +21,11 @@ export class TemplateStore {
     return [...this.templates.values()];
   }
 
-  addTemplate(template: Template) {
+  addTemplate(template: TemplateDTO) {
     this.templates.set(template.id, template);
   }
 
-  updateTemplate(id: string, fields: Omit<Template, "id">) {
+  updateTemplate(id: string, fields: Omit<TemplateDTO, "id">) {
     const template = this.templates.get(id);
     if (template) {
       Object.assign(template, fields);

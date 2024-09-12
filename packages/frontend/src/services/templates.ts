@@ -3,7 +3,7 @@ import { useTemplateRepository } from "@/repositories/template";
 import { useAnalysisStore } from "@/stores/analysis";
 import { useTemplateStore } from "@/stores/templates";
 import { defineStore } from "pinia";
-import type { Template } from "shared";
+import type { TemplateDTO } from "shared";
 
 export const useTemplateService = defineStore("services.templates", () => {
   const sdk = useSDK();
@@ -46,7 +46,7 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
-  const updateTemplate = async (id: string, fields: Omit<Template, "id">) => {
+  const updateTemplate = async (id: string, fields: Omit<TemplateDTO, "id">) => {
     const result = await repository.updateTemplate(id, fields);
 
     if (result.type === "Ok") {

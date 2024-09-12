@@ -1,7 +1,7 @@
-import type { User } from "shared";
+import type { UserDTO } from "shared";
 
 export type UserState =
   | { type: "Idle" }
   | { type: "Loading" }
   | { type: "Error"; error: string }
-  | { type: "Success"; users: User[]; selectedUserId: string | undefined };
+  | { type: "Success"; users: UserDTO[]; selectedUserId: string | undefined };

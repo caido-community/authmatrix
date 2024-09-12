@@ -1,5 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
-import type { Role } from "shared";
+import type { RoleDTO } from "shared";
 
 export const useRoleRepository = () => {
   const sdk = useSDK();
@@ -33,7 +33,7 @@ export const useRoleRepository = () => {
     }
   };
 
-  const updateRole = async (id: string, fields: Omit<Role, "id">) => {
+  const updateRole = async (id: string, fields: Omit<RoleDTO, "id">) => {
     try {
       const newRole = await sdk.backend.updateRole(id, fields);
 

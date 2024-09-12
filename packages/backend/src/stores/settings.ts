@@ -1,9 +1,9 @@
-import type { Settings } from "shared";
+import type { SettingsDTO } from "shared";
 
 export class SettingsStore {
   private static _store?: SettingsStore;
 
-  private settings: Settings;
+  private settings: SettingsDTO;
 
   private constructor() {
     this.settings = {
@@ -24,7 +24,7 @@ export class SettingsStore {
     return { ...this.settings };
   }
 
-  updateSettings(newSettings: Settings) {
+  updateSettings(newSettings: SettingsDTO) {
     this.settings = { ...newSettings };
     return this.settings;
   }

@@ -1,5 +1,5 @@
 import { useSDK } from "@/plugins/sdk";
-import type { Settings } from "shared";
+import type { SettingsDTO } from "shared";
 
 export const useSettingsRepository = () => {
   const sdk = useSDK();
@@ -18,7 +18,7 @@ export const useSettingsRepository = () => {
     }
   };
 
-  const updateSettings = async (newSettings: Settings) => {
+  const updateSettings = async (newSettings: SettingsDTO) => {
     try {
       const settings = await sdk.backend.updateSettings(newSettings);
       return {

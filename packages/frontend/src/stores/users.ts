@@ -1,6 +1,6 @@
 import type { UserState } from "@/types";
 import { defineStore } from "pinia";
-import type { User } from "shared";
+import type { UserDTO } from "shared";
 import { reactive } from "vue";
 
 type Context = {
@@ -10,9 +10,9 @@ type Context = {
 type Message =
   | { type: "Start" }
   | { type: "Error"; error: string }
-  | { type: "Success"; users: User[] }
-  | { type: "AddUser"; user: User }
-  | { type: "UpdateUser"; user: User }
+  | { type: "Success"; users: UserDTO[] }
+  | { type: "AddUser"; user: UserDTO }
+  | { type: "UpdateUser"; user: UserDTO }
   | { type: "DeleteUser"; id: string }
   | { type: "SelectUser"; id: string | undefined };
 

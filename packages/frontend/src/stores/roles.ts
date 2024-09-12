@@ -1,6 +1,6 @@
 import type { RoleState } from "@/types";
 import { defineStore } from "pinia";
-import type { Role } from "shared";
+import type { RoleDTO } from "shared";
 import { reactive } from "vue";
 
 type Context = {
@@ -10,9 +10,9 @@ type Context = {
 type Message =
   | { type: "Start" }
   | { type: "Error"; error: string }
-  | { type: "Success"; roles: Role[] }
-  | { type: "AddRole"; role: Role }
-  | { type: "UpdateRole"; role: Role }
+  | { type: "Success"; roles: RoleDTO[] }
+  | { type: "AddRole"; role: RoleDTO }
+  | { type: "UpdateRole"; role: RoleDTO }
   | { type: "DeleteRole"; id: string };
 
 export const useRoleStore = defineStore("stores.roles", () => {

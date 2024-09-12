@@ -1,5 +1,5 @@
 import type { SDK } from "caido:plugin";
-import type { Settings } from "shared";
+import type { SettingsDTO } from "shared";
 import { SettingsStore } from "../stores/settings";
 
 export const getSettings = () => {
@@ -7,7 +7,7 @@ export const getSettings = () => {
   return store.getSettings();
 };
 
-export const updateSettings = (_sdk: SDK, newSettings: Settings) => {
+export const updateSettings = (_sdk: SDK, newSettings: SettingsDTO) => {
   const store = SettingsStore.get();
   return store.updateSettings(newSettings);
 };
