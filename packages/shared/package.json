@@ -1,7 +1,7 @@
 {
   "name": "shared",
   "version": "0.1.0",
-  "description": "StarterKit plugin for Caido",
+  "description": "Shared types between frontend and backend",
   "author": "Caido Labs Inc. <dev@caido.io>",
   "license": "CC0-1.0",
   "type": "module",

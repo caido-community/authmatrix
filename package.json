@@ -1,7 +1,7 @@
 {
-  "name": "starterkit-plugin",
-  "version": "0.1.0",
-  "description": "StarterKit plugin for Caido",
+  "name": "authmatrix",
+  "version": "0.1.1",
+  "description": "Caido plugin for grid-based authorization testing across multiple users and roles",
   "author": "Caido Labs Inc. <dev@caido.io>",
   "license": "CC0-1.0",
   "type": "module",
