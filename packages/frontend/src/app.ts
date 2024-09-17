@@ -23,6 +23,13 @@ export const defineApp = (sdk: CaidoSDK) => {
   app.use(PrimeVue, {
     theme: {
       preset: ClassicTheme,
+      options: {
+        /**
+         * The selector to use to determine if the user has selected dark mode.
+         * This selector is present in the HTML of the core Caido app, not the plugin.
+         */
+        darkModeSelector: "[data-mode=dark]",
+      }
     },
     pt: {
       ...ClassicThemePassthrough,
