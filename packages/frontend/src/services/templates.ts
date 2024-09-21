@@ -76,6 +76,19 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
+  const clearTemplates = async () => {
+    const result = await repository.clearTemplates();
+
+    if (result.type === "Ok") {
+      store.send({ type: "ClearTemplates" });
+      analysisStore.selectionState.send({ type: "Reset" });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
   const initialize = async () => {
     store.send({ type: "Start" });
 
@@ -94,6 +107,11 @@ export const useTemplateService = defineStore("services.templates", () => {
     sdk.backend.onEvent("templates:updated", (template) => {
       store.send({ type: "UpdateTemplate", template });
     });
+
+    sdk.backend.onEvent("templates:cleared", () => {
+      store.send({ type: "ClearTemplates" });
+      analysisStore.selectionState.send({ type: "Reset" });
+    });
   };
 
   const getState = () => store.getState();
@@ -106,5 +124,6 @@ export const useTemplateService = defineStore("services.templates", () => {
     addTemplate,
     updateTemplate,
     deleteTemplate,
+    clearTemplates,
   };
 });
