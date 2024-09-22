@@ -8,13 +8,13 @@ import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { getSettings, updateSettings } from "./services/settings";
 import {
   addTemplate,
+  clearTemplates,
   deleteTemplate,
   getTemplates,
   registerTemplateEvents,
   toggleTemplateRole,
   toggleTemplateUser,
   updateTemplate,
-  clearTemplates,
 } from "./services/templates";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
 

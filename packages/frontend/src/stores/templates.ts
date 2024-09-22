@@ -113,7 +113,7 @@ const processSuccess = (
       return {
         ...state,
         templates: [],
-      }
+      };
 
     case "Start":
     case "Error":

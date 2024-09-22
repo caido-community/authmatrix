@@ -100,7 +100,10 @@ export const useTemplateRepository = () => {
     }
   };
 
-  const updateTemplate = async (id: string, fields: Omit<TemplateDTO, "id">) => {
+  const updateTemplate = async (
+    id: string,
+    fields: Omit<TemplateDTO, "id">,
+  ) => {
     try {
       const newTemplate = await sdk.backend.updateTemplate(id, fields);
       if (newTemplate) {
@@ -134,7 +137,7 @@ export const useTemplateRepository = () => {
         error: "Failed to clear templates",
       };
     }
-  }
+  };
 
   return {
     getTemplates,

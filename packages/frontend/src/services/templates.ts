@@ -46,7 +46,10 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
-  const updateTemplate = async (id: string, fields: Omit<TemplateDTO, "id">) => {
+  const updateTemplate = async (
+    id: string,
+    fields: Omit<TemplateDTO, "id">,
+  ) => {
     const result = await repository.updateTemplate(id, fields);
 
     if (result.type === "Ok") {

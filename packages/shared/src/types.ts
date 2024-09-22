@@ -4,14 +4,14 @@ export type RoleRuleDTO = {
   roleId: string;
   hasAccess: boolean;
   status: RuleStatusDTO;
-}
+};
 
 export type UserRuleDTO = {
   type: "UserRule";
   userId: string;
   hasAccess: boolean;
   status: RuleStatusDTO;
-}
+};
 
 export type TemplateDTO = {
   id: string;
@@ -25,37 +25,36 @@ export type TemplateDTO = {
     isTls: boolean;
     method: string;
   };
-}
+};
 
 export type AnalysisRequestDTO = {
   id: string;
   userId: string;
   requestId: string;
   templateId: string;
-}
+};
 
 export type RoleDTO = {
   id: string;
   name: string;
   description: string;
-}
-
+};
 
 export type SettingsDTO = {
   autoCaptureRequests: boolean;
   autoRunAnalysis: boolean;
-}
+};
 
 export type UserAttributeDTO = {
   id: string;
   name: string;
   value: string;
   kind: "Cookie" | "Header";
-}
+};
 
 export type UserDTO = {
   id: string;
   name: string;
   roleIds: string[];
   attributes: UserAttributeDTO[];
-}
+};
