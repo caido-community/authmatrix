@@ -6,7 +6,7 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
-import type { UserDTO, UserAttributeDTO } from "shared";
+import type { UserAttributeDTO, UserDTO } from "shared";
 
 const props = defineProps<{
   user: UserDTO;

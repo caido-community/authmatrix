@@ -63,6 +63,10 @@ const deleteTemplate = (template: TemplateDTO) => {
   service.deleteTemplate(template.id);
 };
 
+const clearTemplates = () => {
+  service.clearTemplates();
+};
+
 const settingsService = useSettingsService();
 const toggleAutoCaptureRequests = () => {
   settingsService.toggleAutoCaptureRequests();
@@ -124,6 +128,11 @@ const onTemplateUpdate = (
                 :model-value="settingsState.settings.autoCaptureRequests"
                 @update:model-value="() => toggleAutoCaptureRequests()" />
             </div>
+            <Button
+              v-tooltip="'Clear all template entries.'"
+              label="Clear All"
+              @click="clearTemplates" />
+
             <Button
               v-tooltip="'Run the analysis on the current requests.'"
               label="Analyze"

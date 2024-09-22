@@ -29,7 +29,7 @@ export const defineApp = (sdk: CaidoSDK) => {
          * This selector is present in the HTML of the core Caido app, not the plugin.
          */
         darkModeSelector: "[data-mode=dark]",
-      }
+      },
     },
     pt: {
       ...ClassicThemePassthrough,

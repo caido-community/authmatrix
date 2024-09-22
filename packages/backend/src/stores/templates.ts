@@ -80,4 +80,8 @@ export class TemplateStore {
 
     return template;
   }
+
+  clearTemplates() {
+    this.templates.clear();
+  }
 }

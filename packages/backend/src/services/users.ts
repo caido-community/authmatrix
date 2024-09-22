@@ -28,7 +28,11 @@ export const deleteUser = (sdk: SDK, id: string) => {
   store.deleteUser(id);
 };
 
-export const updateUser = (sdk: SDK, id: string, fields: Omit<UserDTO, "id">) => {
+export const updateUser = (
+  sdk: SDK,
+  id: string,
+  fields: Omit<UserDTO, "id">,
+) => {
   const store = UserStore.get();
   return store.updateUser(id, fields);
 };

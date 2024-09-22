@@ -8,8 +8,8 @@ import type {
   AnalysisRequestDTO,
   RuleStatusDTO,
   TemplateDTO,
-  UserDTO,
   UserAttributeDTO,
+  UserDTO,
 } from "shared";
 import { AnalysisStore } from "../stores/analysis";
 import { Uint8ArrayToString, isPresent } from "../utils";

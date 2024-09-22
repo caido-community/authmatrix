@@ -73,6 +73,12 @@ export const toggleTemplateUser = (
   return newTemplate;
 };
 
+export const clearTemplates = (sdk: SDK<never, BackendEvents>) => {
+  const store = TemplateStore.get();
+  store.clearTemplates();
+  sdk.api.send("templates:cleared");
+};
+
 export const onInterceptResponse = async (
   sdk: SDK<never, BackendEvents>,
   request: Request,
