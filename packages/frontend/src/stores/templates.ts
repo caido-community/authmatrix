@@ -13,7 +13,8 @@ type Message =
   | { type: "Success"; templates: TemplateDTO[] }
   | { type: "AddTemplate"; template: TemplateDTO }
   | { type: "UpdateTemplate"; template: TemplateDTO }
-  | { type: "DeleteTemplate"; id: string };
+  | { type: "DeleteTemplate"; id: string }
+  | { type: "ClearTemplates" };
 
 export const useTemplateStore = defineStore("stores.templates", () => {
   const context: Context = reactive({
@@ -56,6 +57,7 @@ const processIdle = (
     case "AddTemplate":
     case "UpdateTemplate":
     case "DeleteTemplate":
+    case "ClearTemplates":
       return state;
   }
 };
@@ -72,6 +74,7 @@ const processError = (
     case "AddTemplate":
     case "UpdateTemplate":
     case "DeleteTemplate":
+    case "ClearTemplates":
       return state;
   }
 };
@@ -106,6 +109,11 @@ const processSuccess = (
           (template) => template.id !== message.id,
         ),
       };
+    case "ClearTemplates":
+      return {
+        ...state,
+        templates: [],
+      }
 
     case "Start":
     case "Error":
@@ -127,6 +135,7 @@ const processLoading = (
     case "AddTemplate":
     case "UpdateTemplate":
     case "DeleteTemplate":
+    case "ClearTemplates":
       return state;
   }
 };

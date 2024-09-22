@@ -122,6 +122,20 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const clearTemplates = async () => {
+    try {
+      await sdk.backend.clearTemplates();
+      return {
+        type: "Ok" as const,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to clear templates",
+      };
+    }
+  }
+
   return {
     getTemplates,
     toggleTemplateRole,
@@ -129,5 +143,6 @@ export const useTemplateRepository = () => {
     addTemplate,
     updateTemplate,
     deleteTemplate,
+    clearTemplates,
   };
 };

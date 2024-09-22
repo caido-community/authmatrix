@@ -129,14 +129,15 @@ const onTemplateUpdate = (
                 @update:model-value="() => toggleAutoCaptureRequests()" />
             </div>
             <Button
+              v-tooltip="'Clear all template entries.'"
+              label="Clear All"
+              @click="clearTemplates" />
+
+            <Button
               v-tooltip="'Run the analysis on the current requests.'"
               label="Analyze"
               :loading="isAnalyzing"
               @click="runAnalysis" />
-            <Button
-              v-tooltip="'Clear all template entries.'"
-              label="Clear All"
-              @click="clearTemplates" />
           </div>
         </div>
       </template>
