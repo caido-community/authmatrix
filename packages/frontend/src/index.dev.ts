@@ -128,6 +128,9 @@ const backend: API & Record<string, unknown> = {
   getTemplates: () => {
     return templates;
   },
+  clearTemplates: () => {
+    templates.length = 0;
+  },
   addTemplate: () => {
     const newTemplate = {
       id: Math.random().toString(),
