@@ -31,8 +31,8 @@ importers:
         version: link:../shared
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.40.1-beta.7
-        version: 0.40.1-beta.7
+        specifier: 0.41.0
+        version: 0.41.0
 
   packages/frontend:
     dependencies:
@@ -40,8 +40,8 @@ importers:
         specifier: 0.0.3
         version: 0.0.3
       '@caido/sdk-frontend':
-        specifier: 0.40.1-beta.3
-        version: 0.40.1-beta.3(@codemirror/view@6.28.1)
+        specifier: 0.41.0
+        version: 0.41.0(@codemirror/view@6.28.1)
       '@fortawesome/fontawesome-free':
         specifier: 6.6.0
         version: 6.6.0
@@ -62,8 +62,8 @@ importers:
         version: 3.4.37(typescript@5.5.4)
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.40.1-beta.7
-        version: 0.40.1-beta.7
+        specifier: 0.41.0
+        version: 0.41.0
       '@codemirror/view':
         specifier: 6.28.1
         version: 6.28.1
@@ -171,14 +171,14 @@ packages:
   '@caido/primevue@0.0.3':
     resolution: {integrity: sha512-kJEamKSUDx5VESYFJq/X2PJFdFkKLavk/vIUxA4PxN2DUHGxt52K95j8DHF83FEdb7VRJHcYO3cw3zo/oQrX5w==}
 
-  '@caido/quickjs-types@0.6.0':
-    resolution: {integrity: sha512-R3CsIpTK5a4JdgvKEWgAcJFoNYqIT7ktgHp8NKtAYfJFHlCSH8CZFVFm9J0PkH4p9q/x1jnXocNGT9nK7KO0Og==}
+  '@caido/quickjs-types@0.7.0':
+    resolution: {integrity: sha512-F+vORpADqFVjKoC8TDs5vnsP2BEogwgw067pGiwbezCBw/9BzSIuLN5zJRyhvV6Sdgyy4cT8M6oANDpD1ZqLYA==}
 
-  '@caido/sdk-backend@0.40.1-beta.7':
-    resolution: {integrity: sha512-NwjUa0M8w7MAg9rI2BTQ0JLZH8Iq1GkSsqXhHmthEZlloKe1JeYZYx1P+EX4p9wKNonote6UsK4uSS3CCTrvMg==}
+  '@caido/sdk-backend@0.41.0':
+    resolution: {integrity: sha512-H35HvOZ7Kl1IIR6QsLaJHKheEYg2CMbY1TWRqA3NvRcv/AhgR6K70hFr28o9CqvU38eNcNGHQtgxU1xRBQ5Dug==}
 
-  '@caido/sdk-frontend@0.40.1-beta.3':
-    resolution: {integrity: sha512-iuj8ypYrH+chYDy6y8fcNRn5Dl8We7AxldQ7mKEfqezfFdepSrcBVGWWMesHNNJRvFpIvPC59twrzUy+4rG0DA==}
+  '@caido/sdk-frontend@0.41.0':
+    resolution: {integrity: sha512-fX6QiDGR059zBiiC4V69ZATnZ44kcQQF1B+Pzga95Ze98c/5C6I7jHOsjNuflU87mxBmJB352YMWEmkWCf9yOA==}
     peerDependencies:
       '@codemirror/view': ^6.0.0
 
@@ -1186,16 +1186,16 @@ snapshots:
     dependencies:
       '@primevue/themes': 4.0.4
 
-  '@caido/quickjs-types@0.6.0':
+  '@caido/quickjs-types@0.7.0':
     dependencies:
       prettier: 3.3.2
 
-  '@caido/sdk-backend@0.40.1-beta.7':
+  '@caido/sdk-backend@0.41.0':
     dependencies:
-      '@caido/quickjs-types': 0.6.0
+      '@caido/quickjs-types': 0.7.0
       '@caido/sdk-shared': 0.1.0
 
-  '@caido/sdk-frontend@0.40.1-beta.3(@codemirror/view@6.28.1)':
+  '@caido/sdk-frontend@0.41.0(@codemirror/view@6.28.1)':
     dependencies:
       '@codemirror/view': 6.28.1
 

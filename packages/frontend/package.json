@@ -11,7 +11,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@caido/sdk-frontend": "0.40.1-beta.3",
+    "@caido/sdk-frontend": "0.41.0",
     "@fortawesome/fontawesome-free": "6.6.0",
     "@vueuse/core": "10.11.1",
     "pinia": "2.2.1",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@codemirror/view": "6.28.1",
-    "@caido/sdk-backend": "0.40.1-beta.7",
+    "@caido/sdk-backend": "0.41.0",
     "@vitejs/plugin-vue": "5.1.2",
     "backend": "workspace:*",
     "postcss-prefixwrap": "1.51.0",
