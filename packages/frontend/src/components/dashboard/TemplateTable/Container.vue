@@ -11,6 +11,7 @@ import Checkbox from "primevue/checkbox";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
+import SelectButton from "primevue/selectbutton";
 import type { RoleDTO, TemplateDTO, UserDTO } from "shared";
 import { computed } from "vue";
 import RuleStatus from "./RuleStatus.vue";
@@ -68,8 +69,19 @@ const clearTemplates = () => {
 };
 
 const settingsService = useSettingsService();
-const toggleAutoCaptureRequests = () => {
-  settingsService.toggleAutoCaptureRequests();
+const setAutoCaptureRequests = (value: "off" | "all" | "inScope") => {
+  settingsService.setAutoCaptureRequests(value);
+};
+
+const getAutoCaptureRequestLabel = (value: "off" | "all" | "inScope") => {
+  switch (value) {
+    case "off":
+      return "Off";
+    case "all":
+      return "All";
+    case "inScope":
+      return "In Scope";
+  }
 };
 
 const analysisService = useAnalysisService();
@@ -118,16 +130,19 @@ const onTemplateUpdate = (
               Configure a regex to determine if the authentication was successful.
             </p>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex items-end gap-4">
             <div
-              class="flex gap-2"
+              class="flex flex-col gap-2"
               v-tooltip="'Automatically add each intercepted request to the testing queue for analysis.'">
-              <label>Auto-capture requests</label>
-              <Checkbox
-                binary
+              <label class="text-sm text-gray-400">Auto-capture requests</label>
+              <SelectButton
                 :model-value="settingsState.settings.autoCaptureRequests"
-                @update:model-value="() => toggleAutoCaptureRequests()" />
+                :options="['off', 'all', 'inScope']"
+                :option-label="getAutoCaptureRequestLabel"
+                @update:model-value="setAutoCaptureRequests" />
+
             </div>
+
             <Button
               v-tooltip="'Clear all template entries.'"
               label="Clear All"

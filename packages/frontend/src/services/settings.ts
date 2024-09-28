@@ -40,12 +40,12 @@ export const useSettingsService = defineStore("services.settings", () => {
     }
   };
 
-  const toggleAutoCaptureRequests = async () => {
+  const setAutoCaptureRequests = async (value: "off" | "all" | "inScope") => {
     const currState = store.getState();
     if (currState.type === "Success") {
       const result = await repository.updateSettings({
         ...currState.settings,
-        autoCaptureRequests: !currState.settings.autoCaptureRequests,
+        autoCaptureRequests: value,
       });
 
       if (result.type === "Ok") {
@@ -62,6 +62,6 @@ export const useSettingsService = defineStore("services.settings", () => {
     getState,
     initialize,
     toggleAutoRunAnalysis,
-    toggleAutoCaptureRequests,
+    setAutoCaptureRequests,
   };
 });

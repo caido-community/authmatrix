@@ -41,7 +41,7 @@ export type RoleDTO = {
 };
 
 export type SettingsDTO = {
-  autoCaptureRequests: boolean;
+  autoCaptureRequests: "off" | "all" | "inScope";
   autoRunAnalysis: boolean;
 };
 

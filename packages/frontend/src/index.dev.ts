@@ -234,7 +234,7 @@ const backend: API & Record<string, unknown> = {
   },
   getSettings: () => {
     return {
-      autoCaptureRequests: false,
+      autoCaptureRequests: "off",
       autoRunAnalysis: false,
     };
   },

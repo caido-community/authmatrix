@@ -86,12 +86,25 @@ export const onInterceptResponse = async (
 ) => {
   const settingsStore = SettingsStore.get();
   const settings = settingsStore.getSettings();
+  const store = TemplateStore.get();
 
-  if (settings.autoCaptureRequests) {
-    const store = TemplateStore.get();
-    const template = toTemplate(request, response);
-    store.addTemplate(template);
-    sdk.api.send("templates:created", template);
+  switch (settings.autoCaptureRequests) {
+    case "off":
+      return;
+    case "all": {
+      const template = toTemplate(request, response);
+      store.addTemplate(template);
+      sdk.api.send("templates:created", template);
+      break;
+    }
+    case "inScope": {
+      if (sdk.requests.inScope(request)) {
+        const template = toTemplate(request, response);
+        store.addTemplate(template);
+        sdk.api.send("templates:created", template);
+      }
+      break;
+    }
   }
 };
 
