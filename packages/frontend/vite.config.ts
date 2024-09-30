@@ -1,9 +1,11 @@
 import { resolve } from "path";
-import {mergeConfig} from "vite";
+import {defineConfig} from "vite";
+import vue from "@vitejs/plugin-vue";
 
-import baseConfig from "./vite.config.base";
-
-export default mergeConfig(baseConfig, {
+export default defineConfig({
+  plugins: [
+    vue(),
+  ],
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
@@ -17,6 +19,14 @@ export default mergeConfig(baseConfig, {
         manualChunks: undefined,
       },
     },
+  },
+  resolve: {
+    alias: [
+      {
+        find: "@",
+        replacement: resolve(__dirname, "src"),
+      },
+    ],
   },
   define: { 'process.env.NODE_ENV': '"production"' }
 });

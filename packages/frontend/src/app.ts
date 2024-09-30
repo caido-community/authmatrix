@@ -1,4 +1,4 @@
-import { ClassicTheme, ClassicThemePassthrough } from "@caido/primevue";
+import { Classic } from "@caido/primevue";
 import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
 import { createApp } from "vue";
@@ -21,19 +21,8 @@ export const defineApp = (sdk: CaidoSDK) => {
   app.use(pinia);
 
   app.use(PrimeVue, {
-    theme: {
-      preset: ClassicTheme,
-      options: {
-        /**
-         * The selector to use to determine if the user has selected dark mode.
-         * This selector is present in the HTML of the core Caido app, not the plugin.
-         */
-        darkModeSelector: "[data-mode=dark]",
-      },
-    },
-    pt: {
-      ...ClassicThemePassthrough,
-    },
+    unstyled: true,
+    pt: Classic,
   });
 
   app.directive("tooltip", Tooltip);

@@ -18,14 +18,14 @@ const onAddRole = () => {
 <template>
   <Card class="h-full" :pt="{ body: { class: 'h-full' }, content: { class: 'flex-1 min-h-0' } } ">
     <template #title>
-      <div class="flex justify-between">
+      <div class="flex justify-between p-4 items-center">
         <div class="flex flex-col">
           <h1>Roles</h1>
           <p class="text-sm text-gray-400">Manage roles and their descriptions</p>
         </div>
 
         <div class="min-w-max">
-          <Button label="+ Add role" @click="onAddRole" />
+          <Button label="+ Add role" size="small" @click="onAddRole" />
         </div>
       </div>
     </template>

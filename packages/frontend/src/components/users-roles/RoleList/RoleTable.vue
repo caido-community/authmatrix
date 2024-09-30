@@ -58,7 +58,7 @@ const onRoleUpdate = (role: RoleDTO, field: keyof RoleDTO, value: string) => {
       </template>
     </Column>
 
-    <Column>
+    <Column header="">
       <template #body="{ data }">
         <div class="flex justify-end">
           <Button icon="fas fa-trash"  size="small" text severity="danger" @click="onDeleteRole(data)" />
