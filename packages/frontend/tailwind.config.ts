@@ -1,9 +1,8 @@
 import type { Config } from 'tailwindcss'
+import theme from '@caido/tailwindcss';
 
 export default {
-  theme: {
-    extend: {},
-  },
+  theme: theme,
   content: ['./index.html', './src/**/*.{vue,ts}'],
 
   // Disable preflight to avoid conflicts when loaded in Caido
