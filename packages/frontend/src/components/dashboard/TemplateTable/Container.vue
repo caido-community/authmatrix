@@ -121,7 +121,7 @@ const onTemplateUpdate = (
       :pt="{ body: { class: 'flex-1 min-h-0' }, content: { class: 'h-full' } }">
 
       <template #header>
-        <div class="px-4 pt-4 flex justify-between gap-8">
+        <div class="p-4 flex justify-between gap-8">
           <div class="flex flex-col">
             <h2 class="text-lg font-semibold">Templates</h2>
             <p class="text-sm text-gray-400">Add template requests to the queue for analysis.</p>
@@ -209,14 +209,16 @@ const onTemplateUpdate = (
             </template>
           </Column>
 
-          <Column>
+          <Column header="">
             <template #body="{ data }">
               <div class="flex justify-end">
                 <Button icon="fas fa-trash" text severity="danger" size="small" @click="() => deleteTemplate(data)" />
               </div>
             </template>
           </Column>
+
         </DataTable>
+
       </template>
     </Card>
   </div>

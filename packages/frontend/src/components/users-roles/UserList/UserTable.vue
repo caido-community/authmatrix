@@ -70,7 +70,7 @@ const onDeleteUser = (user: UserDTO) => {
       </template>
     </Column>
 
-    <Column>
+    <Column header="">
       <template #body="{ data }">
         <div class="flex justify-end">
           <Button icon="fas fa-trash" text severity="danger" size="small" @click="() => onDeleteUser(data)" />

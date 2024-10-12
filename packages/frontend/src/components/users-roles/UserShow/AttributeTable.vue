@@ -62,7 +62,7 @@ const onAttributeUpdate = (
 
 <template>
   <div class="flex-1 flex flex-col gap-2 min-h-0">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center p-4">
       <h1 class="font-bold">Attributes</h1>
       <div>
         <Button label="+ Add attribute" size="small" @click="onAddAttribute" />
@@ -96,7 +96,7 @@ const onAttributeUpdate = (
           </template>
         </Column>
 
-        <Column>
+        <Column header="">
           <template #body="{ data }">
             <div class="flex justify-end">
               <Button severity="danger" text size="small" icon="fas fa-trash" @click="() => onRemoveAttribute(data)" />
