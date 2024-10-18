@@ -7,6 +7,7 @@ import { generateID } from "../utils";
 
 import { SettingsStore } from "../stores/settings";
 import type { BackendEvents } from "../types";
+import { runAnalysis } from "./analysis";
 
 export const getTemplates = (_sdk: SDK): TemplateDTO[] => {
   const store = TemplateStore.get();
@@ -105,6 +106,9 @@ export const onInterceptResponse = async (
       }
       break;
     }
+  }
+  if (settings.autoRunAnalysis) {
+    runAnalysis(sdk);
   }
 };
 

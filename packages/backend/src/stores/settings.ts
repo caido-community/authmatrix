@@ -8,7 +8,7 @@ export class SettingsStore {
   private constructor() {
     this.settings = {
       autoCaptureRequests: "off",
-      autoRunAnalysis: false,
+      autoRunAnalysis: true,
     };
   }
 
