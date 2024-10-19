@@ -134,6 +134,17 @@ const onTemplateUpdate = (
             <div
               class="flex flex-col gap-2"
               v-tooltip="'Automatically add each intercepted request to the testing queue for analysis.'">
+              <div
+                class="flex items-center gap-2"
+                v-tooltip="'Check this box if you want analysis to automatically run in the background.'">
+                  <Checkbox
+                    inputId="auto-analysis"
+                    :model-value="settingsState.settings.autoRunAnalysis"
+                    binary
+                    @change="() => settingsService.toggleAutoRunAnalysis()" />
+                  <label for="auto-analysis" class="text-sm text-gray-400">Auto-run analysis</label>
+
+              </div>
               <label class="text-sm text-gray-400">Auto-capture requests</label>
               <SelectButton
                 :model-value="settingsState.settings.autoCaptureRequests"
@@ -142,7 +153,6 @@ const onTemplateUpdate = (
                 @update:model-value="setAutoCaptureRequests" />
 
             </div>
-
             <Button
               v-tooltip="'Clear all template entries.'"
               label="Clear All"
