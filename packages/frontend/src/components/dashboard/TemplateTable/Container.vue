@@ -142,7 +142,7 @@ const onTemplateUpdate = (
                     :model-value="settingsState.settings.autoRunAnalysis"
                     binary
                     @change="() => settingsService.toggleAutoRunAnalysis()" />
-                  <label for="auto-analysis" class="text-sm text-gray-400 ml-2">Auto-run analysis</label>
+                  <label for="auto-analysis" class="text-sm text-gray-400">Auto-run analysis</label>
 
               </div>
               <label class="text-sm text-gray-400">Auto-capture requests</label>
