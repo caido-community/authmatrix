@@ -105,6 +105,20 @@ const isAnalyzing = computed(() => {
   return analysisService.jobState.type === "Analyzing";
 });
 
+const defaultPorts = [80, 443];
+
+const getURLColumnValue = (template: TemplateDTO) => {
+  let url = `${template.meta.method} ${template.meta.isTls ? 'https' : 'http'}://${ template.meta.host }`;
+  if (!defaultPorts.includes(template.meta.port)) {
+    url += `:${template.meta.port}`;
+  }
+  url += template.meta.path;
+  if (url.length > 130) {
+    url = url.substring(0, 126) + "...";
+  }
+  return url;
+}
+
 const onTemplateUpdate = (
   template: TemplateDTO,
   field: string,
@@ -182,7 +196,7 @@ const onTemplateUpdate = (
         >
           <Column header="URL">
             <template #body="{ data }">
-              {{ data.meta.method }} {{ data.meta.isTls ? 'https' : 'http' }}://{{ data.meta.host }}:{{ data.meta.port }}
+              {{ getURLColumnValue(data) }}
             </template>
           </Column>
 
