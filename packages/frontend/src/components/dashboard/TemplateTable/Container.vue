@@ -109,7 +109,11 @@ const defaultPorts = [80, 443];
 
 const getURLColumnValue = (template: TemplateDTO) => {
   let url = `${template.meta.method} ${template.meta.isTls ? 'https' : 'http'}://${ template.meta.host }`;
-  if (!defaultPorts.includes(template.meta.port)) {
+  if (
+    !defaultPorts.includes(template.meta.port) || 
+    (template.meta.port === 443 && !template.meta.isTls) ||
+    (template.meta.port === 80 && template.meta.isTls)
+  ) {
     url += `:${template.meta.port}`;
   }
   url += template.meta.path;
