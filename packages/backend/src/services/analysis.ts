@@ -66,6 +66,9 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
 
   for (const template of templates) {
     for (const user of users) {
+      if (analysisStore.resultExists(template.id, user.id)) {
+        continue;
+      }
       const analysisRequest = await sendRequest(sdk, template, user);
       if (analysisRequest) {
         analysisStore.addRequest(analysisRequest);

@@ -21,6 +21,10 @@ export class TemplateStore {
     return [...this.templates.values()];
   }
 
+  templateExists(id: string): boolean {
+    return this.templates.get(id) !== undefined;
+  }
+
   addTemplate(template: TemplateDTO) {
     this.templates.set(template.id, template);
   }
