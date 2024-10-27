@@ -93,6 +93,12 @@ export const onInterceptResponse = async (
     return;
   }
 
+  const matchingQuery = await sdk.requests.query().filter(`req.path.eq:"${request.getPath()}" AND req.host.eq:"${request.getHost()}" AND req.method.eq:"${request.getMethod()}" AND ${settings.defaultFilterHTTPQL}`).descending("req", "id").execute();
+  if (matchingQuery.items.at(0)?.request.getId() !== request.getId()) {
+    sdk.console.log(`Filtering: ${request.getUrl()}`)
+    return;
+  }
+
   const templateId = generateTemplateId(request, settings.deDuplicateHeaders);
   if (store.templateExists(templateId)) {
     return
