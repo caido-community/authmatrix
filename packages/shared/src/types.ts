@@ -43,6 +43,7 @@ export type RoleDTO = {
 export type SettingsDTO = {
   autoCaptureRequests: "off" | "all" | "inScope";
   autoRunAnalysis: boolean;
+  deDuplicateHeaders: string[];
 };
 
 export type UserAttributeDTO = {

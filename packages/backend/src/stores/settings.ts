@@ -9,6 +9,7 @@ export class SettingsStore {
     this.settings = {
       autoCaptureRequests: "off",
       autoRunAnalysis: true,
+      deDuplicateHeaders: [],
     };
   }
 

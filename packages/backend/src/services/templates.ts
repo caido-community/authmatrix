@@ -93,7 +93,7 @@ export const onInterceptResponse = async (
     return;
   }
 
-  const templateId = generateTemplateId(request);
+  const templateId = generateTemplateId(request, settings.deDuplicateHeaders);
   if (store.templateExists(templateId)) {
     return
   }
@@ -124,9 +124,17 @@ export const registerTemplateEvents = (sdk: SDK) => {
 };
 
 
-const generateTemplateId = (request: Request): string => {
-  // Should replace to perhaps exclude and include different parts of the request
-  return sha256Hash(request.getRaw().toText())
+const generateTemplateId = (request: Request, dedupeHeaders: string[] = []): string => {
+  let body = request.getBody()?.toText();
+  if (!body) {
+    body = "";
+  }
+  const bodyHash = sha256Hash(body);
+  let dedupe = `${request.getMethod}~${request.getUrl()}~${bodyHash}`;
+  dedupeHeaders.forEach((h) => {
+    dedupe += `~${request.getHeader(h)?.join("~")}`
+  })
+  return sha256Hash(dedupe)
 }
 
 const toTemplate = (request: Request, response: Response, templateId: string = generateTemplateId(request)): TemplateDTO => {
