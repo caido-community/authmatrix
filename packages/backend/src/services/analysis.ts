@@ -65,59 +65,68 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   );
 
   for (const template of templates) {
-    for (const user of users) {
-      const analysisRequest = await sendRequest(sdk, template, user);
-      if (analysisRequest) {
-        analysisStore.addRequest(analysisRequest);
-        sdk.api.send("results:created", analysisRequest);
+    // Run each template async
+    (async () => {
+      for (const user of users) {
+        if (analysisStore.resultExists(template.id, user.id)) {
+          continue;
+        }
+        const analysisRequest = await sendRequest(sdk, template, user);
+        if (analysisRequest) {
+          analysisStore.addRequest(analysisRequest);
+          sdk.api.send("results:created", analysisRequest);
+        }
       }
-    }
-  }
 
-  const roles = roleStore.getRoles();
-  for (const template of templates) {
-    const newRules: TemplateDTO["rules"] = [];
+      const newRules: TemplateDTO["rules"] = [];
+      const roles = roleStore.getRoles();
+      const rolePromises = roles.map(async (role) => {
+        const currentRule = template.rules.find(
+          (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
+        ) ?? {
+          type: "RoleRule",
+          roleId: role.id,
+          hasAccess: false,
+          status: "Untested",
+        };
+  
+  
+        if (currentRule.status !== "Untested") {
+          return currentRule;
+        }
+  
+        const status = await generateRoleRuleStatus(sdk, template, role.id);
+        return { ...currentRule, status };
+      });
 
-    // Generate role rule statuses in parallel
-    const rolePromises = roles.map(async (role) => {
-      const currentRule = template.rules.find(
-        (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
-      ) ?? {
-        type: "RoleRule",
-        roleId: role.id,
-        hasAccess: false,
-        status: "Untested",
-      };
+      const userPromises = users.map(async (user) => {
+        const currentRule = template.rules.find(
+          (rule) => rule.type === "UserRule" && rule.userId === user.id,
+        ) ?? {
+          type: "UserRule",
+          userId: user.id,
+          hasAccess: false,
+          status: "Untested",
+        };
 
-      const status = await generateRoleRuleStatus(sdk, template, role.id);
-      return { ...currentRule, status };
-    });
+        if (currentRule.status !== "Untested") {
+          return currentRule;
+        }
 
-    // Generate user rule statuses in parallel
-    const userPromises = users.map(async (user) => {
-      const currentRule = template.rules.find(
-        (rule) => rule.type === "UserRule" && rule.userId === user.id,
-      ) ?? {
-        type: "UserRule",
-        userId: user.id,
-        hasAccess: false,
-        status: "Untested",
-      };
+        const status = await generateUserRuleStatus(sdk, template, user);
+        return { ...currentRule, status };
+      });
 
-      const status = await generateUserRuleStatus(sdk, template, user);
-      return { ...currentRule, status };
-    });
+      const roleResults = await Promise.all(rolePromises);
+      const userResults = await Promise.all(userPromises);
 
-    // Await all role and user statuses
-    const roleResults = await Promise.all(rolePromises);
-    const userResults = await Promise.all(userPromises);
+      // Combine results
+      newRules.push(...roleResults, ...userResults);
 
-    // Combine results
-    newRules.push(...roleResults, ...userResults);
-
-    template.rules = newRules;
-    templateStore.updateTemplate(template.id, template);
-    sdk.api.send("templates:updated", template);
+      template.rules = newRules;
+      templateStore.updateTemplate(template.id, template);
+      sdk.api.send("templates:updated", template);
+    })()
   }
 };
 

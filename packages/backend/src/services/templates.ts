@@ -3,7 +3,7 @@ import type { Request, Response } from "caido:utils";
 import type { TemplateDTO } from "shared";
 
 import { TemplateStore } from "../stores/templates";
-import { generateID } from "../utils";
+import { generateID, sha256Hash } from "../utils";
 
 import { SettingsStore } from "../stores/settings";
 import type { BackendEvents } from "../types";
@@ -89,18 +89,25 @@ export const onInterceptResponse = async (
   const settings = settingsStore.getSettings();
   const store = TemplateStore.get();
 
+  if (settings.autoCaptureRequests == "off") {
+    return;
+  }
+
+  const templateId = generateTemplateId(request, settings.deDuplicateHeaders);
+  if (store.templateExists(templateId)) {
+    return
+  }
+
   switch (settings.autoCaptureRequests) {
-    case "off":
-      return;
     case "all": {
-      const template = toTemplate(request, response);
+      const template = toTemplate(request, response, templateId);
       store.addTemplate(template);
       sdk.api.send("templates:created", template);
       break;
     }
     case "inScope": {
       if (sdk.requests.inScope(request)) {
-        const template = toTemplate(request, response);
+        const template = toTemplate(request, response, templateId);
         store.addTemplate(template);
         sdk.api.send("templates:created", template);
       }
@@ -116,9 +123,23 @@ export const registerTemplateEvents = (sdk: SDK) => {
   sdk.events.onInterceptResponse(onInterceptResponse);
 };
 
-const toTemplate = (request: Request, response: Response): TemplateDTO => {
+
+const generateTemplateId = (request: Request, dedupeHeaders: string[] = []): string => {
+  let body = request.getBody()?.toText();
+  if (!body) {
+    body = "";
+  }
+  const bodyHash = sha256Hash(body);
+  let dedupe = `${request.getMethod}~${request.getUrl()}~${bodyHash}`;
+  dedupeHeaders.forEach((h) => {
+    dedupe += `~${request.getHeader(h)?.join("~")}`
+  })
+  return sha256Hash(dedupe)
+}
+
+const toTemplate = (request: Request, response: Response, templateId: string = generateTemplateId(request)): TemplateDTO => {
   return {
-    id: generateID(),
+    id: templateId,
     requestId: request.getId(),
     authSuccessRegex: `HTTP/1[.]1 ${response.getCode()}`,
     rules: [],
