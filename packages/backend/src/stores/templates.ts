@@ -1,4 +1,4 @@
-import type { TemplateDTO } from "shared";
+import type { RoleRuleDTO, TemplateDTO, UserRuleDTO } from "shared";
 
 export class TemplateStore {
   private static _store?: TemplateStore;
@@ -49,7 +49,7 @@ export class TemplateStore {
       });
 
       if (currRule) {
-        currRule.hasAccess = !currRule.hasAccess;
+        this.toggleRule(currRule);
       } else {
         template.rules.push({
           type: "RoleRule",
@@ -63,6 +63,15 @@ export class TemplateStore {
     return template;
   }
 
+  toggleRule(currRule: RoleRuleDTO | UserRuleDTO) {
+    currRule.hasAccess = !currRule.hasAccess;
+    if (currRule.status === "Bypassed" && currRule.hasAccess) {
+      currRule.status = "Enforced"
+    } else if (currRule.status === "Enforced" && !currRule.hasAccess) {
+      currRule.status = "Bypassed"
+    }
+  }
+
   toggleTemplateUser(templateId: string, userId: string) {
     const template = this.templates.get(templateId);
     if (template) {
@@ -71,7 +80,7 @@ export class TemplateStore {
       });
 
       if (currRule) {
-        currRule.hasAccess = !currRule.hasAccess;
+        this.toggleRule(currRule);
       } else {
         template.rules.push({
           type: "UserRule",
