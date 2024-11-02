@@ -92,9 +92,8 @@ export const onInterceptResponse = async (
   if (settings.autoCaptureRequests == "off") {
     return;
   }
-
-  const matchingQuery = await sdk.requests.query().filter(`req.path.eq:"${request.getPath()}" AND req.host.eq:"${request.getHost()}" AND req.method.eq:"${request.getMethod()}" AND ${settings.defaultFilterHTTPQL}`).descending("req", "id").execute();
-  if (matchingQuery.items.at(0)?.request.getId() !== request.getId()) {
+  
+  if (!sdk.requests.matches(settings.defaultFilterHTTPQL, request)) {
     sdk.console.log(`Filtering: ${request.getUrl()}`)
     return;
   }

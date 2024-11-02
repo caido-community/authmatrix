@@ -31,8 +31,8 @@ importers:
         version: link:../shared
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.42.0
-        version: 0.42.0
+        specifier: 0.43.1
+        version: 0.43.1
 
   packages/frontend:
     dependencies:
@@ -40,8 +40,8 @@ importers:
         specifier: 0.1.1
         version: 0.1.1
       '@caido/sdk-frontend':
-        specifier: 0.42.0
-        version: 0.42.0(@codemirror/view@6.28.1)
+        specifier: 0.43.1
+        version: 0.43.1(@codemirror/view@6.28.1)
       '@fortawesome/fontawesome-free':
         specifier: 6.6.0
         version: 6.6.0
@@ -62,8 +62,8 @@ importers:
         version: 3.4.37(typescript@5.5.4)
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.42.0
-        version: 0.42.0
+        specifier: 0.43.1
+        version: 0.43.1
       '@caido/tailwindcss':
         specifier: 0.0.1
         version: 0.0.1
@@ -177,14 +177,14 @@ packages:
   '@caido/primevue@0.1.1':
     resolution: {integrity: sha512-8c8lZaMJEtvJqC7bI7Rjg0VtfhPVejSV02dIMwfxm6hsm8zKaknZ9/a7NslQ41Yow3EHaP3s+fSeewcKIobFOA==}
 
-  '@caido/quickjs-types@0.9.1':
-    resolution: {integrity: sha512-omHqdEetZiW7aqA02Ld3qFEwx7PGke0W8A2VPHh7U7nzCfzbtfQ7QuUqqWy8RvxlYr6Qtr12MBzco7iU1lAArw==}
+  '@caido/quickjs-types@0.12.0':
+    resolution: {integrity: sha512-DXGSzFfqhuSxdTrBeYoMUsvCr/oYzUUeb0DeD2iV/pi4uPQD22AFhkYl8UGv03wGPFlyPSWU+lLobQmpjqNaBw==}
 
-  '@caido/sdk-backend@0.42.0':
-    resolution: {integrity: sha512-czwlgsQPuAIGalydWkszvsiAJ+YnMk6KpKAADn5Ecm2xoUuBOlquQh4CokIKuny3krzDn6wUVWjtEPVoh35vXA==}
+  '@caido/sdk-backend@0.43.1':
+    resolution: {integrity: sha512-C2jZ4V8PkmVVvJmRc+8sAXoXOc7qiSTCDvPIIJWN1u43+qSckYpRRfXyCuz+otpOUkESaMasnUwiSICChpxjYw==}
 
-  '@caido/sdk-frontend@0.42.0':
-    resolution: {integrity: sha512-bI8BObyKDx+/D1Cw9YA/VfB53QwSOjPo+kn5+C0SD8T0tjNef+4yy2s8bBtd1o8JpZ2enIeVf2+aqMxrrmOnyA==}
+  '@caido/sdk-frontend@0.43.1':
+    resolution: {integrity: sha512-uFwdoUimPu2sm4KHzOCoiozbsmX/9qmgZd5V4nofxmJBSQIYLpyVPlk3Gh9+GW1YqPpOyCXjf20POVanbvzcbw==}
     peerDependencies:
       '@codemirror/view': ^6.0.0
 
@@ -909,11 +909,6 @@ packages:
     resolution: {integrity: sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier@3.3.2:
-    resolution: {integrity: sha512-rAVeHYMcv8ATV5d508CFdn+8/pHPpXeIid1DdrPwXnaAdH7cqjVbpJaT5eq4yRAFU/lsbwYwSF/n5iNrdJHPQA==}
-    engines: {node: '>=14'}
-    hasBin: true
-
   primevue@4.1.0:
     resolution: {integrity: sha512-iR/RysaTnZeIG3UVxdhazU7MA8nEODOpHk8WSINwYU0WMsA/ZghbchHOD5a/LYuLuZa3V03j7mX4LMKroeV+ag==}
     engines: {node: '>=12.11.0'}
@@ -1194,16 +1189,14 @@ snapshots:
 
   '@caido/primevue@0.1.1': {}
 
-  '@caido/quickjs-types@0.9.1':
-    dependencies:
-      prettier: 3.3.2
+  '@caido/quickjs-types@0.12.0': {}
 
-  '@caido/sdk-backend@0.42.0':
+  '@caido/sdk-backend@0.43.1':
     dependencies:
-      '@caido/quickjs-types': 0.9.1
+      '@caido/quickjs-types': 0.12.0
       '@caido/sdk-shared': 0.1.1
 
-  '@caido/sdk-frontend@0.42.0(@codemirror/view@6.28.1)':
+  '@caido/sdk-frontend@0.43.1(@codemirror/view@6.28.1)':
     dependencies:
       '@codemirror/view': 6.28.1
 
@@ -1842,8 +1835,6 @@ snapshots:
       nanoid: 3.3.7
       picocolors: 1.0.1
       source-map-js: 1.2.0
-
-  prettier@3.3.2: {}
 
   primevue@4.1.0(vue@3.4.37(typescript@5.5.4)):
     dependencies:
