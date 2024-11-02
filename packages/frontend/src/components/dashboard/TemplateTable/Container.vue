@@ -12,8 +12,8 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import SelectButton from "primevue/selectbutton";
-import type { RoleDTO, TemplateDTO, UserDTO } from "shared";
-import { computed } from "vue";
+import type { RoleDTO, RuleStatusDTO, TemplateDTO, UserDTO } from "shared";
+import { computed, ref } from "vue";
 import RuleStatus from "./RuleStatus.vue";
 
 const props = defineProps<{
@@ -22,6 +22,20 @@ const props = defineProps<{
   roleState: RoleState & { type: "Success" };
   settingsState: SettingsState & { type: "Success" };
 }>();
+
+const selectedStatusFilter = ref<RuleStatusDTO | "All">("All");
+
+const filteredTemplates = computed(() => {
+  if (selectedStatusFilter.value === "All") return props.state.templates;
+
+  return props.state.templates.filter(template =>
+    template.rules.some(rule => rule.status === selectedStatusFilter.value)
+  );
+});
+
+const handleStatusFilterChange = (status: RuleStatusDTO | "All") => {
+  selectedStatusFilter.value = status;
+};
 
 const getRoleValue = (template: TemplateDTO, role: RoleDTO) => {
   const rule = template.rules.find(
@@ -171,6 +185,17 @@ const onTemplateUpdate = (
                 @update:model-value="setAutoCaptureRequests" />
 
             </div>
+            <div
+              class="flex flex-col gap-2"
+              v-tooltip="'Filter table by the status value of at least one role/user.'">
+              <label class="text-sm text-gray-400">Filter table by status</label>
+              <SelectButton
+                :options="['All', 'Enforced', 'Bypassed']"
+                :model-value="selectedStatusFilter"
+                @update:model-value="handleStatusFilterChange"
+                placeholder="Filter by Status"
+              />
+            </div>
             <Button
               v-tooltip="'Clear all template entries.'"
               label="Clear All"
@@ -187,7 +212,7 @@ const onTemplateUpdate = (
 
       <template #content>
         <DataTable
-          :value="state.templates"
+          :value="filteredTemplates"
           striped-rows
           scrollable
           scroll-height="flex"
