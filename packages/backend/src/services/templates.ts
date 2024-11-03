@@ -92,6 +92,11 @@ export const onInterceptResponse = async (
   if (settings.autoCaptureRequests == "off") {
     return;
   }
+  
+  if (!sdk.requests.matches(settings.defaultFilterHTTPQL, request)) {
+    sdk.console.log(`Filtering: ${request.getUrl()}`)
+    return;
+  }
 
   const templateId = generateTemplateId(request, settings.deDuplicateHeaders);
   if (store.templateExists(templateId)) {

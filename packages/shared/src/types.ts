@@ -44,6 +44,7 @@ export type SettingsDTO = {
   autoCaptureRequests: "off" | "all" | "inScope";
   autoRunAnalysis: boolean;
   deDuplicateHeaders: string[];
+  defaultFilterHTTPQL: string;
 };
 
 export type UserAttributeDTO = {
