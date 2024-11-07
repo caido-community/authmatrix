@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Caido plugin for grid-based authorization testing across multiple users and roles",
   "author": "Caido Labs Inc. <dev@caido.io>",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "typecheck": "pnpm -r typecheck",
