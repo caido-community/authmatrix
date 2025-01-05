@@ -12,8 +12,8 @@ importers:
         specifier: 1.8.3
         version: 1.8.3
       '@caido-community/dev':
-        specifier: 0.0.4
-        version: 0.0.4(tsup@8.3.5(jiti@2.4.2)(postcss@8.4.49)(typescript@5.5.4)(yaml@2.5.0))(vite@6.0.7(jiti@2.4.2)(yaml@2.5.0))
+        specifier: 0.0.5
+        version: 0.0.5(postcss@8.4.49)(typescript@5.5.4)(yaml@2.5.0)
       '@caido/tailwindcss':
         specifier: 0.0.1
         version: 0.0.1
@@ -165,12 +165,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@caido-community/dev@0.0.4':
-    resolution: {integrity: sha512-tdd3xbRp31BWijekqM3T0YOyd5aJLKd9uU1bR+25oW3S4YPr/2h/FmICkGHffKDx1tTqZK4dUKhOvUtPL2BOJA==}
+  '@caido-community/dev@0.0.5':
+    resolution: {integrity: sha512-DjclNVTcx0zaSsC3Xtz+V5u4aoOK087ULQWG7p9+CEN0wgn7wVFUX2LL6YWjEQSrSJ7OXdjNtlI6juexP8/wOQ==}
     hasBin: true
-    peerDependencies:
-      tsup: ^8.0.0
-      vite: ^6.0.0
 
   '@caido/plugin-manifest@0.2.1':
     resolution: {integrity: sha512-XcgMlepbJj10QdvxO7TYbYZLeUnhsh2OVGifUGBpLbPXLrXaG4Tpc2XQCH0HeC2dDlHyV8+1vu9SNDJyK6GapQ==}
@@ -1693,7 +1690,7 @@ snapshots:
   '@biomejs/cli-win32-x64@1.8.3':
     optional: true
 
-  '@caido-community/dev@0.0.4(tsup@8.3.5(jiti@2.4.2)(postcss@8.4.49)(typescript@5.5.4)(yaml@2.5.0))(vite@6.0.7(jiti@2.4.2)(yaml@2.5.0))':
+  '@caido-community/dev@0.0.5(postcss@8.4.49)(typescript@5.5.4)(yaml@2.5.0)':
     dependencies:
       '@caido/plugin-manifest': 0.2.1
       chalk: 5.4.1
@@ -1707,9 +1704,23 @@ snapshots:
       ws: 8.18.0
       zod: 3.24.1
     transitivePeerDependencies:
+      - '@microsoft/api-extractor'
+      - '@swc/core'
+      - '@types/node'
       - bufferutil
+      - less
+      - lightningcss
+      - postcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
       - supports-color
+      - terser
+      - tsx
+      - typescript
       - utf-8-validate
+      - yaml
 
   '@caido/plugin-manifest@0.2.1':
     dependencies:
