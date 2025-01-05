@@ -10,6 +10,7 @@ export const SDKPlugin: Plugin = (app, sdk: CaidoSDK) => {
   app.provide(KEY, sdk);
 };
 
+
 export const useSDK = () => {
   return inject(KEY) as CaidoSDK;
 };

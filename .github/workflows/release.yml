@@ -20,8 +20,9 @@ jobs:
 
       - name: Check version
         id: meta
+        working-directory: dist
         run: |
-          VERSION=$(jq -r .version manifest.json)
+          VERSION=$(unzip -p plugin_package.zip manifest.json | jq -r .version)
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
