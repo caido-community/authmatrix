@@ -14,18 +14,12 @@ importers:
       '@caido-community/dev':
         specifier: 0.0.4
         version: 0.0.4(tsup@8.3.5(jiti@2.4.2)(postcss@8.4.49)(typescript@5.5.4)(yaml@2.5.0))(vite@6.0.7(jiti@2.4.2)(yaml@2.5.0))
-      '@caido/plugin-manifest':
-        specifier: 0.1.3
-        version: 0.1.3
       '@caido/tailwindcss':
         specifier: 0.0.1
         version: 0.0.1
       '@vitejs/plugin-vue':
         specifier: 5.2.1
         version: 5.2.1(vite@6.0.7(jiti@2.4.2)(yaml@2.5.0))(vue@3.4.37(typescript@5.5.4))
-      jszip:
-        specifier: 3.10.1
-        version: 3.10.1
       postcss-prefixwrap:
         specifier: 1.51.0
         version: 1.51.0(postcss@8.4.49)
@@ -180,9 +174,6 @@ packages:
     peerDependencies:
       tsup: ^8.0.0
       vite: ^6.0.0
-
-  '@caido/plugin-manifest@0.1.3':
-    resolution: {integrity: sha512-6PK/mIz2vIImgNFmc34Smiz86ifE+B962xz7uR4MPMxRaRlMlgfL8IvPkbpJyRaXb0mDDVqGzMB82HddpyGQSw==}
 
   '@caido/plugin-manifest@0.2.1':
     resolution: {integrity: sha512-XcgMlepbJj10QdvxO7TYbYZLeUnhsh2OVGifUGBpLbPXLrXaG4Tpc2XQCH0HeC2dDlHyV8+1vu9SNDJyK6GapQ==}
@@ -1722,10 +1713,6 @@ snapshots:
       - bufferutil
       - supports-color
       - utf-8-validate
-
-  '@caido/plugin-manifest@0.1.3':
-    dependencies:
-      ajv: 8.16.0
 
   '@caido/plugin-manifest@0.2.1':
     dependencies:
