@@ -25,15 +25,17 @@ export const useUserService = defineStore("services.users", () => {
 
   const getState = () => store.getState();
 
-  const addUser = async (name: string) => {
+  const addUser = async (name: string): Promise<UserDTO | undefined> => {
     const result = await repository.addUser(name);
 
     if (result.type === "Ok") {
       store.send({ type: "AddUser", user: result.user });
+      return result.user;
     } else {
       sdk.window.showToast(result.error, {
         variant: "error",
       });
+      return undefined;
     }
   };
 

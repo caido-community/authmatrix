@@ -41,7 +41,8 @@ const settingsState = computed(() => settingsService.getState());
         :settings-state="settingsState"
       />
     </div>
-    <div class="w-full">
+
+    <div class="w-full" v-if="analysisService.selectionState.type !== 'None'">
       <ResultTabs
         v-if="roleState.type === 'Success' &&
               userState.type === 'Success' &&

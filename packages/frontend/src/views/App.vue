@@ -5,8 +5,7 @@ import { useSettingsService } from "@/services/settings";
 import { useTemplateService } from "@/services/templates";
 import { useUserService } from "@/services/users";
 import MenuBar from "primevue/menubar";
-import { computed, ref } from "vue";
-import { onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import Dashboard from "./Dashboard.vue";
 import UsersRoles from "./UsersRoles.vue";
 
