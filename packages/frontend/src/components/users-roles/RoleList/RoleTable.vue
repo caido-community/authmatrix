@@ -37,7 +37,7 @@ const onRoleUpdate = (role: RoleDTO, field: keyof RoleDTO, value: string) => {
     scroll-height="flex"
     size="small"
     edit-mode="cell"
-    @cell-edit-complete="({ data, field, newValue }) => onRoleUpdate(data, field, newValue)"
+    @cell-edit-complete="({ data, field, newValue }) => onRoleUpdate(data, field as keyof RoleDTO, newValue)"
 
   >
     <template #empty>
@@ -67,4 +67,3 @@ const onRoleUpdate = (role: RoleDTO, field: keyof RoleDTO, value: string) => {
     </Column>
   </DataTable>
 </template>
-

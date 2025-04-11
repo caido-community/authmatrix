@@ -76,7 +76,7 @@ const onAttributeUpdate = (
         scrollable
         scroll-height="flex"
         striped-rows
-        @cell-edit-complete="({ data, field, newValue }) => onAttributeUpdate(data, field, newValue)"
+        @cell-edit-complete="({ data, field, newValue }) => onAttributeUpdate(data, field as keyof UserAttributeDTO, newValue)"
         >
         <Column field="kind" header="Kind">
           <template #editor="{data}">
