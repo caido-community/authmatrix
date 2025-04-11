@@ -10,6 +10,8 @@ import { useRoleService } from "@/services/roles";
 import { useSettingsService } from "@/services/settings";
 import { useTemplateService } from "@/services/templates";
 import { useUserService } from "@/services/users";
+import Splitter from "primevue/splitter";
+import SplitterPanel from "primevue/splitterpanel";
 import { computed } from "vue";
 
 const userService = useUserService();
@@ -53,14 +55,15 @@ const settingsState = computed(() => settingsService.getState());
       />
     </div>
 
-    <div class="w-full h-1/2 flex gap-1">
-      <div class="h-full w-1/2">
-        <ResultRequest :selection-state="analysisService.selectionState" />
-      </div>
-
-      <div class="h-full w-1/2">
-        <ResultResponse :selection-state="analysisService.selectionState" />
-      </div>
+    <div class="w-full h-1/2">
+      <Splitter class="h-full">
+        <SplitterPanel :size="50" class="h-full">
+          <ResultRequest :selection-state="analysisService.selectionState" />
+        </SplitterPanel>
+        <SplitterPanel :size="50" class="h-full">
+          <ResultResponse :selection-state="analysisService.selectionState" />
+        </SplitterPanel>
+      </Splitter>
     </div>
   </div>
 </template>
