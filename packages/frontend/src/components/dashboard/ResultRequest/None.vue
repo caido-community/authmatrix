@@ -6,7 +6,7 @@ import Card from "primevue/card";
   <Card class="h-full" :pt="{ body: { class: 'h-full' }, content: { class: 'h-full' } }">
     <template #content>
       <div class="flex justify-center items-center h-full">
-        <span> No request selected</span>
+        <span class="text-gray-400">No request selected</span>
       </div>
     </template>
   </Card>
