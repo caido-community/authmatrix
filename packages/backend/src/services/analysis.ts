@@ -89,12 +89,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
           hasAccess: false,
           status: "Untested",
         };
-  
-  
-        if (currentRule.status !== "Untested") {
-          return currentRule;
-        }
-  
+
         const status = await generateRoleRuleStatus(sdk, template, role.id);
         return { ...currentRule, status };
       });
@@ -108,10 +103,6 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
           hasAccess: false,
           status: "Untested",
         };
-
-        if (currentRule.status !== "Untested") {
-          return currentRule;
-        }
 
         const status = await generateUserRuleStatus(sdk, template, user);
         return { ...currentRule, status };
