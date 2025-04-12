@@ -16,5 +16,7 @@ export const init = (sdk: CaidoSDK) => {
     body: root,
   });
 
-  sdk.sidebar.registerItem("Authmatrix", "/authmatrix");
+  sdk.sidebar.registerItem("Authmatrix", "/authmatrix", {
+    icon: "fas fa-user-shield",
+  });
 };
