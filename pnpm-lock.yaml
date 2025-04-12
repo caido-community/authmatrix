@@ -46,8 +46,8 @@ importers:
   packages/frontend:
     dependencies:
       '@caido/primevue':
-        specifier: 0.1.9
-        version: 0.1.9(primevue@4.3.3(vue@3.5.13(typescript@5.8.3)))
+        specifier: 0.1.10
+        version: 0.1.10(primevue@4.3.3(vue@3.5.13(typescript@5.8.3)))
       '@caido/sdk-frontend':
         specifier: 0.47.1
         version: 0.47.1(@codemirror/view@6.36.5)
@@ -173,8 +173,8 @@ packages:
   '@caido/plugin-manifest@0.3.0':
     resolution: {integrity: sha512-HRGHf65K2sfSdaEUwkCNDlurJ4zL0bOUg/Db4u6CrwjTTzmg2gOzP6SzLRj+69gWmxOm5LUjhInNHaMIRmQkHw==}
 
-  '@caido/primevue@0.1.9':
-    resolution: {integrity: sha512-Q39R8TGPneXp0W7AwjDWK4HwhgtfTE5VXdjzsA3Ihq8YvSg1sbbrG6te+KieupTAfmQDCW0HpAJ3+YnGZvsFJg==}
+  '@caido/primevue@0.1.10':
+    resolution: {integrity: sha512-fHPGYVFl/O/A5VQDYy5sQU+PVR+Nh44AXAef9Ybl8WvSkW+tfXK+8XIvsLxUqLi8cde1UeXQNp2winhi0vOgFg==}
     peerDependencies:
       primevue: 4.1.0
 
@@ -1768,7 +1768,7 @@ snapshots:
     dependencies:
       ajv: 8.17.1
 
-  '@caido/primevue@0.1.9(primevue@4.3.3(vue@3.5.13(typescript@5.8.3)))':
+  '@caido/primevue@0.1.10(primevue@4.3.3(vue@3.5.13(typescript@5.8.3)))':
     dependencies:
       primevue: 4.3.3(vue@3.5.13(typescript@5.8.3))
 
