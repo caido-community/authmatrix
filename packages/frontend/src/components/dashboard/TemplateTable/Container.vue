@@ -121,9 +121,7 @@ const isAnalyzing = computed(() => {
 const defaultPorts = [80, 443];
 
 const getURLColumnValue = (template: TemplateDTO) => {
-  let url = `${template.meta.method} ${
-    template.meta.isTls ? "https" : "http"
-  }://${template.meta.host}`;
+  let url = `${template.meta.isTls ? "https" : "http"}://${template.meta.host}`;
   if (
     !defaultPorts.includes(template.meta.port) ||
     (template.meta.port === 443 && !template.meta.isTls) ||
@@ -255,6 +253,12 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
               onTemplateUpdate(data, field, newValue)
           "
         >
+          <Column field="method" header="Method" class="w-24">
+            <template #body="{ data }">
+              {{ data.meta.method }}
+            </template>
+          </Column>
+
           <Column header="URL">
             <template #body="{ data }">
               {{ getURLColumnValue(data) }}

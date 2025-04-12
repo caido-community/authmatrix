@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  ResultRequest,
-  ResultTabs,
-  TemplateTable,
-} from "@/components/dashboard";
-import { ResultResponse } from "@/components/dashboard/ResultResponse";
+import { ResultRequest, ResultResponse, ResultTabs, TemplateTable } from "@/components/dashboard";
 import { useAnalysisService } from "@/services/analysis";
 import { useRoleService } from "@/services/roles";
 import { useSettingsService } from "@/services/settings";
