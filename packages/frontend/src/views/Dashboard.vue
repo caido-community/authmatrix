@@ -34,7 +34,8 @@ const settingsState = computed(() => settingsService.getState());
           roleState.type === 'Success' &&
           userState.type === 'Success' &&
           templateState.type === 'Success' &&
-          settingsState.type === 'Success'"
+          settingsState.type === 'Success'
+        "
         :state="templateState"
         :user-state="userState"
         :role-state="roleState"
@@ -42,29 +43,33 @@ const settingsState = computed(() => settingsService.getState());
       />
     </div>
 
-    <div class="w-full" v-if="analysisService.selectionState.type !== 'None'">
-      <ResultTabs
-        v-if="roleState.type === 'Success' &&
-              userState.type === 'Success' &&
-              templateState.type === 'Success' &&
-              analysisService.resultState.type === 'Success'"
-        :template-state="templateState"
-        :user-state="userState"
-        :role-state="roleState"
-        :result-state="analysisService.resultState"
-        :selection-state="analysisService.selectionState"
-      />
-    </div>
+    <div class="w-full h-1/2 flex flex-col gap-1">
+      <div class="w-full" v-if="analysisService.selectionState.type !== 'None'">
+        <ResultTabs
+          v-if="
+            roleState.type === 'Success' &&
+            userState.type === 'Success' &&
+            templateState.type === 'Success' &&
+            analysisService.resultState.type === 'Success'
+          "
+          :template-state="templateState"
+          :user-state="userState"
+          :role-state="roleState"
+          :result-state="analysisService.resultState"
+          :selection-state="analysisService.selectionState"
+        />
+      </div>
 
-    <div class="w-full h-1/2">
-      <Splitter class="h-full">
-        <SplitterPanel :size="50" class="h-full">
-          <ResultRequest :selection-state="analysisService.selectionState" />
-        </SplitterPanel>
-        <SplitterPanel :size="50" class="h-full">
-          <ResultResponse :selection-state="analysisService.selectionState" />
-        </SplitterPanel>
-      </Splitter>
+      <div class="w-full flex-1 min-h-0">
+        <Splitter class="h-full">
+          <SplitterPanel :size="50" class="h-full">
+            <ResultRequest :selection-state="analysisService.selectionState" />
+          </SplitterPanel>
+          <SplitterPanel :size="50" class="h-full">
+            <ResultResponse :selection-state="analysisService.selectionState" />
+          </SplitterPanel>
+        </Splitter>
+      </div>
     </div>
   </div>
 </template>
