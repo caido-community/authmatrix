@@ -20,12 +20,12 @@ const onAddRole = () => {
     <template #title>
       <div class="flex justify-between p-4 items-center">
         <div class="flex flex-col">
-          <h1>Roles</h1>
-          <p class="text-sm text-gray-400">Manage roles and their descriptions</p>
+          <h1 class="text-xl font-bold m-0">Roles</h1>
+          <p class="text-sm font-normal text-gray-400">Manage roles and their descriptions</p>
         </div>
 
         <div class="min-w-max">
-          <Button label="+ Add role" size="small" @click="onAddRole" />
+          <Button icon="fas fa-plus" label="Add role" size="small" @click="onAddRole" />
         </div>
       </div>
     </template>
@@ -35,4 +35,3 @@ const onAddRole = () => {
     </template>
   </Card>
 </template>
-

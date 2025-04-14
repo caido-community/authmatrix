@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { RoleList, UserList, UserShow } from "@/components/users-roles";
+import { RoleList, UserList, UserShow, UserShowNone } from "@/components/users-roles";
 import { useRoleService } from "@/services/roles";
 import { useUserService } from "@/services/users";
+import Splitter from "primevue/splitter";
+import SplitterPanel from "primevue/splitterpanel";
 import { computed } from "vue";
 
 const roleService = useRoleService();
@@ -12,22 +14,24 @@ const userState = computed(() => userService.getState());
 </script>
 
 <template>
-  <div class="h-full flex gap-1">
-    <div class="h-full w-1/2 flex flex-col gap-1">
-      <div class="h-1/2">
-        <UserList
-        v-if="roleState.type === 'Success' && userState.type === 'Success'"
-        v-model:selection="userService.userSelection"
-        :state="userState"
-        :role-state="roleState" />
-      </div>
-      <div class="h-1/2">
-        <RoleList v-if="roleState.type === 'Success'" :state="roleState" />
-      </div>
-    </div>
-
-    <div class="h-full w-1/2">
+  <Splitter class="h-full">
+    <SplitterPanel class="h-full" :size="50">
+      <Splitter layout="vertical" class="h-full">
+        <SplitterPanel :size="50">
+          <UserList
+            v-if="roleState.type === 'Success' && userState.type === 'Success'"
+            v-model:selection="userService.userSelection"
+            :state="userState"
+            :role-state="roleState" />
+        </SplitterPanel>
+        <SplitterPanel :size="50">
+          <RoleList v-if="roleState.type === 'Success'" :state="roleState" />
+        </SplitterPanel>
+      </Splitter>
+    </SplitterPanel>
+    <SplitterPanel class="h-full" :size="50">
       <UserShow v-if="userService.userSelection" :user="userService.userSelection"/>
-    </div>
-  </div>
+      <UserShowNone v-else />
+    </SplitterPanel>
+  </Splitter>
 </template>

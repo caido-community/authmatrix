@@ -63,9 +63,9 @@ const onAttributeUpdate = (
 <template>
   <div class="flex-1 flex flex-col gap-2 min-h-0">
     <div class="flex justify-between items-center p-4">
-      <h1 class="font-bold">Attributes</h1>
+      <h1 class="font-bold text-xl m-0">Attributes</h1>
       <div>
-        <Button label="+ Add attribute" size="small" @click="onAddAttribute" />
+        <Button icon="fas fa-plus" label="Add attribute" size="small" @click="onAddAttribute" />
       </div>
     </div>
 
@@ -76,7 +76,7 @@ const onAttributeUpdate = (
         scrollable
         scroll-height="flex"
         striped-rows
-        @cell-edit-complete="({ data, field, newValue }) => onAttributeUpdate(data, field, newValue)"
+        @cell-edit-complete="({ data, field, newValue }) => onAttributeUpdate(data, field as keyof UserAttributeDTO, newValue)"
         >
         <Column field="kind" header="Kind">
           <template #editor="{data}">

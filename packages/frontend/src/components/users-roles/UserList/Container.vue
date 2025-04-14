@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useUserService } from "@/services/users";
-import { RoleState } from "@/types";
-import { UserState } from "@/types";
+import { RoleState, UserState } from "@/types";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import type { UserDTO } from "shared";
@@ -17,8 +16,11 @@ const selection = defineModel<UserDTO | undefined>("selection", {
 });
 
 const service = useUserService();
-const onAddUser = () => {
-  service.addUser("New user");
+const onAddUser = async () => {
+  const user = await service.addUser("New user");
+  if (user) {
+    selection.value = user;
+  }
 };
 </script>
 
@@ -28,11 +30,11 @@ const onAddUser = () => {
     <template #title>
       <div class="flex justify-between p-4 items-center">
         <div class="flex flex-col w-full">
-          <h1>Users</h1>
-          <p class="text-sm text-gray-400">Manage users and their access to the system</p>
+          <h1 class="text-xl font-bold m-0">Users</h1>
+          <p class="text-sm font-normal text-gray-400">Manage users and their access to the system</p>
         </div>
         <div class="min-w-max">
-          <Button label="+ Add User" size="small" @click="onAddUser" />
+          <Button icon="fas fa-plus" label="Add User" size="small" @click="onAddUser" />
         </div>
       </div>
     </template>

@@ -9,7 +9,7 @@ import Card from "primevue/card";
   >
     <template #content>
       <div class="flex justify-center items-center h-full">
-        <span class="text-gray-400">No request selected</span>
+        <span class="text-gray-400">No user selected</span>
       </div>
     </template>
   </Card>

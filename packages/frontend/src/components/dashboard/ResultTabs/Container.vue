@@ -63,7 +63,7 @@ const selection = computed({
 </script>
 
 <template>
-  <Card :pt="{ body: { style: 'padding: 0.75rem 1.25rem' } }">
+  <Card :pt="{ body: { style: 'padding: 0.5rem 0.35rem' } }">
     <template #content>
       <div class="flex gap-2 items-center w-full">
         <div class="flex flex-col gap-1">

@@ -2,9 +2,8 @@
 import { useAnalysisService } from "@/services/analysis";
 import { useSettingsService } from "@/services/settings";
 import { useTemplateService } from "@/services/templates";
-import { SettingsState, TemplateState } from "@/types";
-import { RoleState } from "@/types";
-import { UserState } from "@/types";
+import { RoleState, SettingsState, TemplateState, UserState } from "@/types";
+import { useMediaQuery } from "@vueuse/core";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Checkbox from "primevue/checkbox";
@@ -28,8 +27,8 @@ const selectedStatusFilter = ref<RuleStatusDTO | "All">("All");
 const filteredTemplates = computed(() => {
   if (selectedStatusFilter.value === "All") return props.state.templates;
 
-  return props.state.templates.filter(template =>
-    template.rules.some(rule => rule.status === selectedStatusFilter.value)
+  return props.state.templates.filter((template) =>
+    template.rules.some((rule) => rule.status === selectedStatusFilter.value)
   );
 });
 
@@ -39,28 +38,28 @@ const handleStatusFilterChange = (status: RuleStatusDTO | "All") => {
 
 const getRoleValue = (template: TemplateDTO, role: RoleDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
+    (rule) => rule.type === "RoleRule" && rule.roleId === role.id
   );
   return rule?.hasAccess ?? false;
 };
 
 const getRoleStatus = (template: TemplateDTO, role: RoleDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
+    (rule) => rule.type === "RoleRule" && rule.roleId === role.id
   );
   return rule?.status ?? "Untested";
 };
 
 const getUserValue = (template: TemplateDTO, user: UserDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "UserRule" && rule.userId === user.id,
+    (rule) => rule.type === "UserRule" && rule.userId === user.id
   );
   return rule?.hasAccess ?? false;
 };
 
 const getUserStatus = (template: TemplateDTO, user: UserDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "UserRule" && rule.userId === user.id,
+    (rule) => rule.type === "UserRule" && rule.userId === user.id
   );
   return rule?.status ?? "Untested";
 };
@@ -122,73 +121,99 @@ const isAnalyzing = computed(() => {
 const defaultPorts = [80, 443];
 
 const getURLColumnValue = (template: TemplateDTO) => {
-  let url = `${template.meta.method} ${template.meta.isTls ? 'https' : 'http'}://${ template.meta.host }`;
+  let url = `${template.meta.isTls ? "https" : "http"}://${template.meta.host}`;
   if (
-    !defaultPorts.includes(template.meta.port) || 
+    !defaultPorts.includes(template.meta.port) ||
     (template.meta.port === 443 && !template.meta.isTls) ||
     (template.meta.port === 80 && template.meta.isTls)
   ) {
     url += `:${template.meta.port}`;
   }
   url += template.meta.path;
-  if (url.length > 130) {
-    url = url.substring(0, 126) + "...";
+  if (url.length > 96) {
+    url = url.substring(0, 96) + "...";
   }
   return url;
-}
+};
 
 const onTemplateUpdate = (
   template: TemplateDTO,
   field: string,
-  newValue: unknown,
+  newValue: unknown
 ) => {
   service.updateTemplate(template.id, { ...template, [field]: newValue });
 };
-</script>
 
+const isSmallScreen = useMediaQuery("(max-width: 1150px)");
+</script>
 <template>
   <div class="h-full">
     <Card
       class="h-full"
-      :pt="{ body: { class: 'flex-1 min-h-0' }, content: { class: 'h-full' } }">
-
+      :pt="{ body: { class: 'flex-1 min-h-0' }, content: { class: 'h-full' } }"
+    >
       <template #header>
-        <div class="p-4 flex justify-between gap-8">
-          <div class="flex flex-col">
+        <div
+          :class="[
+            'header-container p-4 flex justify-between gap-8',
+            { 'flex-col gap-4': isSmallScreen, 'flex-row': !isSmallScreen },
+          ]"
+        >
+          <div
+            :class="[
+              'header-info flex flex-col',
+              { 'w-full': isSmallScreen, 'w-[40%]': !isSmallScreen },
+            ]"
+          >
             <h2 class="text-lg font-semibold">Templates</h2>
-            <p class="text-sm text-gray-400">Add template requests to the queue for analysis.</p>
+            <p class="text-sm text-gray-400">
+              Add template requests to the queue for analysis.
+            </p>
             <p class="text-sm text-gray-400">
               Specify which roles and users should have access to each resource.
-              Configure a regex to determine if the authentication was successful.
+              <br />
+              Configure a regex to determine if the authentication was
+              successful.
             </p>
           </div>
           <div class="flex items-end gap-4">
-            <div
-              class="flex flex-col gap-2"
-              v-tooltip="'Automatically add each intercepted request to the testing queue for analysis.'">
+            <div class="flex flex-col gap-2">
               <div
                 class="flex items-center gap-2"
-                v-tooltip="'Check this box if you want analysis to automatically run in the background.'">
-                  <Checkbox
-                    inputId="auto-analysis"
-                    :model-value="settingsState.settings.autoRunAnalysis"
-                    binary
-                    @change="() => settingsService.toggleAutoRunAnalysis()" />
-                  <label for="auto-analysis" class="text-sm text-gray-400">Auto-run analysis</label>
-
+                v-tooltip="
+                  'Check this box if you want analysis to automatically run in the background.'
+                "
+              >
+                <Checkbox
+                  inputId="auto-analysis"
+                  :model-value="settingsState.settings.autoRunAnalysis"
+                  binary
+                  @change="() => settingsService.toggleAutoRunAnalysis()"
+                />
+                <label for="auto-analysis" class="text-sm text-gray-400"
+                  >Auto-run analysis</label
+                >
               </div>
               <label class="text-sm text-gray-400">Auto-capture requests</label>
               <SelectButton
                 :model-value="settingsState.settings.autoCaptureRequests"
                 :options="['off', 'all', 'inScope']"
                 :option-label="getAutoCaptureRequestLabel"
-                @update:model-value="setAutoCaptureRequests" />
-
+                @update:model-value="setAutoCaptureRequests"
+                v-tooltip="
+                  'Automatically add each intercepted request to the testing queue for analysis.'
+                "
+              />
             </div>
             <div
               class="flex flex-col gap-2"
-              v-tooltip="'Filter table by the status value of at least one role/user.'">
-              <label class="text-sm text-gray-400">Filter table by status</label>
+              v-tooltip="
+                'Filter table by the status value of at least one role/user.'
+              "
+            >
+              <label class="text-sm text-gray-400"
+                >Filter table by status</label
+              >
               <SelectButton
                 :options="['All', 'Enforced', 'Bypassed']"
                 :model-value="selectedStatusFilter"
@@ -199,13 +224,15 @@ const onTemplateUpdate = (
             <Button
               v-tooltip="'Clear all template entries.'"
               label="Clear All"
-              @click="clearTemplates" />
+              @click="clearTemplates"
+            />
 
             <Button
               v-tooltip="'Run the analysis on the current requests.'"
               label="Analyze"
               :loading="isAnalyzing"
-              @click="runAnalysis" />
+              @click="runAnalysis"
+            />
           </div>
         </div>
       </template>
@@ -221,8 +248,17 @@ const onTemplateUpdate = (
           selection-mode="single"
           data-key="id"
           v-model:selection="selection"
-          @cell-edit-complete="({ data, field, newValue }) => onTemplateUpdate(data, field, newValue)"
+          @cell-edit-complete="
+            ({ data, field, newValue }) =>
+              onTemplateUpdate(data, field, newValue)
+          "
         >
+          <Column field="method" header="Method" class="w-24">
+            <template #body="{ data }">
+              {{ data.meta.method }}
+            </template>
+          </Column>
+
           <Column header="URL">
             <template #body="{ data }">
               {{ getURLColumnValue(data) }}
@@ -235,28 +271,37 @@ const onTemplateUpdate = (
             </template>
           </Column>
 
-
           <Column v-for="role in roleState.roles" key="id" :header="role.name">
             <template #body="{ data }">
               <div class="flex items-center gap-4">
                 <Checkbox
-                  v-tooltip="'Check this box if this role should have access to this resource.'"
+                  v-tooltip="
+                    'Check this box if this role should have access to this resource.'
+                  "
                   :model-value="getRoleValue(data, role)"
                   binary
-                  @change="() => toggleRole(data, role)" />
+                  @change="() => toggleRole(data, role)"
+                />
                 <RuleStatus :status="getRoleStatus(data, role)" />
               </div>
             </template>
           </Column>
 
-          <Column v-for="user of userState.users" :key="user.id" :header="user.name">
+          <Column
+            v-for="user of userState.users"
+            :key="user.id"
+            :header="user.name"
+          >
             <template #body="{ data }">
               <div class="flex items-center gap-4">
                 <Checkbox
-                  v-tooltip="'Check this box if this user should have access to this resource.'"
+                  v-tooltip="
+                    'Check this box if this user should have access to this resource.'
+                  "
                   :model-value="getUserValue(data, user)"
                   binary
-                  @change="() => toggleUser(data, user)" />
+                  @change="() => toggleUser(data, user)"
+                />
                 <RuleStatus :status="getUserStatus(data, user)" />
               </div>
             </template>
@@ -265,13 +310,17 @@ const onTemplateUpdate = (
           <Column header="">
             <template #body="{ data }">
               <div class="flex justify-end">
-                <Button icon="fas fa-trash" text severity="danger" size="small" @click="() => deleteTemplate(data)" />
+                <Button
+                  icon="fas fa-trash"
+                  text
+                  severity="danger"
+                  size="small"
+                  @click="() => deleteTemplate(data)"
+                />
               </div>
             </template>
           </Column>
-
         </DataTable>
-
       </template>
     </Card>
   </div>

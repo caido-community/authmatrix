@@ -89,12 +89,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
           hasAccess: false,
           status: "Untested",
         };
-  
-  
-        if (currentRule.status !== "Untested") {
-          return currentRule;
-        }
-  
+
         const status = await generateRoleRuleStatus(sdk, template, role.id);
         return { ...currentRule, status };
       });
@@ -108,10 +103,6 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
           hasAccess: false,
           status: "Untested",
         };
-
-        if (currentRule.status !== "Untested") {
-          return currentRule;
-        }
 
         const status = await generateUserRuleStatus(sdk, template, user);
         return { ...currentRule, status };
@@ -158,6 +149,9 @@ const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
 
 const setCookies = (spec: RequestSpec, attributes: UserAttributeDTO[]) => {
   const newCookies = attributes.filter((attr) => attr.kind === "Cookie");
+  if (newCookies.length === 0) {
+    return spec;
+  }
 
   // Set cookies
   const cookies: Record<string, string> = {};
