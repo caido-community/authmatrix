@@ -1,5 +1,5 @@
 import type { SDK } from "caido:plugin";
-import type { Request, Response } from "caido:utils";
+import type { ID, Request, Response } from "caido:utils";
 import type { TemplateDTO } from "shared";
 
 import { TemplateStore } from "../stores/templates";
@@ -123,6 +123,34 @@ export const onInterceptResponse = async (
     runAnalysis(sdk);
   }
 };
+
+export const addTemplateFromContext = async (
+  sdk: SDK<never, BackendEvents>,
+  request_id: ID,
+) => {
+  const settingsStore = SettingsStore.get();
+  const settings = settingsStore.getSettings();
+  const store = TemplateStore.get();
+
+  const result = await sdk.requests.get(request_id.toString())
+  if (!result) {
+    return;
+  }
+  const request = result.request;
+  const response = result.response;
+  if(!request || !response) {
+    return;
+  }
+
+  const templateId = generateTemplateId(request, settings.deDuplicateHeaders);
+  if (store.templateExists(templateId)) {
+    return
+  }
+
+  const template = toTemplate(request, response, templateId);
+  store.addTemplate(template);
+  sdk.api.send("templates:created", template);
+}
 
 export const registerTemplateEvents = (sdk: SDK) => {
   sdk.events.onInterceptResponse(onInterceptResponse);
