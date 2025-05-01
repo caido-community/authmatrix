@@ -12,6 +12,7 @@ import {
   deleteTemplate,
   getTemplates,
   registerTemplateEvents,
+  addTemplateFromContext,
   toggleTemplateRole,
   toggleTemplateUser,
   updateTemplate,
@@ -41,6 +42,7 @@ export type API = DefineAPI<{
   clearTemplates: typeof clearTemplates;
   toggleTemplateRole: typeof toggleTemplateRole;
   toggleTemplateUser: typeof toggleTemplateUser;
+  addTemplateFromContext: typeof addTemplateFromContext;
 
   // Settings endpoints
   getSettings: typeof getSettings;
@@ -73,6 +75,7 @@ export function init(sdk: SDK<API>) {
   sdk.api.register("toggleTemplateRole", toggleTemplateRole);
   sdk.api.register("toggleTemplateUser", toggleTemplateUser);
   sdk.api.register("clearTemplates", clearTemplates);
+  sdk.api.register("addTemplateFromContext", addTemplateFromContext);
 
   // Settings endpoints
   sdk.api.register("getSettings", getSettings);

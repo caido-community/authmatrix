@@ -1,7 +1,7 @@
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
 
-export const init = (sdk: CaidoSDK) => {
+export const init = (sdk: CaidoSDK ) => {
   const app = defineApp(sdk);
 
   const root = document.createElement("div");
@@ -18,5 +18,34 @@ export const init = (sdk: CaidoSDK) => {
 
   sdk.sidebar.registerItem("Authmatrix", "/authmatrix", {
     icon: "fas fa-user-shield",
+  });
+
+  sdk.commands.register("send-to-authmatrix", {
+    name: "Send to Authmatrix",
+    run: (context) => {
+      if (context.type === "RequestRowContext") {
+        context.requests.forEach(async (request) => {
+          if (request.id) {
+            sdk.backend.addTemplateFromContext(request.id);
+          }
+        });
+      } else if (context.type === "RequestContext") {
+        if (context.request.id) {
+          sdk.backend.addTemplateFromContext(context.request.id);
+        }
+      }
+    },
+  });
+
+  sdk.menu.registerItem({
+    type: "RequestRow",
+    commandId: "send-to-authmatrix",
+    leadingIcon: "fas fa-user-shield",
+  });
+
+  sdk.menu.registerItem({
+    type: "Request",
+    commandId: "send-to-authmatrix",
+    leadingIcon: "fas fa-user-shield",
   });
 };
