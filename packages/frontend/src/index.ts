@@ -1,4 +1,3 @@
-import { getRequestResponse } from "backend/src/services/analysis";
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
 
@@ -26,10 +25,14 @@ export const init = (sdk: CaidoSDK ) => {
     run: (context) => {
       if (context.type === "RequestRowContext") {
         context.requests.forEach(async (request) => {
-          sdk.backend.addTemplateFromContext(request.id);
+          if (request.id) {
+            sdk.backend.addTemplateFromContext(request.id);
+          }
         });
       } else if (context.type === "RequestContext") {
-        sdk.backend.addTemplateFromContext(context.request.id);
+        if (context.request.id) {
+          sdk.backend.addTemplateFromContext(context.request.id);
+        }
       }
     },
   });
