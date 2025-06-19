@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { ResultRequest, ResultResponse, ResultTabs, TemplateTable } from "@/components/dashboard";
+import Splitter from "primevue/splitter";
+import SplitterPanel from "primevue/splitterpanel";
+import { computed } from "vue";
+
+import {
+  ResultRequest,
+  ResultResponse,
+  ResultTabs,
+  TemplateTable,
+} from "@/components/dashboard";
 import { useAnalysisService } from "@/services/analysis";
 import { useRoleService } from "@/services/roles";
 import { useSettingsService } from "@/services/settings";
 import { useTemplateService } from "@/services/templates";
 import { useUserService } from "@/services/users";
-import Splitter from "primevue/splitter";
-import SplitterPanel from "primevue/splitterpanel";
-import { computed } from "vue";
 
 const userService = useUserService();
 const roleService = useRoleService();
@@ -39,7 +45,7 @@ const settingsState = computed(() => settingsService.getState());
     </div>
 
     <div class="w-full h-1/2 flex flex-col gap-1">
-      <div class="w-full" v-if="analysisService.selectionState.type !== 'None'">
+      <div v-if="analysisService.selectionState.type !== 'None'" class="w-full">
         <ResultTabs
           v-if="
             roleState.type === 'Success' &&

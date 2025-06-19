@@ -1,9 +1,5 @@
 import type { SDK } from "caido:plugin";
 import type { RequestSpec } from "caido:utils";
-
-import { TemplateStore } from "../stores/templates";
-import { UserStore } from "../stores/users";
-
 import type {
   AnalysisRequestDTO,
   RuleStatusDTO,
@@ -11,11 +7,13 @@ import type {
   UserAttributeDTO,
   UserDTO,
 } from "shared";
-import { AnalysisStore } from "../stores/analysis";
-import { Uint8ArrayToString, isPresent } from "../utils";
 
+import { AnalysisStore } from "../stores/analysis";
 import { RoleStore } from "../stores/roles";
+import { TemplateStore } from "../stores/templates";
+import { UserStore } from "../stores/users";
 import type { BackendEvents } from "../types";
+import { isPresent, Uint8ArrayToString } from "../utils";
 
 export const getResults = (_sdk: SDK): AnalysisRequestDTO[] => {
   const store = AnalysisStore.get();
@@ -59,66 +57,73 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   // Send requests
   const templates = templateStore.getTemplates();
   const users = userStore.getUsers();
+  const roles = roleStore.getRoles();
 
   sdk.console.debug(
     `Analyzing ${templates.length} templates with ${users.length} users`,
   );
 
-  for (const template of templates) {
-    // Run each template async
-    (async () => {
-      for (const user of users) {
-        if (analysisStore.resultExists(template.id, user.id)) {
-          continue;
+  // Process templates in batches of 5
+  const batchSize = 5;
+  for (let i = 0; i < templates.length; i += batchSize) {
+    const batch = templates.slice(i, i + batchSize);
+
+    await Promise.all(
+      batch.map(async (template) => {
+        sdk.api.send("cursor:mark", template.id, true);
+
+        for (const user of users) {
+          if (analysisStore.resultExists(template.id, user.id)) {
+            sdk.api.send("cursor:mark", template.id, false);
+            continue;
+          }
+
+          const analysisRequest = await sendRequest(sdk, template, user);
+          if (analysisRequest) {
+            analysisStore.addRequest(analysisRequest);
+            sdk.api.send("results:created", analysisRequest);
+          }
         }
-        const analysisRequest = await sendRequest(sdk, template, user);
-        if (analysisRequest) {
-          analysisStore.addRequest(analysisRequest);
-          sdk.api.send("results:created", analysisRequest);
+
+        const newRules: TemplateDTO["rules"] = [];
+
+        for (const role of roles) {
+          const currentRule = template.rules.find(
+            (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
+          ) ?? {
+            type: "RoleRule",
+            roleId: role.id,
+            hasAccess: false,
+            status: "Untested",
+          };
+
+          const status = await generateRoleRuleStatus(sdk, template, role.id);
+          newRules.push({ ...currentRule, status });
         }
-      }
 
-      const newRules: TemplateDTO["rules"] = [];
-      const roles = roleStore.getRoles();
-      const rolePromises = roles.map(async (role) => {
-        const currentRule = template.rules.find(
-          (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
-        ) ?? {
-          type: "RoleRule",
-          roleId: role.id,
-          hasAccess: false,
-          status: "Untested",
-        };
+        for (const user of users) {
+          const currentRule = template.rules.find(
+            (rule) => rule.type === "UserRule" && rule.userId === user.id,
+          ) ?? {
+            type: "UserRule",
+            userId: user.id,
+            hasAccess: false,
+            status: "Untested",
+          };
 
-        const status = await generateRoleRuleStatus(sdk, template, role.id);
-        return { ...currentRule, status };
-      });
+          const status = await generateUserRuleStatus(sdk, template, user);
+          newRules.push({ ...currentRule, status });
+        }
 
-      const userPromises = users.map(async (user) => {
-        const currentRule = template.rules.find(
-          (rule) => rule.type === "UserRule" && rule.userId === user.id,
-        ) ?? {
-          type: "UserRule",
-          userId: user.id,
-          hasAccess: false,
-          status: "Untested",
-        };
-
-        const status = await generateUserRuleStatus(sdk, template, user);
-        return { ...currentRule, status };
-      });
-
-      const roleResults = await Promise.all(rolePromises);
-      const userResults = await Promise.all(userPromises);
-
-      // Combine results
-      newRules.push(...roleResults, ...userResults);
-
-      template.rules = newRules;
-      templateStore.updateTemplate(template.id, template);
-      sdk.api.send("templates:updated", template);
-    })()
+        template.rules = newRules;
+        templateStore.updateTemplate(template.id, template);
+        sdk.api.send("templates:updated", template);
+        sdk.api.send("cursor:mark", template.id, false);
+      }),
+    );
   }
+
+  sdk.api.send("cursor:clear");
 };
 
 const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {

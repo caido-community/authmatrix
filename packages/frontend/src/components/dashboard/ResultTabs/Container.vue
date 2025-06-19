@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { useAnalysisService } from "@/services/analysis";
-import {
-  AnalysisResultState,
-  AnalysisSelectionState,
-  TemplateState,
-  UserState,
-} from "@/types";
 import Card from "primevue/card";
 import SelectButton from "primevue/selectbutton";
 import { computed } from "vue";
+
+import { useAnalysisService } from "@/services/analysis";
+import {
+  type AnalysisResultState,
+  type AnalysisSelectionState,
+  type TemplateState,
+  type UserState,
+} from "@/types";
 
 const props = defineProps<{
   templateState: TemplateState & { type: "Success" };
@@ -72,10 +73,10 @@ const selection = computed({
             :options="options"
             :option-disabled="isDisabled"
             :allow-empty="false"
-            >
+          >
             <template #option="{ option }">
               <span v-if="option === 'Original'">{{ option }}</span>
-              <span class="flex items-center gap-2" v-else>
+              <span v-else class="flex items-center gap-2">
                 <span class="text-xs fas fa-user"></span>
                 {{ getLabel(option) }}
               </span>

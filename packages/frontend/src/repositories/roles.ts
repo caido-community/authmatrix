@@ -1,5 +1,6 @@
-import { useSDK } from "@/plugins/sdk";
 import type { RoleDTO } from "shared";
+
+import { useSDK } from "@/plugins/sdk";
 
 export const useRoleRepository = () => {
   const sdk = useSDK();

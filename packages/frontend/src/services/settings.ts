@@ -1,7 +1,8 @@
+import { defineStore } from "pinia";
+
 import { useSDK } from "@/plugins/sdk";
 import { useSettingsRepository } from "@/repositories/settings";
 import { useSettingsStore } from "@/stores/settings";
-import { defineStore } from "pinia";
 
 export const useSettingsService = defineStore("services.settings", () => {
   const sdk = useSDK();

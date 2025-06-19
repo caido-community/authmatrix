@@ -1,5 +1,6 @@
-import type { AnalysisJobState } from "@/types";
 import { reactive } from "vue";
+
+import type { AnalysisJobState } from "@/types";
 
 type Context = {
   state: AnalysisJobState;

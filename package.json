@@ -9,16 +9,20 @@
     "typecheck": "pnpm -r typecheck",
     "build": "caido-dev build",
     "watch": "caido-dev watch",
-    "lint": "biome check --write ./packages/*/src"
+    "lint": "eslint --fix packages/*/src"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
     "@caido-community/dev": "0.1.5",
     "@caido/tailwindcss": "0.0.1",
     "@vitejs/plugin-vue": "5.2.3",
     "postcss-prefixwrap": "1.55.0",
     "tailwindcss": "3.4.13",
     "tailwindcss-primeui": "0.6.1",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "@caido/eslint-config": "^0.5.0",
+
+    "eslint": "^9.29.0"
+  },
+  "dependencies": {
   }
 }

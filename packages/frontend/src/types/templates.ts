@@ -8,4 +8,8 @@ export type TemplateState =
   | { type: "Idle" }
   | { type: "Loading" }
   | { type: "Error"; error: string }
-  | { type: "Success"; templates: TemplateDTO[] };
+  | {
+      type: "Success";
+      templates: TemplateDTO[];
+      scanningTemplateIds: Set<string>;
+    };

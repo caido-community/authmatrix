@@ -1,7 +1,8 @@
-import type { SettingsState } from "@/types";
 import { defineStore } from "pinia";
 import type { SettingsDTO } from "shared";
 import { reactive } from "vue";
+
+import type { SettingsState } from "@/types";
 
 type Context = {
   state: SettingsState;

@@ -1,9 +1,10 @@
+import { defineStore } from "pinia";
+import { computed } from "vue";
+
 import { useSDK } from "@/plugins/sdk";
 import { useAnalysisRepository } from "@/repositories/analysis";
 import { useAnalysisStore } from "@/stores/analysis";
 import { useTemplateStore } from "@/stores/templates";
-import { defineStore } from "pinia";
-import { computed } from "vue";
 
 export const useAnalysisService = defineStore("services.analysis", () => {
   const sdk = useSDK();
@@ -50,7 +51,7 @@ export const useAnalysisService = defineStore("services.analysis", () => {
     if (resultState.type !== "Success" || templateState.type !== "Success")
       return;
 
-    if (!templateId) {
+    if (templateId === undefined) {
       store.selectionState.send({ type: "Reset" });
       return;
     }
@@ -86,7 +87,7 @@ export const useAnalysisService = defineStore("services.analysis", () => {
     }
 
     const template = templateState.templates.find((t) => t.id === templateId);
-    if (template && !userId) {
+    if (template && userId === undefined) {
       store.selectionState.send({ type: "Start", templateId, userId });
       const result = await repository.getRequestResponse(template.requestId);
 

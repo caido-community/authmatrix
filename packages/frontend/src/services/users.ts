@@ -1,10 +1,10 @@
+import { defineStore } from "pinia";
+import type { UserDTO } from "shared";
 import { computed } from "vue";
 
 import { useSDK } from "@/plugins/sdk";
 import { useUserRepository } from "@/repositories/users";
 import { useUserStore } from "@/stores/users";
-import { defineStore } from "pinia";
-import type { UserDTO } from "shared";
 
 export const useUserService = defineStore("services.users", () => {
   const sdk = useSDK();
