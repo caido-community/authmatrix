@@ -294,7 +294,7 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
           <Column
             field="authSuccessRegex"
             header="Auth Success Regex"
-            class="w-[200px]"
+            class="w-[200px] min-w-[200px]"
           >
             <template #editor="{ data }">
               <InputText v-model="data.authSuccessRegex" />
@@ -356,7 +356,7 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
   </div>
 </template>
 
-<style>
+<style scoped>
 .scanning-row {
   background: linear-gradient(
     90deg,
