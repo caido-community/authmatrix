@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useSDK } from "@/plugins/sdk";
-import { AnalysisSelectionState } from "@/types";
 import { onMounted, ref } from "vue";
+
+import { useSDK } from "@/plugins/sdk";
+import { type AnalysisSelectionState } from "@/types";
 
 const props = defineProps<{
   selectionState: AnalysisSelectionState & { type: "Success" };

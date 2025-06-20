@@ -1,5 +1,6 @@
-import { useSDK } from "@/plugins/sdk";
 import type { UserDTO } from "shared";
+
+import { useSDK } from "@/plugins/sdk";
 
 export const useUserRepository = () => {
   const sdk = useSDK();

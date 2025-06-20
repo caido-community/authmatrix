@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { useAnalysisService } from "@/services/analysis";
-import { useSettingsService } from "@/services/settings";
-import { useTemplateService } from "@/services/templates";
-import { RoleState, SettingsState, TemplateState, UserState } from "@/types";
 import { useMediaQuery } from "@vueuse/core";
 import Button from "primevue/button";
 import Card from "primevue/card";
@@ -13,7 +9,18 @@ import InputText from "primevue/inputtext";
 import SelectButton from "primevue/selectbutton";
 import type { RoleDTO, RuleStatusDTO, TemplateDTO, UserDTO } from "shared";
 import { computed, ref } from "vue";
+
 import RuleStatus from "./RuleStatus.vue";
+
+import { useAnalysisService } from "@/services/analysis";
+import { useSettingsService } from "@/services/settings";
+import { useTemplateService } from "@/services/templates";
+import {
+  type RoleState,
+  type SettingsState,
+  type TemplateState,
+  type UserState,
+} from "@/types";
 
 const props = defineProps<{
   state: TemplateState & { type: "Success" };
@@ -28,7 +35,7 @@ const filteredTemplates = computed(() => {
   if (selectedStatusFilter.value === "All") return props.state.templates;
 
   return props.state.templates.filter((template) =>
-    template.rules.some((rule) => rule.status === selectedStatusFilter.value)
+    template.rules.some((rule) => rule.status === selectedStatusFilter.value),
   );
 });
 
@@ -38,28 +45,28 @@ const handleStatusFilterChange = (status: RuleStatusDTO | "All") => {
 
 const getRoleValue = (template: TemplateDTO, role: RoleDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "RoleRule" && rule.roleId === role.id
+    (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
   );
   return rule?.hasAccess ?? false;
 };
 
 const getRoleStatus = (template: TemplateDTO, role: RoleDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "RoleRule" && rule.roleId === role.id
+    (rule) => rule.type === "RoleRule" && rule.roleId === role.id,
   );
   return rule?.status ?? "Untested";
 };
 
 const getUserValue = (template: TemplateDTO, user: UserDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "UserRule" && rule.userId === user.id
+    (rule) => rule.type === "UserRule" && rule.userId === user.id,
   );
   return rule?.hasAccess ?? false;
 };
 
 const getUserStatus = (template: TemplateDTO, user: UserDTO) => {
   const rule = template.rules.find(
-    (rule) => rule.type === "UserRule" && rule.userId === user.id
+    (rule) => rule.type === "UserRule" && rule.userId === user.id,
   );
   return rule?.status ?? "Untested";
 };
@@ -120,28 +127,37 @@ const isAnalyzing = computed(() => {
 
 const defaultPorts = [80, 443];
 
-const getURLColumnValue = (template: TemplateDTO) => {
-  let url = `${template.meta.isTls ? "https" : "http"}://${template.meta.host}`;
+const getHostColumnValue = (template: TemplateDTO) => {
+  let host = template.meta.host;
   if (
     !defaultPorts.includes(template.meta.port) ||
     (template.meta.port === 443 && !template.meta.isTls) ||
     (template.meta.port === 80 && template.meta.isTls)
   ) {
-    url += `:${template.meta.port}`;
+    host += `:${template.meta.port}`;
   }
-  url += template.meta.path;
-  if (url.length > 96) {
-    url = url.substring(0, 96) + "...";
-  }
-  return url;
+  return host;
 };
+
+const getPathColumnValue = (template: TemplateDTO) =>
+  template.meta.path.length > 64
+    ? template.meta.path.slice(0, 64) + "..."
+    : template.meta.path;
 
 const onTemplateUpdate = (
   template: TemplateDTO,
   field: string,
-  newValue: unknown
+  newValue: unknown,
 ) => {
   service.updateTemplate(template.id, { ...template, [field]: newValue });
+};
+
+const isTemplateScanning = (template: TemplateDTO) => {
+  return props.state.scanningTemplateIds.has(template.id);
+};
+
+const getRowClass = (data: TemplateDTO) => {
+  return isTemplateScanning(data) ? "scanning-row" : "";
 };
 
 const isSmallScreen = useMediaQuery("(max-width: 1150px)");
@@ -179,13 +195,13 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
           <div class="flex items-end gap-4">
             <div class="flex flex-col gap-2">
               <div
-                class="flex items-center gap-2"
                 v-tooltip="
                   'Check this box if you want analysis to automatically run in the background.'
                 "
+                class="flex items-center gap-2"
               >
                 <Checkbox
-                  inputId="auto-analysis"
+                  input-id="auto-analysis"
                   :model-value="settingsState.settings.autoRunAnalysis"
                   binary
                   @change="() => settingsService.toggleAutoRunAnalysis()"
@@ -196,20 +212,20 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
               </div>
               <label class="text-sm text-gray-400">Auto-capture requests</label>
               <SelectButton
+                v-tooltip="
+                  'Automatically add each intercepted request to the testing queue for analysis.'
+                "
                 :model-value="settingsState.settings.autoCaptureRequests"
                 :options="['off', 'all', 'inScope']"
                 :option-label="getAutoCaptureRequestLabel"
                 @update:model-value="setAutoCaptureRequests"
-                v-tooltip="
-                  'Automatically add each intercepted request to the testing queue for analysis.'
-                "
               />
             </div>
             <div
-              class="flex flex-col gap-2"
               v-tooltip="
                 'Filter table by the status value of at least one role/user.'
               "
+              class="flex flex-col gap-2"
             >
               <label class="text-sm text-gray-400"
                 >Filter table by status</label
@@ -217,8 +233,8 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
               <SelectButton
                 :options="['All', 'Enforced', 'Bypassed']"
                 :model-value="selectedStatusFilter"
-                @update:model-value="handleStatusFilterChange"
                 placeholder="Filter by Status"
+                @update:model-value="handleStatusFilterChange"
               />
             </div>
             <Button
@@ -231,6 +247,9 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
               v-tooltip="'Run the analysis on the current requests.'"
               label="Analyze"
               :loading="isAnalyzing"
+              :disabled="
+                userState.users.length === 0 || state.templates.length === 0
+              "
               @click="runAnalysis"
             />
           </div>
@@ -239,7 +258,9 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
 
       <template #content>
         <DataTable
+          v-model:selection="selection"
           :value="filteredTemplates"
+          :row-class="getRowClass"
           striped-rows
           scrollable
           scroll-height="flex"
@@ -247,25 +268,34 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
           edit-mode="cell"
           selection-mode="single"
           data-key="id"
-          v-model:selection="selection"
           @cell-edit-complete="
             ({ data, field, newValue }) =>
               onTemplateUpdate(data, field, newValue)
           "
         >
-          <Column field="method" header="Method" class="w-24">
+          <Column field="method" header="Method" class="w-[85px]">
             <template #body="{ data }">
               {{ data.meta.method }}
             </template>
           </Column>
 
-          <Column header="URL">
+          <Column header="Host" class="w-[230px] overflow-hidden">
             <template #body="{ data }">
-              {{ getURLColumnValue(data) }}
+              {{ getHostColumnValue(data) }}
             </template>
           </Column>
 
-          <Column field="authSuccessRegex" header="Auth Success Regex">
+          <Column header="Path" class="w-[500px] whitespace-nowrap">
+            <template #body="{ data }">
+              {{ getPathColumnValue(data) }}
+            </template>
+          </Column>
+
+          <Column
+            field="authSuccessRegex"
+            header="Auth Success Regex"
+            class="w-[200px] min-w-[200px]"
+          >
             <template #editor="{ data }">
               <InputText v-model="data.authSuccessRegex" />
             </template>
@@ -325,3 +355,25 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
     </Card>
   </div>
 </template>
+
+<style scoped>
+.scanning-row {
+  background: linear-gradient(
+    90deg,
+    rgba(from var(--c-bg-secondary) r g b / 0.1) 0%,
+    rgba(from var(--c-bg-secondary) r g b / 0.05) 100%
+  );
+  border-left: 3px solid #22c55e;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+</style>

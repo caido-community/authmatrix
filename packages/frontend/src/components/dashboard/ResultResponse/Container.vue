@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { AnalysisSelectionState } from "@/types";
-
 import Failed from "./Failed.vue";
 import Loading from "./Loading.vue";
 import None from "./None.vue";
 import Show from "./Show.vue";
+
+import { type AnalysisSelectionState } from "@/types";
 
 defineProps<{
   selectionState: AnalysisSelectionState;

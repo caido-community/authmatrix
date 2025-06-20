@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useUserService } from "@/services/users";
-import { RoleState } from "@/types";
-import { UserState } from "@/types";
 import Button from "primevue/button";
 import Checkbox from "primevue/checkbox";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import type { RoleDTO, UserDTO } from "shared";
+
+import { useUserService } from "@/services/users";
+import { type RoleState, type UserState } from "@/types";
 
 defineProps<{
   state: UserState & { type: "Success" };
@@ -40,11 +40,10 @@ const onDeleteUser = (user: UserDTO) => {
 };
 </script>
 
-
 <template>
   <DataTable
-    :value="state.users"
     v-model:selection="userSelection"
+    :value="state.users"
     data-key="id"
     striped-rows
     scrollable
@@ -54,26 +53,34 @@ const onDeleteUser = (user: UserDTO) => {
     class="w-full"
   >
     <template #empty>
-      <div class="flex flex-col items-center p-8 w-full">
+      <div class="flex flex-col items-center p-8 w-full text-center">
         <p class="text-gray-400">No users configured.</p>
-        <p class="text-gray-400">Click on the button above to add a new user.</p>
+        <p class="text-gray-400">
+          Click on the button above to add a new user.
+        </p>
       </div>
     </template>
     <Column field="name" header="Name" />
-    <Column
-      v-for="role in roleState.roles"
-      :key="role.id"
-      :header="role.name"
-    >
+    <Column v-for="role in roleState.roles" :key="role.id" :header="role.name">
       <template #body="{ data }">
-        <Checkbox :model-value="getRoleValue(data, role)" binary @change="() => toggleRole(data, role)" />
+        <Checkbox
+          :model-value="getRoleValue(data, role)"
+          binary
+          @change="() => toggleRole(data, role)"
+        />
       </template>
     </Column>
 
     <Column header="">
       <template #body="{ data }">
         <div class="flex justify-end">
-          <Button icon="fas fa-trash" text severity="danger" size="small" @click="() => onDeleteUser(data)" />
+          <Button
+            icon="fas fa-trash"
+            text
+            severity="danger"
+            size="small"
+            @click="() => onDeleteUser(data)"
+          />
         </div>
       </template>
     </Column>

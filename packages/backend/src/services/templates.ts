@@ -2,11 +2,11 @@ import type { SDK } from "caido:plugin";
 import type { ID, Request, Response } from "caido:utils";
 import type { TemplateDTO } from "shared";
 
+import { SettingsStore } from "../stores/settings";
 import { TemplateStore } from "../stores/templates";
+import type { BackendEvents } from "../types";
 import { generateID, sha256Hash } from "../utils";
 
-import { SettingsStore } from "../stores/settings";
-import type { BackendEvents } from "../types";
 import { runAnalysis } from "./analysis";
 
 export const getTemplates = (_sdk: SDK): TemplateDTO[] => {
@@ -80,7 +80,7 @@ export const clearTemplates = (sdk: SDK<never, BackendEvents>) => {
   sdk.api.send("templates:cleared");
 };
 
-export const onInterceptResponse = async (
+export const onInterceptResponse = (
   sdk: SDK<never, BackendEvents>,
   request: Request,
   response: Response,
@@ -89,18 +89,17 @@ export const onInterceptResponse = async (
   const settings = settingsStore.getSettings();
   const store = TemplateStore.get();
 
-  if (settings.autoCaptureRequests == "off") {
+  if (settings.autoCaptureRequests === "off") {
     return;
   }
-  
+
   if (!sdk.requests.matches(settings.defaultFilterHTTPQL, request)) {
-    sdk.console.log(`Filtering: ${request.getUrl()}`)
     return;
   }
 
   const templateId = generateTemplateId(request, settings.deDuplicateHeaders);
   if (store.templateExists(templateId)) {
-    return
+    return;
   }
 
   switch (settings.autoCaptureRequests) {
@@ -132,45 +131,52 @@ export const addTemplateFromContext = async (
   const settings = settingsStore.getSettings();
   const store = TemplateStore.get();
 
-  const result = await sdk.requests.get(request_id.toString())
+  const result = await sdk.requests.get(request_id.toString());
   if (!result) {
     return;
   }
+
   const request = result.request;
   const response = result.response;
-  if(!request || !response) {
+  if (!response) {
     return;
   }
 
   const templateId = generateTemplateId(request, settings.deDuplicateHeaders);
   if (store.templateExists(templateId)) {
-    return
+    return;
   }
 
   const template = toTemplate(request, response, templateId);
   store.addTemplate(template);
   sdk.api.send("templates:created", template);
-}
+};
 
 export const registerTemplateEvents = (sdk: SDK) => {
   sdk.events.onInterceptResponse(onInterceptResponse);
 };
 
-
-const generateTemplateId = (request: Request, dedupeHeaders: string[] = []): string => {
+const generateTemplateId = (
+  request: Request,
+  dedupeHeaders: string[] = [],
+): string => {
   let body = request.getBody()?.toText();
-  if (!body) {
+  if (body === undefined) {
     body = "";
   }
   const bodyHash = sha256Hash(body);
   let dedupe = `${request.getMethod}~${request.getUrl()}~${bodyHash}`;
   dedupeHeaders.forEach((h) => {
-    dedupe += `~${request.getHeader(h)?.join("~")}`
-  })
-  return sha256Hash(dedupe)
-}
+    dedupe += `~${request.getHeader(h)?.join("~")}`;
+  });
+  return sha256Hash(dedupe);
+};
 
-const toTemplate = (request: Request, response: Response, templateId: string = generateTemplateId(request)): TemplateDTO => {
+const toTemplate = (
+  request: Request,
+  response: Response,
+  templateId: string = generateTemplateId(request),
+): TemplateDTO => {
   return {
     id: templateId,
     requestId: request.getId(),

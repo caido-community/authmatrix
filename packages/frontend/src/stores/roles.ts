@@ -1,7 +1,8 @@
-import type { RoleState } from "@/types";
 import { defineStore } from "pinia";
 import type { RoleDTO } from "shared";
 import { reactive } from "vue";
+
+import type { RoleState } from "@/types";
 
 type Context = {
   state: RoleState;

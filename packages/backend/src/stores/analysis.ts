@@ -29,7 +29,9 @@ export class AnalysisStore {
   }
 
   resultExists(templateId: string, userId: string): boolean {
-    return this.resultExistsByResultHash(this.getResultHash(templateId, userId));
+    return this.resultExistsByResultHash(
+      this.getResultHash(templateId, userId),
+    );
   }
 
   resultExistsByResultHash(resultHash: string): boolean {
@@ -37,7 +39,7 @@ export class AnalysisStore {
   }
 
   addRequest(result: AnalysisRequestDTO) {
-    let resultHash = this.getResultHash(result.templateId, result.userId);
+    const resultHash = this.getResultHash(result.templateId, result.userId);
     if (this.resultExistsByResultHash(resultHash)) {
       return;
     }
@@ -46,11 +48,13 @@ export class AnalysisStore {
   }
 
   deleteRequest(requestId: string) {
-    let result = this.requests.get(requestId);
+    const result = this.requests.get(requestId);
     if (!result) {
       return;
     }
-    this.analysisLookup.delete(this.getResultHash(result.templateId, result.userId));
+    this.analysisLookup.delete(
+      this.getResultHash(result.templateId, result.userId),
+    );
     this.requests.delete(requestId);
   }
 

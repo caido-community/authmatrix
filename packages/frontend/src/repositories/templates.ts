@@ -1,5 +1,6 @@
-import { useSDK } from "@/plugins/sdk";
 import type { TemplateDTO } from "shared";
+
+import { useSDK } from "@/plugins/sdk";
 
 export const useTemplateRepository = () => {
   const sdk = useSDK();

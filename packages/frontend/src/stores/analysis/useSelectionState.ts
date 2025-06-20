@@ -1,5 +1,6 @@
-import type { AnalysisSelectionState } from "@/types";
 import { reactive } from "vue";
+
+import type { AnalysisSelectionState } from "@/types";
 
 type Context = {
   state: AnalysisSelectionState;

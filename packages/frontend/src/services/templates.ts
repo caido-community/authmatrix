@@ -1,9 +1,10 @@
+import { defineStore } from "pinia";
+import type { TemplateDTO } from "shared";
+
 import { useSDK } from "@/plugins/sdk";
 import { useTemplateRepository } from "@/repositories/template";
 import { useAnalysisStore } from "@/stores/analysis";
 import { useTemplateStore } from "@/stores/templates";
-import { defineStore } from "pinia";
-import type { TemplateDTO } from "shared";
 
 export const useTemplateService = defineStore("services.templates", () => {
   const sdk = useSDK();
@@ -114,6 +115,14 @@ export const useTemplateService = defineStore("services.templates", () => {
     sdk.backend.onEvent("templates:cleared", () => {
       store.send({ type: "ClearTemplates" });
       analysisStore.selectionState.send({ type: "Reset" });
+    });
+
+    sdk.backend.onEvent("cursor:mark", (templateId, isScanning) => {
+      store.send({ type: "MarkTemplate", templateId, isScanning });
+    });
+
+    sdk.backend.onEvent("cursor:clear", () => {
+      store.send({ type: "ClearMarkings" });
     });
   };
 

@@ -1,5 +1,6 @@
-import { useSDK } from "@/plugins/sdk";
 import type { SettingsDTO } from "shared";
+
+import { useSDK } from "@/plugins/sdk";
 
 export const useSettingsRepository = () => {
   const sdk = useSDK();

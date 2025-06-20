@@ -1,5 +1,6 @@
 import type { SDK } from "caido:plugin";
 import type { UserDTO } from "shared";
+
 import { UserStore } from "../stores/users";
 
 export const getUsers = (sdk: SDK) => {

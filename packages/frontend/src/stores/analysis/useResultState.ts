@@ -1,6 +1,7 @@
-import type { AnalysisResultState } from "@/types";
 import type { AnalysisRequestDTO } from "shared";
 import { reactive } from "vue";
+
+import type { AnalysisResultState } from "@/types";
 
 type Context = {
   state: AnalysisResultState;

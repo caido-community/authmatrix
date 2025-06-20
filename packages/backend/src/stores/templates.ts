@@ -66,9 +66,9 @@ export class TemplateStore {
   toggleRule(currRule: RoleRuleDTO | UserRuleDTO) {
     currRule.hasAccess = !currRule.hasAccess;
     if (currRule.status === "Bypassed" && currRule.hasAccess) {
-      currRule.status = "Enforced"
+      currRule.status = "Enforced";
     } else if (currRule.status === "Enforced" && !currRule.hasAccess) {
-      currRule.status = "Bypassed"
+      currRule.status = "Bypassed";
     }
   }
 

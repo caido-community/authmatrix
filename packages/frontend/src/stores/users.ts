@@ -1,7 +1,8 @@
-import type { UserState } from "@/types";
 import { defineStore } from "pinia";
 import type { UserDTO } from "shared";
 import { reactive } from "vue";
+
+import type { UserState } from "@/types";
 
 type Context = {
   state: UserState;

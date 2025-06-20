@@ -7,4 +7,6 @@ export type BackendEvents = DefineEvents<{
   "templates:cleared": () => void;
   "results:created": (result: AnalysisRequestDTO) => void;
   "results:clear": () => void;
+  "cursor:mark": (templateId: string, isScanning: boolean) => void;
+  "cursor:clear": () => void;
 }>;

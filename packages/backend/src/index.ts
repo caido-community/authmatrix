@@ -1,4 +1,5 @@
 import type { DefineAPI, SDK } from "caido:plugin";
+
 import {
   getRequestResponse,
   getResults,
@@ -8,11 +9,11 @@ import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { getSettings, updateSettings } from "./services/settings";
 import {
   addTemplate,
+  addTemplateFromContext,
   clearTemplates,
   deleteTemplate,
   getTemplates,
   registerTemplateEvents,
-  addTemplateFromContext,
   toggleTemplateRole,
   toggleTemplateUser,
   updateTemplate,

@@ -1,5 +1,6 @@
 import type { SDK } from "caido:plugin";
 import type { RoleDTO } from "shared";
+
 import { RoleStore } from "../stores/roles";
 
 export const getRoles = (sdk: SDK): RoleDTO[] => {

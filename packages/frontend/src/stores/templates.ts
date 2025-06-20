@@ -1,7 +1,8 @@
-import type { TemplateState } from "@/types";
 import { defineStore } from "pinia";
 import type { TemplateDTO } from "shared";
 import { reactive } from "vue";
+
+import type { TemplateState } from "@/types";
 
 type Context = {
   state: TemplateState;
@@ -14,7 +15,9 @@ type Message =
   | { type: "AddTemplate"; template: TemplateDTO }
   | { type: "UpdateTemplate"; template: TemplateDTO }
   | { type: "DeleteTemplate"; id: string }
-  | { type: "ClearTemplates" };
+  | { type: "ClearTemplates" }
+  | { type: "MarkTemplate"; templateId: string; isScanning: boolean }
+  | { type: "ClearMarkings" };
 
 export const useTemplateStore = defineStore("stores.templates", () => {
   const context: Context = reactive({
@@ -58,6 +61,8 @@ const processIdle = (
     case "UpdateTemplate":
     case "DeleteTemplate":
     case "ClearTemplates":
+    case "MarkTemplate":
+    case "ClearMarkings":
       return state;
   }
 };
@@ -75,6 +80,8 @@ const processError = (
     case "UpdateTemplate":
     case "DeleteTemplate":
     case "ClearTemplates":
+    case "MarkTemplate":
+    case "ClearMarkings":
       return state;
   }
 };
@@ -102,19 +109,40 @@ const processSuccess = (
           template.id === message.template.id ? message.template : template,
         ),
       };
-    case "DeleteTemplate":
+    case "DeleteTemplate": {
+      const newScanningIds = new Set(state.scanningTemplateIds);
+      newScanningIds.delete(message.id);
       return {
         ...state,
         templates: state.templates.filter(
           (template) => template.id !== message.id,
         ),
+        scanningTemplateIds: newScanningIds,
       };
+    }
     case "ClearTemplates":
       return {
         ...state,
         templates: [],
+        scanningTemplateIds: new Set(),
       };
-
+    case "MarkTemplate": {
+      const updatedScanningIds = new Set(state.scanningTemplateIds);
+      if (message.isScanning) {
+        updatedScanningIds.add(message.templateId);
+      } else {
+        updatedScanningIds.delete(message.templateId);
+      }
+      return {
+        ...state,
+        scanningTemplateIds: updatedScanningIds,
+      };
+    }
+    case "ClearMarkings":
+      return {
+        ...state,
+        scanningTemplateIds: new Set(),
+      };
     case "Start":
     case "Error":
     case "Success":
@@ -130,12 +158,18 @@ const processLoading = (
     case "Error":
       return { type: "Error", error: message.error };
     case "Success":
-      return { type: "Success", templates: message.templates };
+      return {
+        type: "Success",
+        templates: message.templates,
+        scanningTemplateIds: new Set(),
+      };
     case "Start":
     case "AddTemplate":
     case "UpdateTemplate":
     case "DeleteTemplate":
     case "ClearTemplates":
+    case "MarkTemplate":
+    case "ClearMarkings":
       return state;
   }
 };
