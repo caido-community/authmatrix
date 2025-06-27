@@ -10,7 +10,7 @@ export default defineConfig({
   id: "authmatrix",
   name: "AuthMatrix",
   description: "Grid-based authorization testing across multiple users and roles.",
-  version: "0.7.0",
+  version: "0.7.1",
   author: {
     name: "Caido Labs Inc.",
     email: "dev@caido.io",

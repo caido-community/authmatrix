@@ -61,6 +61,4 @@ export const init = (sdk: CaidoSDK) => {
     commandId: "send-to-authmatrix",
     leadingIcon: "fas fa-user-shield",
   });
-
-  sdk.navigation.goTo("/authmatrix");
 };
