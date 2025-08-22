@@ -36,4 +36,8 @@ export class RoleStore {
       return role;
     }
   }
+
+  clear() {
+    this.roles.clear();
+  }
 }

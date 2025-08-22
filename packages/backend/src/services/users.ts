@@ -25,7 +25,10 @@ export const addUser = async (sdk: SDK, name: string) => {
     attributes: [],
   };
 
-  await createUser(sdk, user);
+  const project = await sdk.projects.getCurrent();
+  if (!project) throw new Error("No active project");
+  const projectId = project.getId();
+  await createUser(sdk, projectId, user);
 
   const store = UserStore.get();
   store.addUser(user);
@@ -34,7 +37,10 @@ export const addUser = async (sdk: SDK, name: string) => {
 };
 
 export const deleteUser = async (sdk: SDK, id: string) => {
-  await removeUser(sdk, id);
+  const project = await sdk.projects.getCurrent();
+  if (!project) throw new Error("No active project");
+  const projectId = project.getId();
+  await removeUser(sdk, projectId, id);
   const store = UserStore.get();
   store.deleteUser(id);
 };
@@ -48,10 +54,20 @@ export const updateUser = async (
   const current = currentStore.getUser(id);
   if (!current) return undefined;
 
-  await updateUserName(sdk, id, fields.name);
-  await replaceUserRoles(sdk, id, fields.roleIds);
+  const project = await sdk.projects.getCurrent();
+  if (!project) return undefined;
+  const projectId = project.getId();
+
+  await updateUserName(sdk, projectId, id, fields.name);
+  await replaceUserRoles(sdk, projectId, id, fields.roleIds);
   const existingAttrIds = (current.attributes ?? []).map((a) => a.id);
-  await upsertUserAttributes(sdk, id, fields.attributes, existingAttrIds);
+  await upsertUserAttributes(
+    sdk,
+    projectId,
+    id,
+    fields.attributes,
+    existingAttrIds,
+  );
 
   const store = UserStore.get();
   return store.updateUser(id, fields);

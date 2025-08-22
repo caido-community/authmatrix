@@ -16,7 +16,10 @@ export const getRoles = (sdk: SDK): RoleDTO[] => {
 export const addRole = async (sdk: SDK, name: string) => {
   const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
   const role: RoleDTO = { id, name, description: "" };
-  await createRole(sdk, role);
+  const project = await sdk.projects.getCurrent();
+  if (!project) throw new Error("No active project");
+  const projectId = project.getId();
+  await createRole(sdk, projectId, role);
 
   const store = RoleStore.get();
   store.addRole(role);
@@ -24,7 +27,10 @@ export const addRole = async (sdk: SDK, name: string) => {
 };
 
 export const deleteRole = async (sdk: SDK, id: string) => {
-  await removeRole(sdk, id);
+  const project = await sdk.projects.getCurrent();
+  if (!project) throw new Error("No active project");
+  const projectId = project.getId();
+  await removeRole(sdk, projectId, id);
   const store = RoleStore.get();
   store.deleteRole(id);
 };
@@ -34,7 +40,10 @@ export const updateRole = async (
   id: string,
   fields: Omit<RoleDTO, "id">,
 ) => {
-  await updateRoleFields(sdk, id, fields);
+  const project = await sdk.projects.getCurrent();
+  if (!project) throw new Error("No active project");
+  const projectId = project.getId();
+  await updateRoleFields(sdk, projectId, id, fields);
 
   const store = RoleStore.get();
   return store.updateRole(id, fields);

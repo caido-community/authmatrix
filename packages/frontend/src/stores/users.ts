@@ -85,6 +85,8 @@ const processSuccess = (
   message: Message,
 ): UserState => {
   switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
     case "AddUser": {
       const selectedUserId = state.selectedUserId ?? message.user.id;
       return {
@@ -116,7 +118,6 @@ const processSuccess = (
         selectedUserId: message.id,
       };
 
-    case "Start":
     case "Error":
     case "Success":
       return state;

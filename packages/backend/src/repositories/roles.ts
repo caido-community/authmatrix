@@ -3,37 +3,51 @@ import type { RoleDTO } from "shared";
 
 import { getDb } from "../db";
 
-export const getAllRoles = async (sdk: SDK): Promise<RoleDTO[]> => {
+export const getAllRoles = async (
+  sdk: SDK,
+  projectId: string
+): Promise<RoleDTO[]> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(
-    "SELECT id, name, description FROM roles ORDER BY name ASC",
+    "SELECT id, name, description FROM roles WHERE project_id = ? ORDER BY name ASC"
   );
-  const rows: RoleDTO[] = await stmt.all();
+  const rows: RoleDTO[] = await stmt.all(projectId);
   return rows;
 };
 
-export const createRole = async (sdk: SDK, role: RoleDTO): Promise<void> => {
+export const createRole = async (
+  sdk: SDK,
+  projectId: string,
+  role: RoleDTO
+): Promise<void> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(
-    "INSERT INTO roles (id, name, description) VALUES (?, ?, ?)",
+    "INSERT INTO roles (id, project_id, name, description) VALUES (?, ?, ?, ?)"
   );
-  await stmt.run(role.id, role.name, role.description);
+  await stmt.run(role.id, projectId, role.name, role.description);
 };
 
-export const removeRole = async (sdk: SDK, id: string): Promise<void> => {
+export const removeRole = async (
+  sdk: SDK,
+  projectId: string,
+  id: string
+): Promise<void> => {
   const db = await getDb(sdk);
-  const stmt = await db.prepare("DELETE FROM roles WHERE id = ?");
-  await stmt.run(id);
+  const stmt = await db.prepare(
+    "DELETE FROM roles WHERE id = ? AND project_id = ?"
+  );
+  await stmt.run(id, projectId);
 };
 
 export const updateRoleFields = async (
   sdk: SDK,
+  projectId: string,
   id: string,
-  fields: Omit<RoleDTO, "id">,
+  fields: Omit<RoleDTO, "id">
 ): Promise<void> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(
-    "UPDATE roles SET name = ?, description = ? WHERE id = ?",
+    "UPDATE roles SET name = ?, description = ? WHERE id = ? AND project_id = ?"
   );
-  await stmt.run(fields.name, fields.description, id);
+  await stmt.run(fields.name, fields.description, id, projectId);
 };

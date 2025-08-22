@@ -91,6 +91,8 @@ const processSuccess = (
   message: Message,
 ): TemplateState => {
   switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
     case "AddTemplate":
       if (
         state.templates.some((template) => template.id === message.template.id)
@@ -143,7 +145,6 @@ const processSuccess = (
         ...state,
         scanningTemplateIds: new Set(),
       };
-    case "Start":
     case "Error":
     case "Success":
       return state;

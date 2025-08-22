@@ -40,4 +40,8 @@ export class UserStore {
       return user;
     }
   }
+
+  clear() {
+    this.users.clear();
+  }
 }

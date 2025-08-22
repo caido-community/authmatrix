@@ -10,6 +10,7 @@ import { useRoleService } from "@/services/roles";
 import { useSettingsService } from "@/services/settings";
 import { useTemplateService } from "@/services/templates";
 import { useUserService } from "@/services/users";
+import { useSDK } from "@/plugins/sdk";
 
 const page = ref<"Dashboard" | "Users & Roles">("Dashboard");
 const items = [
@@ -43,13 +44,19 @@ const userService = useUserService();
 const templateService = useTemplateService();
 const settingsService = useSettingsService();
 const analysisService = useAnalysisService();
+const sdk = useSDK();
 
 onMounted(() => {
-  roleService.initialize();
-  userService.initialize();
-  templateService.initialize();
-  settingsService.initialize();
-  analysisService.initialize();
+  const setup = () => {
+    roleService.initialize();
+    userService.initialize();
+    templateService.initialize();
+    settingsService.initialize();
+    analysisService.initialize();
+  };
+
+  sdk.backend.onEvent("project:changed", setup);
+  setup();
 });
 </script>
 
