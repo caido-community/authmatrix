@@ -32,9 +32,8 @@ export const init = (sdk: CaidoSDK) => {
 
       if (context.type === "RequestRowContext") {
         addedCount = context.requests
-          .filter(request => request.id !== undefined)
-          .map(request => addTemplate(request.id))
-          .length;
+          .filter((request) => request.id !== undefined)
+          .map((request) => addTemplate(request.id)).length;
       } else if (context.type === "RequestContext" && context.request.id) {
         addedCount = addTemplate(context.request.id) ? 1 : 0;
       }
@@ -44,7 +43,7 @@ export const init = (sdk: CaidoSDK) => {
           addedCount === 1
             ? "Request sent to Authmatrix"
             : `${addedCount} requests sent to Authmatrix`,
-          { variant: "success" }
+          { variant: "success" },
         );
       }
     },

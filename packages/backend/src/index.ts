@@ -1,5 +1,6 @@
 import type { DefineAPI, SDK } from "caido:plugin";
 
+import { hydrateStoresFromDb, initDatabase } from "./db";
 import {
   getRequestResponse,
   getResults,
@@ -55,7 +56,10 @@ export type API = DefineAPI<{
   getRequestResponse: typeof getRequestResponse;
 }>;
 
-export function init(sdk: SDK<API>) {
+export async function init(sdk: SDK<API>) {
+  await initDatabase(sdk);
+  await hydrateStoresFromDb(sdk);
+
   // Role endpoints
   sdk.api.register("getRoles", getRoles);
   sdk.api.register("addRole", addRole);
