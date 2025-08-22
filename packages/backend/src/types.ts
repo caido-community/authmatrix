@@ -9,5 +9,5 @@ export type BackendEvents = DefineEvents<{
   "results:clear": () => void;
   "cursor:mark": (templateId: string, isScanning: boolean) => void;
   "cursor:clear": () => void;
-  "project:changed": (projectId: string) => void;
+  "project:changed": (projectId: string | undefined) => void;
 }>;

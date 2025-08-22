@@ -43,7 +43,7 @@ export const init = (sdk: CaidoSDK) => {
           addedCount === 1
             ? "Request sent to Authmatrix"
             : `${addedCount} requests sent to Authmatrix`,
-          { variant: "success" },
+          { variant: "success" }
         );
       }
     },
@@ -60,4 +60,14 @@ export const init = (sdk: CaidoSDK) => {
     commandId: "send-to-authmatrix",
     leadingIcon: "fas fa-user-shield",
   });
+
+  const subscription = sdk.graphql.deletedProject();
+  (async () => {
+    for await (const event of subscription) {
+      const projectId = event.deletedProject?.deletedProjectId;
+      if (projectId) {
+        sdk.backend.deleteProjectData(projectId);
+      }
+    }
+  })();
 };

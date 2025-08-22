@@ -23,6 +23,7 @@ import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
 import { RoleStore } from "./stores/roles";
 import { UserStore } from "./stores/users";
 import { BackendEvents } from "./types";
+import { deleteProjectData, getActiveProject } from "./services/utils";
 
 export type { BackendEvents } from "./types";
 
@@ -60,6 +61,7 @@ export type API = DefineAPI<{
 
   // Utils endpoints
   getActiveProject: typeof getActiveProject;
+  deleteProjectData: typeof deleteProjectData;
 }>;
 
 export async function init(sdk: SDK<API, BackendEvents>) {
@@ -99,15 +101,13 @@ export async function init(sdk: SDK<API, BackendEvents>) {
 
   // Utils endpoints
   sdk.api.register("getActiveProject", getActiveProject);
+  sdk.api.register("deleteProjectData", deleteProjectData);
 
   // Events
   registerTemplateEvents(sdk);
 
   sdk.events.onProjectChange(async (sdk, project) => {
     const projectId = project?.getId();
-    if (!projectId) {
-      return;
-    }
 
     const roleStore = RoleStore.get();
     const userStore = UserStore.get();
@@ -115,21 +115,6 @@ export async function init(sdk: SDK<API, BackendEvents>) {
     userStore.clear();
 
     await hydrateStoresFromDb(sdk);
-    sdk.api.send("project:changed", projectId as string);
+    sdk.api.send("project:changed", projectId);
   });
 }
-
-const getActiveProject = async (sdk: SDK<API>) => {
-  const project = await sdk.projects.getCurrent();
-  if (!project) {
-    return {
-      type: "Err" as const,
-      message: "No project selected",
-    };
-  }
-
-  return {
-    type: "Ok" as const,
-    id: project.getId(),
-  };
-};
