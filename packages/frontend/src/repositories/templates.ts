@@ -24,7 +24,7 @@ export const useTemplateRepository = () => {
     try {
       const newTemplate = await sdk.backend.toggleTemplateRole(
         templateId,
-        roleId,
+        roleId
       );
 
       if (newTemplate) {
@@ -50,7 +50,7 @@ export const useTemplateRepository = () => {
     try {
       const newTemplate = await sdk.backend.toggleTemplateUser(
         templateId,
-        userId,
+        userId
       );
 
       if (newTemplate) {
@@ -75,9 +75,16 @@ export const useTemplateRepository = () => {
   const addTemplate = async () => {
     try {
       const newTemplate = await sdk.backend.addTemplate();
+      if (newTemplate) {
+        return {
+          type: "Ok" as const,
+          template: newTemplate,
+        };
+      }
+
       return {
-        type: "Ok" as const,
-        template: newTemplate,
+        type: "Err" as const,
+        error: "Failed to add template",
       };
     } catch {
       return {
@@ -103,7 +110,7 @@ export const useTemplateRepository = () => {
 
   const updateTemplate = async (
     id: string,
-    fields: Omit<TemplateDTO, "id">,
+    fields: Omit<TemplateDTO, "id">
   ) => {
     try {
       const newTemplate = await sdk.backend.updateTemplate(id, fields);
