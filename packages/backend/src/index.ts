@@ -20,10 +20,11 @@ import {
   updateTemplate,
 } from "./services/templates";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
-import { RoleStore } from "./stores/roles";
-import { UserStore } from "./stores/users";
-import { BackendEvents } from "./types";
 import { deleteProjectData, getActiveProject } from "./services/utils";
+import { RoleStore } from "./stores/roles";
+import { TemplateStore } from "./stores/templates";
+import { UserStore } from "./stores/users";
+import { type BackendEvents } from "./types";
 
 export type { BackendEvents } from "./types";
 
@@ -65,6 +66,7 @@ export type API = DefineAPI<{
 }>;
 
 export async function init(sdk: SDK<API, BackendEvents>) {
+  // DB setup
   await initDatabase(sdk);
   await hydrateStoresFromDb(sdk);
 
@@ -106,15 +108,19 @@ export async function init(sdk: SDK<API, BackendEvents>) {
   // Events
   registerTemplateEvents(sdk);
 
+  // On project change we want to clear all stores and re-hydrate from the database with new projectID
   sdk.events.onProjectChange(async (sdk, project) => {
-    const projectId = project?.getId();
-
     const roleStore = RoleStore.get();
+    const templateStore = TemplateStore.get();
     const userStore = UserStore.get();
+
     roleStore.clear();
+    templateStore.clearTemplates();
     userStore.clear();
 
     await hydrateStoresFromDb(sdk);
+
+    const projectId = project?.getId();
     sdk.api.send("project:changed", projectId);
   });
 }

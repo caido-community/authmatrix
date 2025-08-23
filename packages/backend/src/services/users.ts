@@ -1,14 +1,14 @@
 import type { SDK } from "caido:plugin";
 import type { UserDTO } from "shared";
 
+import { withProject } from "../db/utils";
 import {
   createUser,
+  updateUser as dbUpdateUser,
   removeUser,
-  replaceUserRoles,
-  updateUserName,
-  upsertUserAttributes,
 } from "../repositories/users";
 import { UserStore } from "../stores/users";
+import { generateID } from "../utils";
 
 export const getUsers = (_sdk: SDK) => {
   const store = UserStore.get();
@@ -16,7 +16,7 @@ export const getUsers = (_sdk: SDK) => {
 };
 
 export const addUser = async (sdk: SDK, name: string) => {
-  const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
+  const id = generateID();
 
   const user: UserDTO = {
     id,
@@ -25,10 +25,9 @@ export const addUser = async (sdk: SDK, name: string) => {
     attributes: [],
   };
 
-  const project = await sdk.projects.getCurrent();
-  if (!project) throw new Error("No active project");
-  const projectId = project.getId();
-  await createUser(sdk, projectId, user);
+  await withProject(sdk, async (projectId) => {
+    await createUser(sdk, projectId, user);
+  });
 
   const store = UserStore.get();
   store.addUser(user);
@@ -37,10 +36,10 @@ export const addUser = async (sdk: SDK, name: string) => {
 };
 
 export const deleteUser = async (sdk: SDK, id: string) => {
-  const project = await sdk.projects.getCurrent();
-  if (!project) throw new Error("No active project");
-  const projectId = project.getId();
-  await removeUser(sdk, projectId, id);
+  await withProject(sdk, async (projectId) => {
+    await removeUser(sdk, projectId, id);
+  });
+
   const store = UserStore.get();
   store.deleteUser(id);
 };
@@ -50,25 +49,11 @@ export const updateUser = async (
   id: string,
   fields: Omit<UserDTO, "id">,
 ) => {
-  const currentStore = UserStore.get();
-  const current = currentStore.getUser(id);
+  const current = UserStore.get().getUser(id);
   if (!current) return undefined;
-
-  const project = await sdk.projects.getCurrent();
-  if (!project) return undefined;
-  const projectId = project.getId();
-
-  await updateUserName(sdk, projectId, id, fields.name);
-  await replaceUserRoles(sdk, projectId, id, fields.roleIds);
-  const existingAttrIds = (current.attributes ?? []).map((a) => a.id);
-  await upsertUserAttributes(
-    sdk,
-    projectId,
-    id,
-    fields.attributes,
-    existingAttrIds,
-  );
-
+  const persisted = await withProject(sdk, async (projectId) => {
+    return dbUpdateUser(sdk, projectId, { id, ...fields });
+  });
   const store = UserStore.get();
-  return store.updateUser(id, fields);
+  return store.updateUser(id, persisted);
 };

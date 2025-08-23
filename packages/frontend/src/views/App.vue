@@ -5,12 +5,12 @@ import { computed, onMounted, ref } from "vue";
 import Dashboard from "./Dashboard.vue";
 import UsersRoles from "./UsersRoles.vue";
 
+import { useSDK } from "@/plugins/sdk";
 import { useAnalysisService } from "@/services/analysis";
 import { useRoleService } from "@/services/roles";
 import { useSettingsService } from "@/services/settings";
 import { useTemplateService } from "@/services/templates";
 import { useUserService } from "@/services/users";
-import { useSDK } from "@/plugins/sdk";
 
 const page = ref<"Dashboard" | "Users & Roles">("Dashboard");
 const items = [

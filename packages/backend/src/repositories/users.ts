@@ -1,7 +1,8 @@
 import type { SDK } from "caido:plugin";
-import type { UserAttributeDTO, UserDTO } from "shared";
+import type { UserDTO } from "shared";
 
-import { getDb } from "../db";
+import { getDb } from "../db/client";
+import { withProject } from "packages/backend/src/db";
 
 export const createUser = async (
   sdk: SDK,
@@ -27,68 +28,72 @@ export const removeUser = async (
   await stmt.run(id, projectId);
 };
 
-export const updateUserName = async (
+export const updateUser = async (
   sdk: SDK,
   projectId: string,
-  id: string,
-  name: string,
-): Promise<void> => {
-  const db = await getDb(sdk);
-  const stmt = await db.prepare(
-    "UPDATE users SET name = ? WHERE id = ? AND project_id = ?",
-  );
-  await stmt.run(name, id, projectId);
-};
+  user: { id: string } & Omit<UserDTO, "id">,
+): Promise<Omit<UserDTO, "id">> => {
+  const { id, name, roleIds, attributes } = user;
 
-export const replaceUserRoles = async (
-  sdk: SDK,
-  projectId: string,
-  id: string,
-  roleIds: string[],
-): Promise<void> => {
-  const db = await getDb(sdk);
-  const del = await db.prepare(
-    "DELETE FROM user_roles WHERE user_id = ? AND project_id = ?",
-  );
-  await del.run(id, projectId);
-  if (roleIds.length === 0) return;
-  const ins = await db.prepare(
-    "INSERT INTO user_roles (user_id, role_id, project_id) VALUES (?, ?, ?)",
-  );
-  for (const roleId of roleIds) {
-    await ins.run(id, roleId, projectId);
-  }
-};
+  return await withProject(sdk, async (projectId) => {
+    const db = await getDb(sdk);
 
-export const upsertUserAttributes = async (
-  sdk: SDK,
-  projectId: string,
-  id: string,
-  attributes: UserAttributeDTO[],
-  existingIds: string[],
-): Promise<void> => {
-  const db = await getDb(sdk);
+    const u = await db.prepare(
+      "UPDATE users SET name = ? WHERE id = ? AND project_id = ?",
+    );
+    await u.run(name, id, projectId);
 
-  const newIds = new Set(attributes.map((a) => a.id));
-  for (const oldId of existingIds) {
-    if (!newIds.has(oldId)) {
-      const del = await db.prepare(
-        "DELETE FROM user_attributes WHERE id = ? AND project_id = ?",
+    const delRoles = await db.prepare(
+      "DELETE FROM user_roles WHERE user_id = ? AND project_id = ?",
+    );
+    await delRoles.run(id, projectId);
+
+    let persistedRoleIds: string[] = [];
+    if (roleIds.length > 0) {
+      const selAll = await db.prepare(
+        `
+        SELECT id FROM roles
+        WHERE project_id = ?
+        `,
       );
-      await del.run(oldId, projectId);
+      const rows: { id: string }[] = await selAll.all(projectId);
+      const valid = new Set(rows.map((r) => r.id));
+      persistedRoleIds = roleIds.filter((rid) => valid.has(rid));
+      const insRole = await db.prepare(
+        `
+        INSERT INTO user_roles (user_id, role_id, project_id)
+        VALUES (?, ?, ?)
+        `,
+      );
+      for (const rid of persistedRoleIds) {
+        await insRole.run(id, rid, projectId);
+      }
     }
-  }
 
-  const upsert = await db.prepare(`
-    INSERT INTO user_attributes (id, user_id, project_id, name, value, kind)
-    VALUES (?, ?, ?, ?, ?, ?)
-    ON CONFLICT(id, project_id) DO UPDATE SET
-      name = excluded.name,
-      value = excluded.value,
-      kind = excluded.kind
-  `);
+    if (attributes.length === 0) {
+      const delAttrsAll = await db.prepare(
+        "DELETE FROM user_attributes WHERE user_id = ? AND project_id = ?",
+      );
+      await delAttrsAll.run(id, projectId);
+    } else {
+      const delAttrsAll = await db.prepare(
+        "DELETE FROM user_attributes WHERE user_id = ? AND project_id = ?",
+      );
+      await delAttrsAll.run(id, projectId);
+      const upsert = await db.prepare(
+        `
+        INSERT INTO user_attributes
+          (id, user_id, project_id, name, value, kind)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id, project_id)
+        DO UPDATE SET name=excluded.name, value=excluded.value, kind=excluded.kind
+        `,
+      );
+      for (const a of attributes) {
+        await upsert.run(a.id, id, projectId, a.name, a.value, a.kind);
+      }
+    }
 
-  for (const attr of attributes) {
-    await upsert.run(attr.id, id, projectId, attr.name, attr.value, attr.kind);
-  }
+    return { name, roleIds: persistedRoleIds, attributes };
+  });
 };

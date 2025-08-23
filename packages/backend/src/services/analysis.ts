@@ -8,6 +8,8 @@ import type {
   UserDTO,
 } from "shared";
 
+import { withProject } from "../db/utils";
+import { updateTemplateFields } from "../repositories/templates";
 import { AnalysisStore } from "../stores/analysis";
 import { RoleStore } from "../stores/roles";
 import { TemplateStore } from "../stores/templates";
@@ -45,6 +47,9 @@ export const getRequestResponse = async (sdk: SDK, requestId: string) => {
 };
 
 export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
+  const project = await sdk.projects.getCurrent();
+  if (!project) return;
+
   const templateStore = TemplateStore.get();
   const userStore = UserStore.get();
   const roleStore = RoleStore.get();
@@ -119,6 +124,9 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
         templateStore.updateTemplate(template.id, template);
         sdk.api.send("templates:updated", template);
         sdk.api.send("cursor:mark", template.id, false);
+        await withProject(sdk, async (projectId) => {
+          await updateTemplateFields(sdk, projectId, template.id, template);
+        });
       }),
     );
   }

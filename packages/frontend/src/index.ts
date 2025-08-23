@@ -43,7 +43,7 @@ export const init = (sdk: CaidoSDK) => {
           addedCount === 1
             ? "Request sent to Authmatrix"
             : `${addedCount} requests sent to Authmatrix`,
-          { variant: "success" }
+          { variant: "success" },
         );
       }
     },

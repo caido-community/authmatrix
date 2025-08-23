@@ -2,6 +2,15 @@ import type { SDK } from "caido:plugin";
 import type { ID, Request, Response } from "caido:utils";
 import type { TemplateDTO } from "shared";
 
+import { withProject } from "../db/utils";
+import {
+  clearAllTemplates,
+  createTemplate,
+  removeTemplate,
+  replaceTemplateRules,
+  updateTemplateFields,
+  upsertTemplateRule,
+} from "../repositories/templates";
 import { SettingsStore } from "../stores/settings";
 import { TemplateStore } from "../stores/templates";
 import type { BackendEvents } from "../types";
@@ -14,7 +23,10 @@ export const getTemplates = (_sdk: SDK): TemplateDTO[] => {
   return store.getTemplates();
 };
 
-export const addTemplate = (sdk: SDK<never, BackendEvents>) => {
+export const addTemplate = async (sdk: SDK<never, BackendEvents>) => {
+  const project = await sdk.projects.getCurrent();
+  if (!project) return;
+
   const newTemplate: TemplateDTO = {
     id: generateID(),
     requestId: generateID(),
@@ -33,57 +45,99 @@ export const addTemplate = (sdk: SDK<never, BackendEvents>) => {
   store.addTemplate(newTemplate);
   sdk.api.send("templates:created", newTemplate);
 
+  await withProject(sdk, async (projectId) => {
+    await createTemplate(sdk, projectId, newTemplate);
+  });
+
   return newTemplate;
 };
 
-export const deleteTemplate = (_sdk: SDK, requestId: string) => {
+export const deleteTemplate = async (sdk: SDK, requestId: string) => {
   const store = TemplateStore.get();
   store.deleteTemplate(requestId);
+
+  await withProject(sdk, async (projectId) => {
+    await removeTemplate(sdk, projectId, requestId);
+  });
 };
 
-export const updateTemplate = (
+export const updateTemplate = async (
   sdk: SDK<never, BackendEvents>,
   id: string,
-  fields: Omit<TemplateDTO, "id">,
+  fields: Omit<TemplateDTO, "id">
 ) => {
   const store = TemplateStore.get();
   const newTemplate = store.updateTemplate(id, fields);
   sdk.api.send("templates:updated", newTemplate);
+
+  await withProject(sdk, async (projectId) => {
+    await updateTemplateFields(sdk, projectId, id, fields);
+    await replaceTemplateRules(sdk, projectId, id, fields.rules);
+  });
+
   return newTemplate;
 };
 
-export const toggleTemplateRole = (
+export const toggleTemplateRole = async (
   sdk: SDK<never, BackendEvents>,
   requestId: string,
-  roleId: string,
+  roleId: string
 ) => {
   const store = TemplateStore.get();
+
   const newTemplate = store.toggleTemplateRole(requestId, roleId);
   sdk.api.send("templates:updated", newTemplate);
+  if (!newTemplate) return undefined;
+
+  const rule = newTemplate.rules.find((r) => {
+    return r.type === "RoleRule" && r.roleId === roleId;
+  });
+  if (!rule) return newTemplate;
+
+  await withProject(sdk, async (projectId) => {
+    await upsertTemplateRule(sdk, projectId, requestId, rule);
+  });
+
   return newTemplate;
 };
 
-export const toggleTemplateUser = (
+export const toggleTemplateUser = async (
   sdk: SDK<never, BackendEvents>,
   requestId: string,
-  userId: string,
+  userId: string
 ) => {
   const store = TemplateStore.get();
+
   const newTemplate = store.toggleTemplateUser(requestId, userId);
   sdk.api.send("templates:updated", newTemplate);
+  if (!newTemplate) return undefined;
+
+  const rule = newTemplate.rules.find((r) => {
+    return r.type === "UserRule" && r.userId === userId;
+  });
+  if (!rule) return newTemplate;
+
+  await withProject(sdk, async (projectId) => {
+    await upsertTemplateRule(sdk, projectId, requestId, rule);
+  });
+
   return newTemplate;
 };
 
-export const clearTemplates = (sdk: SDK<never, BackendEvents>) => {
+export const clearTemplates = async (sdk: SDK<never, BackendEvents>) => {
   const store = TemplateStore.get();
   store.clearTemplates();
   sdk.api.send("templates:cleared");
+
+  await withProject(sdk, async (projectId) => {
+    await clearAllTemplates(sdk, projectId);
+  });
 };
 
-export const onInterceptResponse = (
+export const onInterceptResponse = async (
   sdk: SDK<never, BackendEvents>,
   request: Request,
-  response: Response,
+  response: Response
 ) => {
   const settingsStore = SettingsStore.get();
   const settings = settingsStore.getSettings();
@@ -102,11 +156,18 @@ export const onInterceptResponse = (
     return;
   }
 
+  const project = await sdk.projects.getCurrent();
+  if (!project) return;
+
   switch (settings.autoCaptureRequests) {
     case "all": {
       const template = toTemplate(request, response, templateId);
       store.addTemplate(template);
       sdk.api.send("templates:created", template);
+
+      await withProject(sdk, async (projectId) => {
+        await createTemplate(sdk, projectId, template);
+      });
       break;
     }
     case "inScope": {
@@ -114,10 +175,15 @@ export const onInterceptResponse = (
         const template = toTemplate(request, response, templateId);
         store.addTemplate(template);
         sdk.api.send("templates:created", template);
+
+        await withProject(sdk, async (projectId) => {
+          await createTemplate(sdk, projectId, template);
+        });
       }
       break;
     }
   }
+
   if (settings.autoRunAnalysis) {
     runAnalysis(sdk);
   }
@@ -125,8 +191,11 @@ export const onInterceptResponse = (
 
 export const addTemplateFromContext = async (
   sdk: SDK<never, BackendEvents>,
-  request_id: ID,
+  request_id: ID
 ) => {
+  const project = await sdk.projects.getCurrent();
+  if (!project) return;
+
   const settingsStore = SettingsStore.get();
   const settings = settingsStore.getSettings();
   const store = TemplateStore.get();
@@ -150,6 +219,8 @@ export const addTemplateFromContext = async (
   const template = toTemplate(request, response, templateId);
   store.addTemplate(template);
   sdk.api.send("templates:created", template);
+
+  await createTemplate(sdk, project.getId(), template);
 };
 
 export const registerTemplateEvents = (sdk: SDK) => {
@@ -158,14 +229,14 @@ export const registerTemplateEvents = (sdk: SDK) => {
 
 const generateTemplateId = (
   request: Request,
-  dedupeHeaders: string[] = [],
+  dedupeHeaders: string[] = []
 ): string => {
   let body = request.getBody()?.toText();
   if (body === undefined) {
     body = "";
   }
   const bodyHash = sha256Hash(body);
-  let dedupe = `${request.getMethod}~${request.getUrl()}~${bodyHash}`;
+  let dedupe = `${request.getMethod()}~${request.getUrl()}~${bodyHash}`;
   dedupeHeaders.forEach((h) => {
     dedupe += `~${request.getHeader(h)?.join("~")}`;
   });
@@ -175,7 +246,7 @@ const generateTemplateId = (
 const toTemplate = (
   request: Request,
   response: Response,
-  templateId: string = generateTemplateId(request),
+  templateId: string = generateTemplateId(request)
 ): TemplateDTO => {
   return {
     id: templateId,
