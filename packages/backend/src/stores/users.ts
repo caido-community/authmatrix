@@ -40,4 +40,14 @@ export class UserStore {
       return user;
     }
   }
+
+  clear() {
+    this.users.clear();
+  }
+
+  removeRoleFromAllUsers(roleId: string) {
+    this.users.forEach((user) => {
+      user.roleIds = user.roleIds.filter((id) => id !== roleId);
+    });
+  }
 }

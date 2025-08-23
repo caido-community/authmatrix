@@ -75,9 +75,16 @@ export const useTemplateRepository = () => {
   const addTemplate = async () => {
     try {
       const newTemplate = await sdk.backend.addTemplate();
+      if (newTemplate) {
+        return {
+          type: "Ok" as const,
+          template: newTemplate,
+        };
+      }
+
       return {
-        type: "Ok" as const,
-        template: newTemplate,
+        type: "Err" as const,
+        error: "Failed to add template",
       };
     } catch {
       return {

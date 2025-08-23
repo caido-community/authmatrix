@@ -82,6 +82,8 @@ const processSuccess = (
   message: Message,
 ): RoleState => {
   switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
     case "AddRole":
       return {
         ...state,
@@ -100,7 +102,6 @@ const processSuccess = (
         roles: state.roles.filter((role) => role.id !== message.id),
       };
 
-    case "Start":
     case "Error":
     case "Success":
       return state;

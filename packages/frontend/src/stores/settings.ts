@@ -76,13 +76,14 @@ const processSuccess = (
   message: Message,
 ): SettingsState => {
   switch (message.type) {
+    case "Start":
+      return { type: "Loading" };
     case "UpdateSettings":
       return {
         ...state,
         settings: message.settings,
       };
 
-    case "Start":
     case "Error":
     case "Success":
       return state;

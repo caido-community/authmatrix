@@ -1,5 +1,6 @@
 import type { DefineAPI, SDK } from "caido:plugin";
 
+import { hydrateStoresFromDb, initDatabase } from "./db";
 import {
   getRequestResponse,
   getResults,
@@ -19,6 +20,11 @@ import {
   updateTemplate,
 } from "./services/templates";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
+import { deleteProjectData, getActiveProject } from "./services/utils";
+import { RoleStore } from "./stores/roles";
+import { TemplateStore } from "./stores/templates";
+import { UserStore } from "./stores/users";
+import { type BackendEvents } from "./types";
 
 export type { BackendEvents } from "./types";
 
@@ -53,9 +59,17 @@ export type API = DefineAPI<{
   runAnalysis: typeof runAnalysis;
   getResults: typeof getResults;
   getRequestResponse: typeof getRequestResponse;
+
+  // Utils endpoints
+  getActiveProject: typeof getActiveProject;
+  deleteProjectData: typeof deleteProjectData;
 }>;
 
-export function init(sdk: SDK<API>) {
+export async function init(sdk: SDK<API, BackendEvents>) {
+  // DB setup
+  await initDatabase(sdk);
+  await hydrateStoresFromDb(sdk);
+
   // Role endpoints
   sdk.api.register("getRoles", getRoles);
   sdk.api.register("addRole", addRole);
@@ -87,6 +101,26 @@ export function init(sdk: SDK<API>) {
   sdk.api.register("getResults", getResults);
   sdk.api.register("getRequestResponse", getRequestResponse);
 
+  // Utils endpoints
+  sdk.api.register("getActiveProject", getActiveProject);
+  sdk.api.register("deleteProjectData", deleteProjectData);
+
   // Events
   registerTemplateEvents(sdk);
+
+  // On project change we want to clear all stores and re-hydrate from the database with new projectID
+  sdk.events.onProjectChange(async (sdk, project) => {
+    const roleStore = RoleStore.get();
+    const templateStore = TemplateStore.get();
+    const userStore = UserStore.get();
+
+    roleStore.clear();
+    templateStore.clearTemplates();
+    userStore.clear();
+
+    await hydrateStoresFromDb(sdk);
+
+    const projectId = project?.getId();
+    sdk.api.send("project:changed", projectId);
+  });
 }

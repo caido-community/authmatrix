@@ -267,7 +267,6 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
           size="small"
           edit-mode="cell"
           selection-mode="single"
-          data-key="id"
           @cell-edit-complete="
             ({ data, field, newValue }) =>
               onTemplateUpdate(data, field, newValue)
@@ -356,7 +355,7 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
   </div>
 </template>
 
-<style scoped>
+<style>
 .scanning-row {
   background: linear-gradient(
     90deg,

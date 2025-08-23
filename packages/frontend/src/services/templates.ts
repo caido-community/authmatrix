@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import type { TemplateDTO } from "shared";
 
 import { useSDK } from "@/plugins/sdk";
-import { useTemplateRepository } from "@/repositories/template";
+import { useTemplateRepository } from "@/repositories/templates";
 import { useAnalysisStore } from "@/stores/analysis";
 import { useTemplateStore } from "@/stores/templates";
 

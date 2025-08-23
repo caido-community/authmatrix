@@ -5,6 +5,7 @@ import { computed, onMounted, ref } from "vue";
 import Dashboard from "./Dashboard.vue";
 import UsersRoles from "./UsersRoles.vue";
 
+import { useSDK } from "@/plugins/sdk";
 import { useAnalysisService } from "@/services/analysis";
 import { useRoleService } from "@/services/roles";
 import { useSettingsService } from "@/services/settings";
@@ -43,13 +44,19 @@ const userService = useUserService();
 const templateService = useTemplateService();
 const settingsService = useSettingsService();
 const analysisService = useAnalysisService();
+const sdk = useSDK();
 
 onMounted(() => {
-  roleService.initialize();
-  userService.initialize();
-  templateService.initialize();
-  settingsService.initialize();
-  analysisService.initialize();
+  const setup = () => {
+    roleService.initialize();
+    userService.initialize();
+    templateService.initialize();
+    settingsService.initialize();
+    analysisService.initialize();
+  };
+
+  sdk.backend.onEvent("project:changed", setup);
+  setup();
 });
 </script>
 

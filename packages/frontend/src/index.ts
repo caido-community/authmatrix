@@ -32,9 +32,8 @@ export const init = (sdk: CaidoSDK) => {
 
       if (context.type === "RequestRowContext") {
         addedCount = context.requests
-          .filter(request => request.id !== undefined)
-          .map(request => addTemplate(request.id))
-          .length;
+          .filter((request) => request.id !== undefined)
+          .map((request) => addTemplate(request.id)).length;
       } else if (context.type === "RequestContext" && context.request.id) {
         addedCount = addTemplate(context.request.id) ? 1 : 0;
       }
@@ -44,7 +43,7 @@ export const init = (sdk: CaidoSDK) => {
           addedCount === 1
             ? "Request sent to Authmatrix"
             : `${addedCount} requests sent to Authmatrix`,
-          { variant: "success" }
+          { variant: "success" },
         );
       }
     },
@@ -61,4 +60,14 @@ export const init = (sdk: CaidoSDK) => {
     commandId: "send-to-authmatrix",
     leadingIcon: "fas fa-user-shield",
   });
+
+  const subscription = sdk.graphql.deletedProject();
+  (async () => {
+    for await (const event of subscription) {
+      const projectId = event.deletedProject?.deletedProjectId;
+      if (projectId) {
+        sdk.backend.deleteProjectData(projectId);
+      }
+    }
+  })();
 };
