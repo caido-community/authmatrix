@@ -1,8 +1,8 @@
 import type { SDK } from "caido:plugin";
 import type { UserDTO } from "shared";
 
+import { withProject } from "../db";
 import { getDb } from "../db/client";
-import { withProject } from "packages/backend/src/db";
 
 export const createUser = async (
   sdk: SDK,

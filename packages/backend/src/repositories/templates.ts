@@ -7,7 +7,7 @@ import { toDbBool } from "../db/utils";
 export const createTemplate = async (
   sdk: SDK,
   projectId: string,
-  template: TemplateDTO
+  template: TemplateDTO,
 ): Promise<void> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(`
@@ -26,7 +26,7 @@ export const createTemplate = async (
     template.meta.port,
     template.meta.path,
     toDbBool(template.meta.isTls),
-    template.meta.method
+    template.meta.method,
   );
 };
 
@@ -34,7 +34,7 @@ export const updateTemplateFields = async (
   sdk: SDK,
   projectId: string,
   id: string,
-  fields: Omit<TemplateDTO, "id">
+  fields: Omit<TemplateDTO, "id">,
 ): Promise<void> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(`
@@ -57,14 +57,14 @@ export const updateTemplateFields = async (
     toDbBool(fields.meta.isTls),
     fields.meta.method,
     id,
-    projectId
+    projectId,
   );
 };
 
 export const removeTemplate = async (
   sdk: SDK,
   projectId: string,
-  id: string
+  id: string,
 ): Promise<void> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(`
@@ -75,7 +75,7 @@ export const removeTemplate = async (
 
 export const clearAllTemplates = async (
   sdk: SDK,
-  projectId: string
+  projectId: string,
 ): Promise<void> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(`
@@ -88,7 +88,7 @@ export const upsertTemplateRule = async (
   sdk: SDK,
   projectId: string,
   templateId: string,
-  rule: RoleRuleDTO | UserRuleDTO
+  rule: RoleRuleDTO | UserRuleDTO,
 ): Promise<void> => {
   const db = await getDb(sdk);
   const stmt = await db.prepare(`
@@ -106,7 +106,7 @@ export const upsertTemplateRule = async (
     type,
     subjectId,
     toDbBool(rule.hasAccess),
-    rule.status
+    rule.status,
   );
 };
 
@@ -114,7 +114,7 @@ export const replaceTemplateRules = async (
   sdk: SDK,
   projectId: string,
   templateId: string,
-  rules: Array<RoleRuleDTO | UserRuleDTO>
+  rules: Array<RoleRuleDTO | UserRuleDTO>,
 ): Promise<void> => {
   const db = await getDb(sdk);
   const del = await db.prepare(`
@@ -136,7 +136,7 @@ export const replaceTemplateRules = async (
       type,
       subjectId,
       toDbBool(rule.hasAccess),
-      rule.status
+      rule.status,
     );
   }
 };

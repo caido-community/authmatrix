@@ -64,7 +64,7 @@ export const deleteTemplate = async (sdk: SDK, requestId: string) => {
 export const updateTemplate = async (
   sdk: SDK<never, BackendEvents>,
   id: string,
-  fields: Omit<TemplateDTO, "id">
+  fields: Omit<TemplateDTO, "id">,
 ) => {
   const store = TemplateStore.get();
   const newTemplate = store.updateTemplate(id, fields);
@@ -81,7 +81,7 @@ export const updateTemplate = async (
 export const toggleTemplateRole = async (
   sdk: SDK<never, BackendEvents>,
   requestId: string,
-  roleId: string
+  roleId: string,
 ) => {
   const store = TemplateStore.get();
 
@@ -104,7 +104,7 @@ export const toggleTemplateRole = async (
 export const toggleTemplateUser = async (
   sdk: SDK<never, BackendEvents>,
   requestId: string,
-  userId: string
+  userId: string,
 ) => {
   const store = TemplateStore.get();
 
@@ -137,7 +137,7 @@ export const clearTemplates = async (sdk: SDK<never, BackendEvents>) => {
 export const onInterceptResponse = async (
   sdk: SDK<never, BackendEvents>,
   request: Request,
-  response: Response
+  response: Response,
 ) => {
   const settingsStore = SettingsStore.get();
   const settings = settingsStore.getSettings();
@@ -191,7 +191,7 @@ export const onInterceptResponse = async (
 
 export const addTemplateFromContext = async (
   sdk: SDK<never, BackendEvents>,
-  request_id: ID
+  request_id: ID,
 ) => {
   const project = await sdk.projects.getCurrent();
   if (!project) return;
@@ -229,7 +229,7 @@ export const registerTemplateEvents = (sdk: SDK) => {
 
 const generateTemplateId = (
   request: Request,
-  dedupeHeaders: string[] = []
+  dedupeHeaders: string[] = [],
 ): string => {
   let body = request.getBody()?.toText();
   if (body === undefined) {
@@ -246,7 +246,7 @@ const generateTemplateId = (
 const toTemplate = (
   request: Request,
   response: Response,
-  templateId: string = generateTemplateId(request)
+  templateId: string = generateTemplateId(request),
 ): TemplateDTO => {
   return {
     id: templateId,
