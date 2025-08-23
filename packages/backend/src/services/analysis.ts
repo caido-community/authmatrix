@@ -122,10 +122,11 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
 
         template.rules = newRules;
         templateStore.updateTemplate(template.id, template);
-        sdk.api.send("templates:updated", template);
-        sdk.api.send("cursor:mark", template.id, false);
+
         await withProject(sdk, async (projectId) => {
           await updateTemplateFields(sdk, projectId, template.id, template);
+          sdk.api.send("templates:updated", template);
+          sdk.api.send("cursor:mark", template.id, false);
         });
       }),
     );

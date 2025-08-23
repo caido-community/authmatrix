@@ -49,11 +49,13 @@ export const updateUser = async (
   id: string,
   fields: Omit<UserDTO, "id">,
 ) => {
-  const current = UserStore.get().getUser(id);
+  const store = UserStore.get();
+  const current = store.getUser(id);
   if (!current) return undefined;
+
   const persisted = await withProject(sdk, async (projectId) => {
     return dbUpdateUser(sdk, projectId, { id, ...fields });
   });
-  const store = UserStore.get();
+
   return store.updateUser(id, persisted);
 };

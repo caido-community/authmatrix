@@ -43,10 +43,10 @@ export const addTemplate = async (sdk: SDK<never, BackendEvents>) => {
 
   const store = TemplateStore.get();
   store.addTemplate(newTemplate);
-  sdk.api.send("templates:created", newTemplate);
 
   await withProject(sdk, async (projectId) => {
     await createTemplate(sdk, projectId, newTemplate);
+    sdk.api.send("templates:created", newTemplate);
   });
 
   return newTemplate;
@@ -68,11 +68,11 @@ export const updateTemplate = async (
 ) => {
   const store = TemplateStore.get();
   const newTemplate = store.updateTemplate(id, fields);
-  sdk.api.send("templates:updated", newTemplate);
 
   await withProject(sdk, async (projectId) => {
     await updateTemplateFields(sdk, projectId, id, fields);
     await replaceTemplateRules(sdk, projectId, id, fields.rules);
+    sdk.api.send("templates:updated", newTemplate);
   });
 
   return newTemplate;
@@ -127,10 +127,10 @@ export const toggleTemplateUser = async (
 export const clearTemplates = async (sdk: SDK<never, BackendEvents>) => {
   const store = TemplateStore.get();
   store.clearTemplates();
-  sdk.api.send("templates:cleared");
 
   await withProject(sdk, async (projectId) => {
     await clearAllTemplates(sdk, projectId);
+    sdk.api.send("templates:cleared");
   });
 };
 
@@ -163,10 +163,10 @@ export const onInterceptResponse = async (
     case "all": {
       const template = toTemplate(request, response, templateId);
       store.addTemplate(template);
-      sdk.api.send("templates:created", template);
 
       await withProject(sdk, async (projectId) => {
         await createTemplate(sdk, projectId, template);
+        sdk.api.send("templates:created", template);
       });
       break;
     }
@@ -174,10 +174,10 @@ export const onInterceptResponse = async (
       if (sdk.requests.inScope(request)) {
         const template = toTemplate(request, response, templateId);
         store.addTemplate(template);
-        sdk.api.send("templates:created", template);
 
         await withProject(sdk, async (projectId) => {
           await createTemplate(sdk, projectId, template);
+          sdk.api.send("templates:created", template);
         });
       }
       break;

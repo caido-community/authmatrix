@@ -24,7 +24,7 @@ export const useTemplateRepository = () => {
     try {
       const newTemplate = await sdk.backend.toggleTemplateRole(
         templateId,
-        roleId
+        roleId,
       );
 
       if (newTemplate) {
@@ -50,7 +50,7 @@ export const useTemplateRepository = () => {
     try {
       const newTemplate = await sdk.backend.toggleTemplateUser(
         templateId,
-        userId
+        userId,
       );
 
       if (newTemplate) {
@@ -110,7 +110,7 @@ export const useTemplateRepository = () => {
 
   const updateTemplate = async (
     id: string,
-    fields: Omit<TemplateDTO, "id">
+    fields: Omit<TemplateDTO, "id">,
   ) => {
     try {
       const newTemplate = await sdk.backend.updateTemplate(id, fields);
