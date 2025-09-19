@@ -95,9 +95,9 @@ export const useTemplateRepository = () => {
     }
   };
 
-  const importFromSwagger = async (json: string) => {
+  const importFromSwagger = async (json: string, overrideHost?: string) => {
     try {
-      const created = await sdk.backend.importTemplatesFromOpenApi(json);
+      const created = await sdk.backend.importTemplatesFromOpenApi({ rawJson: json, overrideHost });
       return {
         type: "Ok" as const,
         created,

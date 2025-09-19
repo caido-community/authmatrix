@@ -120,6 +120,8 @@ const runAnalysis = () => {
 };
 
 const fileInput = ref<HTMLInputElement | undefined>(undefined);
+const overrideHost = ref<string>("");
+
 const onClickImport = () => {
   fileInput.value?.click();
 };
@@ -131,8 +133,9 @@ const onFileSelected = async (e: Event) => {
   const file = files[0];
   if (!file) return;
   const text = await file.text();
-  await service.importFromSwagger(text);
+  await service.importFromSwagger(text, overrideHost.value.trim() || undefined);
   if (fileInput.value) fileInput.value.value = "";
+  overrideHost.value = "";
 };
 
 const editTemplate = (template: TemplateDTO) => {
@@ -274,6 +277,14 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
                 :model-value="selectedStatusFilter"
                 placeholder="Filter by Status"
                 @update:model-value="handleStatusFilterChange"
+              />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm text-gray-400">Override Host (optional)</label>
+              <InputText
+                v-model="overrideHost"
+                placeholder="e.g., api.example.com"
+                v-tooltip="'Override the host from the Swagger file. Leave empty to use the host from the file.'"
               />
             </div>
             <Button

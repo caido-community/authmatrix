@@ -63,8 +63,8 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
-  const importFromSwagger = async (json: string) => {
-    const result = await repository.importFromSwagger(json);
+  const importFromSwagger = async (json: string, overrideHost?: string) => {
+    const result = await repository.importFromSwagger(json, overrideHost);
 
     if (result.type === "Ok") {
       if (result.created > 0) {

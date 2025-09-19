@@ -611,6 +611,7 @@ type Schema = {
 
 const inferHostPortTls = (
   spec: OpenApiSpec,
+  overrideHost?: string,
 ): { host: string; port: number; isTls: boolean; basePath: string } => {
   // OpenAPI v3 preferred
   if (Array.isArray(spec.servers) && spec.servers.length > 0) {
@@ -620,7 +621,7 @@ const inferHostPortTls = (
       const m = url.match(/^(https?):\/\/([^/:]+)(?::(\d+))?([^?#]*)/);
       if (m) {
         const scheme = m[1];
-        const host: string = m[2] ?? "localhost";
+        const host: string = overrideHost ?? m[2] ?? "localhost";
         const portStr = m[3];
         const path = m[4] ?? "";
         const isTls = scheme === "https";
@@ -641,7 +642,7 @@ const inferHostPortTls = (
       ? "https"
       : "http";
   const isTls = scheme === "https";
-  const host = spec.host ?? "localhost";
+  const host = overrideHost ?? spec.host ?? "localhost";
   const basePath = spec.basePath ?? "";
   const port = isTls ? 443 : 80;
   return { host, port, isTls, basePath };
@@ -1063,8 +1064,9 @@ const generateDefaultValueForPlaceholder = (placeholder: string): string => {
 
 export const importTemplatesFromOpenApi = async (
   sdk: SDK<never, BackendEvents>,
-  rawJson: string,
+  params: { rawJson: string; overrideHost?: string },
 ): Promise<number> => {
+  const { rawJson, overrideHost } = params;
   sdk.console.log("Starting OpenAPI import...");
 
   const project = await sdk.projects.getCurrent();
@@ -1089,7 +1091,7 @@ export const importTemplatesFromOpenApi = async (
 
   sdk.console.log(`Found ${Object.keys(spec.paths).length} paths in spec`);
 
-  const { host, port, isTls, basePath } = inferHostPortTls(spec);
+  const { host, port, isTls, basePath } = inferHostPortTls(spec, overrideHost);
 
   // Extract unique placeholders from all paths and create substitution rules
   await createAutoSubstitutions(sdk, spec);
