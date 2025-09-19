@@ -178,7 +178,7 @@ export const updateTemplateRequestRaw = async (
     if (xForwardedProto === "https") {
       isTls = true;
     }
-    if (forwarded && /proto=https/i.test(forwarded)) {
+    if (forwarded !== undefined && /proto=https/i.test(forwarded)) {
       isTls = true;
     }
     if (xForwardedPort !== undefined) {
@@ -828,7 +828,7 @@ const getParameterValue = (
       return "true";
     case "string": {
       const name = param.name.toLowerCase();
-      if (name.includes("id") || name.includes("key")) return "0";
+      if (name.includes("id") || name.includes("key")) return "1";
       if (name.includes("name") || name.includes("user")) return "string";
       if (name.includes("email")) return "string";
       if (name.includes("token")) return "string";
@@ -913,16 +913,19 @@ export const importTemplatesFromOpenApi = async (
         continue;
 
       const fullPath = `${basePath || ""}${pathKey}`;
-      // Replace placeholder path params with realistic values based on parameter definitions
+      console.log(`Original Swagger path: "${fullPath}"`);
+      // First apply substitutions to the original path with placeholders
+      const substitutedPath = applySubstitutions(fullPath);
+      console.log(`After substitutions: "${substitutedPath}"`);
+      // Then replace remaining placeholder path params with realistic values
       const resolvedPath = replacePathParameters(
-        fullPath,
+        substitutedPath,
         operation,
         spec.definitions,
       );
-      // Apply substitutions to the resolved path
-      const substitutedPath = applySubstitutions(resolvedPath);
+      console.log(`After parameter replacement: "${resolvedPath}"`);
       const queryString = buildQueryString(operation, spec.definitions);
-      const fullUrl = `${isTls ? "https" : "http"}://${host}:${port}${substitutedPath}${queryString}`;
+      const fullUrl = `${isTls ? "https" : "http"}://${host}:${port}${resolvedPath}${queryString}`;
 
       // Try to create a real base request in Caido so the UI can load it later
       let createdTemplate: TemplateDTO | undefined = undefined;
@@ -950,8 +953,10 @@ export const importTemplatesFromOpenApi = async (
         // Generate template ID manually to avoid issues with the request object
         const templateId = generateTemplateId(realRequest);
         const temp = toTemplate(realRequest, realResponse, templateId);
-        // Preserve original placeholder path in template meta for user editing
-        temp.meta.path = fullPath;
+        // Store the substituted path in template meta
+        // Substitutions are applied during import, so store the final path
+        console.log(`Storing substituted path in template (success case): "${resolvedPath}"`);
+        temp.meta.path = resolvedPath;
         createdTemplate = temp;
       } catch (error) {
         sdk.console.log(
@@ -993,8 +998,10 @@ export const importTemplatesFromOpenApi = async (
           pseudoResponse,
           templateId,
         );
-        // Keep original placeholders in meta
-        temp.meta.path = fullPath;
+        // Store the substituted path in template meta
+        // Substitutions are applied during import, so store the final path
+        console.log(`Storing substituted path in template (fallback case): "${resolvedPath}"`);
+        temp.meta.path = resolvedPath;
         createdTemplate = temp;
       }
 
@@ -1015,7 +1022,8 @@ export const importTemplatesFromOpenApi = async (
 
   sdk.console.log(`Import completed. Created ${created} templates.`);
   return created;
-};""
+};
+("");
 
 const generateTemplateId = (
   request: Request,

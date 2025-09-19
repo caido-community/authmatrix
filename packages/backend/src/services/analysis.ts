@@ -147,15 +147,26 @@ export const applySubstitutions = (path: string): string => {
   const substitutionStore = SubstitutionStore.get();
   const substitutions = substitutionStore.getSubstitutions();
 
+  console.log(`Available substitutions: ${substitutions.length}`);
+  substitutions.forEach((sub, index) => {
+    console.log(`Substitution ${index}: "${sub.pattern}" -> "${sub.replacement}"`);
+  });
+
   let result = path;
   for (const sub of substitutions) {
+    const beforeReplace = result;
     result = result.replace(
       new RegExp(sub.pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
       sub.replacement,
     );
+    if (beforeReplace !== result) {
+      console.log(`Substitution applied: "${sub.pattern}" -> "${sub.replacement}"`);
+      console.log(`Path changed from: "${beforeReplace}" to: "${result}"`);
+    }
   }
   return result;
 };
+
 
 const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
   const scheme = template.meta.isTls ? "https" : "http";
@@ -164,8 +175,10 @@ const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
     (!template.meta.isTls && template.meta.port === 80)
   );
   const portPart = needsPort ? `:${template.meta.port}` : "";
-  const substitutedPath = applySubstitutions(template.meta.path);
-  const url = `${scheme}://${template.meta.host}${portPart}${substitutedPath}`;
+  // Path already has substitutions applied during import, just use it directly
+  console.log(`Using path from template: "${template.meta.path}"`);
+  const url = `${scheme}://${template.meta.host}${portPart}${template.meta.path}`;
+  console.log(`Final URL: "${url}"`);
 
   const spec = new RequestSpec(url);
   spec.setMethod(template.meta.method);
