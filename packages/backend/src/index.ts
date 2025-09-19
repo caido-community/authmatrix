@@ -18,6 +18,8 @@ import {
 import {
   addTemplate,
   addTemplateFromContext,
+  checkAllTemplatesForRole,
+  checkAllTemplatesForUser,
   clearTemplates,
   deleteTemplate,
   getTemplates,
@@ -62,6 +64,8 @@ export type API = DefineAPI<{
   clearTemplates: typeof clearTemplates;
   toggleTemplateRole: typeof toggleTemplateRole;
   toggleTemplateUser: typeof toggleTemplateUser;
+  checkAllTemplatesForRole: typeof checkAllTemplatesForRole;
+  checkAllTemplatesForUser: typeof checkAllTemplatesForUser;
   addTemplateFromContext: typeof addTemplateFromContext;
   importTemplatesFromOpenApi: typeof importTemplatesFromOpenApi;
 
@@ -112,6 +116,8 @@ export async function init(sdk: SDK<API, BackendEvents>) {
   sdk.api.register("deleteTemplate", deleteTemplate);
   sdk.api.register("toggleTemplateRole", toggleTemplateRole);
   sdk.api.register("toggleTemplateUser", toggleTemplateUser);
+  sdk.api.register("checkAllTemplatesForRole", checkAllTemplatesForRole);
+  sdk.api.register("checkAllTemplatesForUser", checkAllTemplatesForUser);
   sdk.api.register("clearTemplates", clearTemplates);
   sdk.api.register("addTemplateFromContext", addTemplateFromContext);
   sdk.api.register("importTemplatesFromOpenApi", importTemplatesFromOpenApi);

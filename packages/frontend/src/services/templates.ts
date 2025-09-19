@@ -114,6 +114,34 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
+  const checkAllTemplatesForRole = async (roleId: string) => {
+    const result = await repository.checkAllTemplatesForRole(roleId);
+
+    if (result.type === "Ok") {
+      sdk.window.showToast(`Checked ${result.count} templates for role`, {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const checkAllTemplatesForUser = async (userId: string) => {
+    const result = await repository.checkAllTemplatesForUser(userId);
+
+    if (result.type === "Ok") {
+      sdk.window.showToast(`Checked ${result.count} templates for user`, {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
   const initialize = async () => {
     store.send({ type: "Start" });
 
@@ -200,6 +228,8 @@ export const useTemplateService = defineStore("services.templates", () => {
     initialize,
     toggleTemplateRole,
     toggleTemplateUser,
+    checkAllTemplatesForRole,
+    checkAllTemplatesForUser,
     addTemplate,
     updateTemplate,
     updateTemplateRequest,

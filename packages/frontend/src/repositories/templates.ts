@@ -163,6 +163,36 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const checkAllTemplatesForRole = async (roleId: string) => {
+    try {
+      const count = await sdk.backend.checkAllTemplatesForRole(roleId);
+      return {
+        type: "Ok" as const,
+        count,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to check all templates for role",
+      };
+    }
+  };
+
+  const checkAllTemplatesForUser = async (userId: string) => {
+    try {
+      const count = await sdk.backend.checkAllTemplatesForUser(userId);
+      return {
+        type: "Ok" as const,
+        count,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to check all templates for user",
+      };
+    }
+  };
+
   const updateTemplateRequest = async (
     templateId: string,
     requestSpec: RequestSpec,
@@ -253,6 +283,8 @@ export const useTemplateRepository = () => {
     getRequestResponse,
     deleteTemplate,
     clearTemplates,
+    checkAllTemplatesForRole,
+    checkAllTemplatesForUser,
     importFromSwagger,
   };
 };

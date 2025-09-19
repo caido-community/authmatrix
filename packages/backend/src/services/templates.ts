@@ -372,6 +372,82 @@ export const clearTemplates = async (sdk: SDK<never, BackendEvents>) => {
   });
 };
 
+export const checkAllTemplatesForRole = async (
+  sdk: SDK<never, BackendEvents>,
+  roleId: string,
+) => {
+  const store = TemplateStore.get();
+  const templates = store.getTemplates();
+  const updatedTemplates: TemplateDTO[] = [];
+
+  for (const template of templates) {
+    const rule = template.rules.find(
+      (r) => r.type === "RoleRule" && r.roleId === roleId,
+    );
+
+    // Only update if the rule doesn't exist or doesn't have access
+    if (!rule || !rule.hasAccess) {
+      const updatedTemplate = store.toggleTemplateRole(template.id, roleId);
+      if (updatedTemplate) {
+        updatedTemplates.push(updatedTemplate);
+        sdk.api.send("templates:updated", updatedTemplate);
+      }
+    }
+  }
+
+  // Save all changes to database
+  await withProject(sdk, async (projectId) => {
+    for (const template of updatedTemplates) {
+      const rule = template.rules.find(
+        (r) => r.type === "RoleRule" && r.roleId === roleId,
+      );
+      if (rule) {
+        await upsertTemplateRule(sdk, projectId, template.id, rule);
+      }
+    }
+  });
+
+  return updatedTemplates.length;
+};
+
+export const checkAllTemplatesForUser = async (
+  sdk: SDK<never, BackendEvents>,
+  userId: string,
+) => {
+  const store = TemplateStore.get();
+  const templates = store.getTemplates();
+  const updatedTemplates: TemplateDTO[] = [];
+
+  for (const template of templates) {
+    const rule = template.rules.find(
+      (r) => r.type === "UserRule" && r.userId === userId,
+    );
+
+    // Only update if the rule doesn't exist or doesn't have access
+    if (!rule || !rule.hasAccess) {
+      const updatedTemplate = store.toggleTemplateUser(template.id, userId);
+      if (updatedTemplate) {
+        updatedTemplates.push(updatedTemplate);
+        sdk.api.send("templates:updated", updatedTemplate);
+      }
+    }
+  }
+
+  // Save all changes to database
+  await withProject(sdk, async (projectId) => {
+    for (const template of updatedTemplates) {
+      const rule = template.rules.find(
+        (r) => r.type === "UserRule" && r.userId === userId,
+      );
+      if (rule) {
+        await upsertTemplateRule(sdk, projectId, template.id, rule);
+      }
+    }
+  });
+
+  return updatedTemplates.length;
+};
+
 export const onInterceptResponse = async (
   sdk: SDK<never, BackendEvents>,
   request: Request,
@@ -955,7 +1031,9 @@ export const importTemplatesFromOpenApi = async (
         const temp = toTemplate(realRequest, realResponse, templateId);
         // Store the substituted path in template meta
         // Substitutions are applied during import, so store the final path
-        console.log(`Storing substituted path in template (success case): "${resolvedPath}"`);
+        console.log(
+          `Storing substituted path in template (success case): "${resolvedPath}"`,
+        );
         temp.meta.path = resolvedPath;
         createdTemplate = temp;
       } catch (error) {
@@ -1000,7 +1078,9 @@ export const importTemplatesFromOpenApi = async (
         );
         // Store the substituted path in template meta
         // Substitutions are applied during import, so store the final path
-        console.log(`Storing substituted path in template (fallback case): "${resolvedPath}"`);
+        console.log(
+          `Storing substituted path in template (fallback case): "${resolvedPath}"`,
+        );
         temp.meta.path = resolvedPath;
         createdTemplate = temp;
       }

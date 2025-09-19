@@ -149,7 +149,9 @@ export const applySubstitutions = (path: string): string => {
 
   console.log(`Available substitutions: ${substitutions.length}`);
   substitutions.forEach((sub, index) => {
-    console.log(`Substitution ${index}: "${sub.pattern}" -> "${sub.replacement}"`);
+    console.log(
+      `Substitution ${index}: "${sub.pattern}" -> "${sub.replacement}"`,
+    );
   });
 
   let result = path;
@@ -160,13 +162,14 @@ export const applySubstitutions = (path: string): string => {
       sub.replacement,
     );
     if (beforeReplace !== result) {
-      console.log(`Substitution applied: "${sub.pattern}" -> "${sub.replacement}"`);
+      console.log(
+        `Substitution applied: "${sub.pattern}" -> "${sub.replacement}"`,
+      );
       console.log(`Path changed from: "${beforeReplace}" to: "${result}"`);
     }
   }
   return result;
 };
-
 
 const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
   const scheme = template.meta.isTls ? "https" : "http";

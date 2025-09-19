@@ -82,6 +82,14 @@ const toggleUser = (template: TemplateDTO, user: UserDTO) => {
   service.toggleTemplateUser(template.id, user.id);
 };
 
+const checkAllTemplatesForRole = (role: RoleDTO) => {
+  service.checkAllTemplatesForRole(role.id);
+};
+
+const checkAllTemplatesForUser = (user: UserDTO) => {
+  service.checkAllTemplatesForUser(user.id);
+};
+
 const deleteTemplate = (template: TemplateDTO) => {
   service.deleteTemplate(template.id);
 };
@@ -121,6 +129,7 @@ const onFileSelected = async (e: Event) => {
   const files = target?.files ?? undefined;
   if (!files || files.length === 0) return;
   const file = files[0];
+  if (!file) return;
   const text = await file.text();
   await service.importFromSwagger(text);
   if (fileInput.value) fileInput.value.value = "";
@@ -343,7 +352,20 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
             </template>
           </Column>
 
-          <Column v-for="role in roleState.roles" key="id" :header="role.name">
+          <Column v-for="role in roleState.roles" :key="role.id">
+            <template #header>
+              <div class="flex items-center gap-2">
+                <span>{{ role.name }}</span>
+                <Button
+                  v-tooltip="`Check all templates for ${role.name}`"
+                  icon="fas fa-check-square"
+                  text
+                  severity="success"
+                  size="small"
+                  @click="() => checkAllTemplatesForRole(role)"
+                />
+              </div>
+            </template>
             <template #body="{ data }">
               <div class="flex items-center gap-4">
                 <Checkbox
@@ -359,11 +381,20 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
             </template>
           </Column>
 
-          <Column
-            v-for="user of userState.users"
-            :key="user.id"
-            :header="user.name"
-          >
+          <Column v-for="user of userState.users" :key="user.id">
+            <template #header>
+              <div class="flex items-center gap-2">
+                <span>{{ user.name }}</span>
+                <Button
+                  v-tooltip="`Check all templates for ${user.name}`"
+                  icon="fas fa-check-square"
+                  text
+                  severity="success"
+                  size="small"
+                  @click="() => checkAllTemplatesForUser(user)"
+                />
+              </div>
+            </template>
             <template #body="{ data }">
               <div class="flex items-center gap-4">
                 <Checkbox
