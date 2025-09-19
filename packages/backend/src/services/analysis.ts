@@ -1,5 +1,5 @@
 import type { SDK } from "caido:plugin";
-import type { RequestSpec } from "caido:utils";
+import { RequestSpec } from "caido:utils";
 import type {
   AnalysisRequestDTO,
   RuleStatusDTO,
@@ -12,6 +12,7 @@ import { withProject } from "../db/utils";
 import { updateTemplateFields } from "../repositories/templates";
 import { AnalysisStore } from "../stores/analysis";
 import { RoleStore } from "../stores/roles";
+import { SubstitutionStore } from "../stores/substitutions";
 import { TemplateStore } from "../stores/templates";
 import { UserStore } from "../stores/users";
 import type { BackendEvents } from "../types";
@@ -23,27 +24,34 @@ export const getResults = (_sdk: SDK): AnalysisRequestDTO[] => {
 };
 
 export const getRequestResponse = async (sdk: SDK, requestId: string) => {
-  const result = await sdk.requests.get(requestId);
-
-  if (!result) {
-    return { type: "Err" as const, message: "Request not found" };
+  if (typeof requestId !== "string" || requestId.trim() === "") {
+    return { type: "Err" as const, message: "Invalid request id" };
   }
 
-  const { request, response } = result;
+  try {
+    const result = await sdk.requests.get(requestId);
+    if (!result) {
+      return { type: "Err" as const, message: "Request not found" };
+    }
 
-  return {
-    type: "Ok" as const,
-    request: {
-      id: request.getId(),
-      raw: Uint8ArrayToString(request.toSpecRaw().getRaw()),
-    },
-    response: response
-      ? {
-          id: response.getId(),
-          raw: response.getRaw().toText(),
-        }
-      : undefined,
-  };
+    const { request, response } = result;
+
+    return {
+      type: "Ok" as const,
+      request: {
+        id: request.getId(),
+        raw: Uint8ArrayToString(request.toSpecRaw().getRaw()),
+      },
+      response: response
+        ? {
+            id: response.getId(),
+            raw: response.getRaw().toText(),
+          }
+        : undefined,
+    };
+  } catch (_e) {
+    return { type: "Err" as const, message: "Request not found" };
+  }
 };
 
 export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
@@ -84,7 +92,7 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
           }
 
           const analysisRequest = await sendRequest(sdk, template, user);
-          if (analysisRequest) {
+          if (analysisRequest !== undefined) {
             analysisStore.addRequest(analysisRequest);
             sdk.api.send("results:created", analysisRequest);
           }
@@ -135,16 +143,32 @@ export const runAnalysis = async (sdk: SDK<never, BackendEvents>) => {
   sdk.api.send("cursor:clear");
 };
 
-const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
-  const { request: baseRequest } =
-    (await sdk.requests.get(template.requestId)) ?? {};
+export const applySubstitutions = (path: string): string => {
+  const substitutionStore = SubstitutionStore.get();
+  const substitutions = substitutionStore.getSubstitutions();
 
-  if (!baseRequest) {
-    sdk.console.error(`Request not found for template ${template.id}`);
-    return;
+  let result = path;
+  for (const sub of substitutions) {
+    result = result.replace(
+      new RegExp(sub.pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
+      sub.replacement,
+    );
   }
+  return result;
+};
 
-  const spec = baseRequest.toSpec();
+const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
+  const scheme = template.meta.isTls ? "https" : "http";
+  const needsPort = !(
+    (template.meta.isTls && template.meta.port === 443) ||
+    (!template.meta.isTls && template.meta.port === 80)
+  );
+  const portPart = needsPort ? `:${template.meta.port}` : "";
+  const substitutedPath = applySubstitutions(template.meta.path);
+  const url = `${scheme}://${template.meta.host}${portPart}${substitutedPath}`;
+
+  const spec = new RequestSpec(url);
+  spec.setMethod(template.meta.method);
   setCookies(spec, user.attributes);
   setHeaders(spec, user.attributes);
 
@@ -239,8 +263,12 @@ const generateRoleRuleStatus = async (
   // Get all result responses
   const responses = await Promise.all(
     templateResults.map(async (result) => {
-      const { response } = (await sdk.requests.get(result.requestId)) ?? {};
-      return response;
+      try {
+        const fetched = await sdk.requests.get(result.requestId);
+        return fetched?.response;
+      } catch (_e) {
+        return undefined;
+      }
     }),
   );
 
@@ -298,8 +326,12 @@ const generateUserRuleStatus = async (
   // Get all result responses
   const responses = await Promise.all(
     results.map(async (result) => {
-      const { response } = (await sdk.requests.get(result.requestId)) ?? {};
-      return response;
+      try {
+        const fetched = await sdk.requests.get(result.requestId);
+        return fetched?.response;
+      } catch (_e) {
+        return undefined;
+      }
     }),
   );
 

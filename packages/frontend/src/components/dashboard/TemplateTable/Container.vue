@@ -11,6 +11,7 @@ import type { RoleDTO, RuleStatusDTO, TemplateDTO, UserDTO } from "shared";
 import { computed, ref } from "vue";
 
 import RuleStatus from "./RuleStatus.vue";
+import TemplateRequestEditor from "./TemplateRequestEditor.vue";
 
 import { useAnalysisService } from "@/services/analysis";
 import { useSettingsService } from "@/services/settings";
@@ -30,6 +31,7 @@ const props = defineProps<{
 }>();
 
 const selectedStatusFilter = ref<RuleStatusDTO | "All">("All");
+const editingTemplate = ref<TemplateDTO | undefined>(undefined);
 
 const filteredTemplates = computed(() => {
   if (selectedStatusFilter.value === "All") return props.state.templates;
@@ -107,6 +109,34 @@ const getAutoCaptureRequestLabel = (value: "off" | "all" | "inScope") => {
 const analysisService = useAnalysisService();
 const runAnalysis = () => {
   analysisService.runAnalysis();
+};
+
+const fileInput = ref<HTMLInputElement | undefined>(undefined);
+const onClickImport = () => {
+  fileInput.value?.click();
+};
+
+const onFileSelected = async (e: Event) => {
+  const target = e.target as HTMLInputElement | undefined;
+  const files = target?.files ?? undefined;
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  const text = await file.text();
+  await service.importFromSwagger(text);
+  if (fileInput.value) fileInput.value.value = "";
+};
+
+const editTemplate = (template: TemplateDTO) => {
+  editingTemplate.value = template;
+};
+
+const closeEditor = () => {
+  editingTemplate.value = undefined;
+};
+
+const onTemplateSaved = (template: TemplateDTO) => {
+  // The template service already updates the store, so we just close the editor
+  closeEditor();
 };
 
 const selection = computed({
@@ -238,6 +268,19 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
               />
             </div>
             <Button
+              v-tooltip="'Import Swagger/OpenAPI JSON to create templates.'"
+              label="Import Swagger"
+              icon="fas fa-file-import"
+              @click="onClickImport"
+            />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="application/json,.json"
+              class="hidden"
+              @change="onFileSelected"
+            />
+            <Button
               v-tooltip="'Clear all template entries.'"
               label="Clear All"
               @click="clearTemplates"
@@ -338,7 +381,14 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
 
           <Column header="">
             <template #body="{ data }">
-              <div class="flex justify-end">
+              <div class="flex justify-end gap-2">
+                <Button
+                  icon="fas fa-edit"
+                  text
+                  severity="info"
+                  size="small"
+                  @click="() => editTemplate(data)"
+                />
                 <Button
                   icon="fas fa-trash"
                   text
@@ -352,6 +402,24 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
         </DataTable>
       </template>
     </Card>
+
+    <!-- Template Request Editor Modal -->
+    <div
+      v-if="editingTemplate"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      @click="closeEditor"
+    >
+      <div
+        class="w-full max-w-6xl h-5/6 bg-surface-700 rounded-lg shadow-lg"
+        @click.stop
+      >
+        <TemplateRequestEditor
+          :template="editingTemplate"
+          @close="closeEditor"
+          @saved="onTemplateSaved"
+        />
+      </div>
+    </div>
   </div>
 </template>
 

@@ -1,3 +1,4 @@
+import type { RequestSpec } from "caido:utils";
 import { defineStore } from "pinia";
 import type { TemplateDTO } from "shared";
 
@@ -55,6 +56,26 @@ export const useTemplateService = defineStore("services.templates", () => {
 
     if (result.type === "Ok") {
       store.send({ type: "UpdateTemplate", template: result.template });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const importFromSwagger = async (json: string) => {
+    const result = await repository.importFromSwagger(json);
+
+    if (result.type === "Ok") {
+      if (result.created > 0) {
+        sdk.window.showToast(`Imported ${result.created} templates`, {
+          variant: "success",
+        });
+      } else {
+        sdk.window.showToast("No templates found in spec", {
+          variant: "info",
+        });
+      }
     } else {
       sdk.window.showToast(result.error, {
         variant: "error",
@@ -126,6 +147,52 @@ export const useTemplateService = defineStore("services.templates", () => {
     });
   };
 
+  const updateTemplateRequest = async (
+    templateId: string,
+    requestSpec: RequestSpec,
+  ) => {
+    const result = await repository.updateTemplateRequest(
+      templateId,
+      requestSpec,
+    );
+
+    if (result.type === "Ok" && result.template) {
+      store.send({ type: "UpdateTemplate", template: result.template });
+      sdk.window.showToast("Template request updated successfully", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const updateTemplateRequestRaw = async (
+    templateId: string,
+    requestRaw: string,
+  ) => {
+    const result = await repository.updateTemplateRequestRaw(
+      templateId,
+      requestRaw,
+    );
+
+    if (result.type === "Ok" && result.template) {
+      store.send({ type: "UpdateTemplate", template: result.template });
+      sdk.window.showToast("Template request updated successfully", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const getRequestResponse = async (requestId: string) => {
+    return await repository.getRequestResponse(requestId);
+  };
+
   const getState = () => store.getState();
 
   return {
@@ -135,7 +202,11 @@ export const useTemplateService = defineStore("services.templates", () => {
     toggleTemplateUser,
     addTemplate,
     updateTemplate,
+    updateTemplateRequest,
+    updateTemplateRequestRaw,
+    getRequestResponse,
     deleteTemplate,
     clearTemplates,
+    importFromSwagger,
   };
 });

@@ -54,6 +54,12 @@ export type UserAttributeDTO = {
   kind: "Cookie" | "Header";
 };
 
+export type SubstitutionDTO = {
+  id: string;
+  pattern: string;
+  replacement: string;
+};
+
 export type UserDTO = {
   id: string;
   name: string;

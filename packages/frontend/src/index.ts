@@ -61,6 +61,39 @@ export const init = (sdk: CaidoSDK) => {
     leadingIcon: "fas fa-user-shield",
   });
 
+  // Optional: Command to import Swagger/OpenAPI JSON
+  sdk.commands.register("authmatrix.import-swagger", {
+    name: "Authmatrix: Import Swagger/OpenAPI JSON",
+    run: () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json,.json";
+      input.style.display = "none";
+      document.body.appendChild(input);
+      input.onchange = async () => {
+        const file = input.files && input.files[0];
+        if (!file) {
+          document.body.removeChild(input);
+          return;
+        }
+        const text = await file.text();
+        const created = await sdk.backend.importTemplatesFromOpenApi(text);
+        if (created > 0) {
+          sdk.window.showToast(`Imported ${created} templates`, {
+            variant: "success",
+          });
+        } else {
+          sdk.window.showToast("No templates found in spec", {
+            variant: "info",
+          });
+        }
+        document.body.removeChild(input);
+      };
+      input.click();
+    },
+  });
+  sdk.commandPalette.register("authmatrix.import-swagger");
+
   const subscription = sdk.graphql.deletedProject();
   (async () => {
     for await (const event of subscription) {

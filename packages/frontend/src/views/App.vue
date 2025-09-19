@@ -9,6 +9,7 @@ import { useSDK } from "@/plugins/sdk";
 import { useAnalysisService } from "@/services/analysis";
 import { useRoleService } from "@/services/roles";
 import { useSettingsService } from "@/services/settings";
+import { useSubstitutionService } from "@/services/substitutions";
 import { useTemplateService } from "@/services/templates";
 import { useUserService } from "@/services/users";
 
@@ -43,6 +44,7 @@ const roleService = useRoleService();
 const userService = useUserService();
 const templateService = useTemplateService();
 const settingsService = useSettingsService();
+const substitutionService = useSubstitutionService();
 const analysisService = useAnalysisService();
 const sdk = useSDK();
 
@@ -52,6 +54,7 @@ onMounted(() => {
     userService.initialize();
     templateService.initialize();
     settingsService.initialize();
+    substitutionService.initialize();
     analysisService.initialize();
   };
 

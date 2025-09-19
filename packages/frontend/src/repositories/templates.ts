@@ -1,3 +1,4 @@
+import type { RequestSpec } from "caido:utils";
 import type { TemplateDTO } from "shared";
 
 import { useSDK } from "@/plugins/sdk";
@@ -94,6 +95,21 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const importFromSwagger = async (json: string) => {
+    try {
+      const created = await sdk.backend.importTemplatesFromOpenApi(json);
+      return {
+        type: "Ok" as const,
+        created,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to import Swagger/OpenAPI spec",
+      };
+    }
+  };
+
   const deleteTemplate = async (id: string) => {
     try {
       await sdk.backend.deleteTemplate(id);
@@ -147,13 +163,90 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const updateTemplateRequest = async (
+    templateId: string,
+    requestSpec: RequestSpec,
+  ) => {
+    try {
+      const updatedTemplate = await sdk.backend.updateTemplateRequest(
+        templateId,
+        requestSpec,
+      );
+      return {
+        type: "Ok" as const,
+        template: updatedTemplate,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to update template request",
+      };
+    }
+  };
+
+  const updateTemplateRequestRaw = async (
+    templateId: string,
+    requestRaw: string,
+  ) => {
+    try {
+      const updatedTemplate = await sdk.backend.updateTemplateRequestRaw(
+        templateId,
+        requestRaw,
+      );
+      
+      if (updatedTemplate) {
+        return {
+          type: "Ok" as const,
+          template: updatedTemplate,
+        };
+      }
+      
+      return {
+        type: "Err" as const,
+        error: "Failed to update template request - invalid request format",
+      };
+    } catch (error) {
+      return {
+        type: "Err" as const,
+        error: `Failed to update template request: ${error.message || "Unknown error"}`,
+      };
+    }
+  };
+
+  const getRequestResponse = async (requestId: string) => {
+    try {
+      const result = await sdk.backend.getRequestResponse(requestId);
+      if (result.type === "Ok") {
+        return {
+          type: "Ok" as const,
+          request: result.request,
+          response: result.response,
+        };
+      }
+
+      return {
+        type: "Err" as const,
+        error: result.message,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to get request & response",
+      };
+    }
+  };
+
   return {
     getTemplates,
     toggleTemplateRole,
     toggleTemplateUser,
     addTemplate,
     updateTemplate,
+    updateTemplateRequest,
+    updateTemplateRequestRaw,
+    getRequestResponse,
     deleteTemplate,
     clearTemplates,
+    importFromSwagger,
   };
 };
