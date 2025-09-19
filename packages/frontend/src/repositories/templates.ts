@@ -110,6 +110,18 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const sendToReplay = async (templateId: string) => {
+    try {
+      const result = await sdk.backend.sendTemplateToReplay(templateId);
+      return result;
+    } catch {
+      return {
+        kind: "Error" as const,
+        error: "Failed to send template to Replay",
+      };
+    }
+  };
+
   const deleteTemplate = async (id: string) => {
     try {
       await sdk.backend.deleteTemplate(id);
@@ -286,5 +298,6 @@ export const useTemplateRepository = () => {
     checkAllTemplatesForRole,
     checkAllTemplatesForUser,
     importFromSwagger,
+    sendToReplay,
   };
 };

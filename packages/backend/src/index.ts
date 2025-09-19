@@ -25,6 +25,7 @@ import {
   getTemplates,
   importTemplatesFromOpenApi,
   registerTemplateEvents,
+  sendTemplateToReplay,
   toggleTemplateRole,
   toggleTemplateUser,
   updateTemplate,
@@ -68,6 +69,7 @@ export type API = DefineAPI<{
   checkAllTemplatesForUser: typeof checkAllTemplatesForUser;
   addTemplateFromContext: typeof addTemplateFromContext;
   importTemplatesFromOpenApi: typeof importTemplatesFromOpenApi;
+  sendTemplateToReplay: typeof sendTemplateToReplay;
 
   // Settings endpoints
   getSettings: typeof getSettings;
@@ -121,6 +123,7 @@ export async function init(sdk: SDK<API, BackendEvents>) {
   sdk.api.register("clearTemplates", clearTemplates);
   sdk.api.register("addTemplateFromContext", addTemplateFromContext);
   sdk.api.register("importTemplatesFromOpenApi", importTemplatesFromOpenApi);
+  sdk.api.register("sendTemplateToReplay", sendTemplateToReplay);
 
   // Settings endpoints
   sdk.api.register("getSettings", getSettings);

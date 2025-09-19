@@ -146,6 +146,61 @@ const closeEditor = () => {
   editingTemplate.value = undefined;
 };
 
+const sendToReplay = async (template: TemplateDTO) => {
+  await service.sendToReplay(template.id);
+};
+
+const handleKeyDown = async (event: KeyboardEvent) => {
+  if (event.ctrlKey && event.key === 'r') {
+    // Only handle if the DataTable is focused or if no other component has handled it
+    const target = event.target as HTMLElement;
+    const isInRequestPreview = target.closest('.cm-editor') || target.closest('[data-request-preview]');
+    
+    if (!isInRequestPreview) {
+      event.preventDefault();
+      if (selection.value) {
+        await sendToReplay(selection.value);
+      }
+    }
+  }
+};
+
+const handleContextMenu = async (event: MouseEvent) => {
+  event.preventDefault();
+  
+  // Create a simple context menu
+  const contextMenu = document.createElement('div');
+  contextMenu.className = 'fixed bg-surface-700 border border-surface-600 rounded shadow-lg z-50';
+  contextMenu.style.left = `${event.clientX}px`;
+  contextMenu.style.top = `${event.clientY}px`;
+  
+  const sendToReplayItem = document.createElement('div');
+  sendToReplayItem.className = 'px-4 py-2 hover:bg-surface-600 cursor-pointer text-sm';
+  sendToReplayItem.innerHTML = '<i class="fas fa-play mr-2"></i>Send to Replay';
+  
+  sendToReplayItem.addEventListener('click', async () => {
+    if (selection.value) {
+      await sendToReplay(selection.value);
+    }
+    document.body.removeChild(contextMenu);
+  });
+  
+  contextMenu.appendChild(sendToReplayItem);
+  document.body.appendChild(contextMenu);
+  
+  // Remove context menu when clicking elsewhere
+  const removeMenu = () => {
+    if (document.body.contains(contextMenu)) {
+      document.body.removeChild(contextMenu);
+    }
+    document.removeEventListener('click', removeMenu);
+  };
+  
+  setTimeout(() => {
+    document.addEventListener('click', removeMenu);
+  }, 100);
+};
+
 const onTemplateSaved = (template: TemplateDTO) => {
   // The template service already updates the store, so we just close the editor
   closeEditor();
@@ -330,10 +385,14 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
           size="small"
           edit-mode="cell"
           selection-mode="single"
+          v-tooltip="'Right-click or press Ctrl+R to send to Replay'"
           @cell-edit-complete="
             ({ data, field, newValue }) =>
               onTemplateUpdate(data, field, newValue)
           "
+          @contextmenu="handleContextMenu"
+          @keydown="handleKeyDown"
+          tabindex="0"
         >
           <Column field="method" header="Method" class="w-[85px]">
             <template #body="{ data }">

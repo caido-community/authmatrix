@@ -83,6 +83,20 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
+  const sendToReplay = async (templateId: string) => {
+    const result = await repository.sendToReplay(templateId);
+
+    if (result.kind === "Ok") {
+      sdk.window.showToast("Template sent to Replay successfully. A new Replay session has been created.", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
   const analysisStore = useAnalysisStore();
   const deleteTemplate = async (id: string) => {
     const result = await repository.deleteTemplate(id);
@@ -238,5 +252,6 @@ export const useTemplateService = defineStore("services.templates", () => {
     deleteTemplate,
     clearTemplates,
     importFromSwagger,
+    sendToReplay,
   };
 });

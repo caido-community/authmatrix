@@ -1,7 +1,7 @@
 import type { SDK } from "caido:plugin";
 import type { ID, Request, Response } from "caido:utils";
 import { RequestSpec } from "caido:utils";
-import type { TemplateDTO } from "shared";
+import type { TemplateDTO, Result } from "shared";
 
 import { getDb } from "../db/client";
 import { withProject } from "../db/utils";
@@ -1268,3 +1268,46 @@ const toTemplate = (
     },
   };
 };
+
+export const sendTemplateToReplay = async (
+  sdk: SDK<never, BackendEvents>,
+  templateId: string,
+): Promise<Result<void>> => {
+  try {
+    const store = TemplateStore.get();
+    const template = store.getTemplate(templateId);
+    
+    if (!template) {
+      return { kind: "Error", error: "Template not found" };
+    }
+
+    // Create RequestSpec from template
+    const scheme = template.meta.isTls ? "https" : "http";
+    const needsPort = !(
+      (template.meta.isTls && template.meta.port === 443) ||
+      (!template.meta.isTls && template.meta.port === 80)
+    );
+    const portPart = needsPort ? `:${template.meta.port}` : "";
+    const url = `${scheme}://${template.meta.host}${portPart}${template.meta.path}`;
+
+    sdk.console.log(`Sending template to Replay: ${template.meta.method} ${url}`);
+
+    const spec = new RequestSpec(url);
+    spec.setMethod(template.meta.method);
+
+    // Add some basic headers that are commonly needed
+    spec.setHeader("User-Agent", "AuthMatrix/1.0");
+    spec.setHeader("Accept", "*/*");
+    spec.setHeader("Content-Type", "application/json");
+
+    // Create a new Replay session with the RequestSpec
+    const replaySession = await sdk.replay.createSession(spec);
+
+    sdk.console.log(`Template sent to Replay successfully. Session ID: ${replaySession.getId()}`);
+    return { kind: "Ok", value: undefined };
+  } catch (error) {
+    sdk.console.log(`Error sending template to Replay: ${error}`);
+    return { kind: "Error", error: `Failed to send template to Replay: ${error}` };
+  }
+};
+

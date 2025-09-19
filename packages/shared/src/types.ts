@@ -66,3 +66,7 @@ export type UserDTO = {
   roleIds: string[];
   attributes: UserAttributeDTO[];
 };
+
+export type Result<T> =
+  | { kind: "Error"; error: string }
+  | { kind: "Ok"; value: T };
