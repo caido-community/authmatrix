@@ -17,7 +17,7 @@ import { TemplateStore } from "../stores/templates";
 import type { BackendEvents } from "../types";
 import { generateID, sha256Hash } from "../utils";
 
-import { runAnalysis } from "./analysis";
+import { applySubstitutions, runAnalysis } from "./analysis";
 
 export const getTemplates = (_sdk: SDK): TemplateDTO[] => {
   const store = TemplateStore.get();
@@ -30,7 +30,7 @@ export const updateTemplateRequest = async (
   requestSpec: RequestSpec,
 ): Promise<TemplateDTO | undefined> => {
   const store = TemplateStore.get();
-  const template = store.getTemplates().find(t => t.id === templateId);
+  const template = store.getTemplates().find((t) => t.id === templateId);
 
   if (template === undefined) {
     return undefined;
@@ -67,7 +67,8 @@ export const updateTemplateRequest = async (
 
     return updatedTemplate;
   } catch (error) {
-    console.error("Failed to update template request:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    sdk.console.log(`Failed to update template request: ${message}`);
     return undefined;
   }
 };
@@ -78,89 +79,150 @@ export const updateTemplateRequestRaw = async (
   requestRaw: string,
 ): Promise<TemplateDTO | undefined> => {
   const store = TemplateStore.get();
-  const template = store.getTemplates().find(t => t.id === templateId);
+  const template = store.getTemplates().find((t) => t.id === templateId);
 
   if (template === undefined) {
     return undefined;
   }
 
   try {
-    console.log("Parsing raw request:", requestRaw.substring(0, 100) + "...");
-    
-    // Normalize line endings and parse the raw request
-    const normalizedRequest = requestRaw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const lines = normalizedRequest.split('\n');
-    
-    console.log("Request lines:", lines.length);
-    
-    if (lines.length === 0) {
-      throw new Error("Empty request");
+    const preview = requestRaw.substring(0, 100);
+    sdk.console.log(`Parsing raw request: ${preview}...`);
+
+    // Parse the raw request and create a RequestSpec
+    // Handle both \r\n and \n line endings
+    const lines = requestRaw.split(/\r?\n/);
+    sdk.console.log(`Split into lines: ${lines.length}`);
+
+    const requestLine = lines[0];
+    sdk.console.log(`Request line: ${requestLine}`);
+
+    if (requestLine === undefined) {
+      throw new Error("Invalid request format - no request line");
     }
-    
-    const requestLine = lines[0].trim();
-    console.log("Request line:", requestLine);
-    
-    if (!requestLine) {
-      throw new Error("Invalid request format - empty request line");
-    }
-    
-    const parts = requestLine.split(' ');
-    console.log("Request line parts:", parts);
-    
-    if (parts.length < 3) {
-      throw new Error(`Invalid request line format - expected "METHOD URL HTTP/VERSION", got: "${requestLine}"`);
-    }
-    
+
+    const parts = requestLine.split(" ");
     const method = parts[0];
-    const url = parts[1];
-    const protocol = parts[2];
-    
-    console.log("Parsed method:", method, "URL:", url, "Protocol:", protocol);
-    
-    if (!method || !url || !protocol) {
-      throw new Error(`Invalid request line - missing method, URL, or protocol: "${requestLine}"`);
+    const path = parts[1];
+
+    sdk.console.log(`Parsed method: ${method} Path: ${path}`);
+
+    if (method === undefined || path === undefined) {
+      throw new Error(`Invalid request line format: "${requestLine}"`);
     }
-    
-    // Validate method
-    const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
-    if (!validMethods.includes(method.toUpperCase())) {
-      throw new Error(`Invalid HTTP method: "${method}"`);
-    }
-    
+
     // Find the end of headers (empty line)
     let headerEndIndex = 1;
-    while (headerEndIndex < lines.length && lines[headerEndIndex]?.trim() !== '') {
+    while (
+      headerEndIndex < lines.length &&
+      lines[headerEndIndex]?.trim() !== ""
+    ) {
       headerEndIndex++;
     }
-    
-    console.log("Header end index:", headerEndIndex);
-    
+
+    sdk.console.log(`Header end index: ${headerEndIndex}`);
+
     // Extract headers
     const headerLines = lines.slice(1, headerEndIndex);
     const bodyLines = lines.slice(headerEndIndex + 1);
-    
-    console.log("Header lines:", headerLines.length, "Body lines:", bodyLines.length);
-    
-    // Create RequestSpec with parsed data
-    const spec = new RequestSpec(url);
-    spec.setMethod(method);
-    
-    // Add headers
+
+    sdk.console.log(`Header lines: ${headerLines.length}`);
+    sdk.console.log(`Body lines: ${bodyLines.length}`);
+
+    // Extract host from headers to build full URL
+    let host = "";
+    let port: number | undefined = undefined;
+    let isTls = false;
+    let xForwardedProto: string | undefined = undefined;
+    let xForwardedPort: string | undefined = undefined;
+    let forwarded: string | undefined = undefined;
+
     for (const headerLine of headerLines) {
-      const colonIndex = headerLine.indexOf(':');
+      const colonIndex = headerLine.indexOf(":");
+      if (colonIndex > 0) {
+        const name = headerLine.substring(0, colonIndex).trim().toLowerCase();
+        const value = headerLine.substring(colonIndex + 1).trim();
+
+        if (name === "host") {
+          host = value;
+          // Check if port is specified
+          if (host.includes(":")) {
+            const partsHost = host.split(":");
+            const hostname = partsHost[0] ?? host;
+            const portStr = partsHost[1];
+            host = hostname;
+            if (portStr !== undefined) {
+              const p = parseInt(portStr, 10);
+              if (!Number.isNaN(p)) port = p;
+            }
+          }
+          sdk.console.log(`Extracted host: ${host} port: ${port}`);
+        }
+        if (name === "x-forwarded-proto") {
+          xForwardedProto = value.toLowerCase();
+        }
+        if (name === "x-forwarded-port") {
+          xForwardedPort = value;
+        }
+        if (name === "forwarded") {
+          forwarded = value;
+        }
+      }
+    }
+
+    if (!host) {
+      throw new Error("No Host header found in request");
+    }
+
+    // Infer TLS/port from headers when possible
+    if (xForwardedProto === "https") {
+      isTls = true;
+    }
+    if (forwarded && /proto=https/i.test(forwarded)) {
+      isTls = true;
+    }
+    if (xForwardedPort !== undefined) {
+      const p = parseInt(xForwardedPort, 10);
+      if (!Number.isNaN(p)) {
+        port = p;
+      }
+    }
+    if (port === 443) {
+      isTls = true;
+    }
+    if (port === undefined) {
+      port = isTls ? 443 : 80;
+    }
+
+    // Build full URL
+    const protocol = isTls ? "https" : "http";
+    const fullUrl = `${protocol}://${host}:${port}${path}`;
+    sdk.console.log(`Built full URL: ${fullUrl}`);
+
+    // Create RequestSpec with full URL
+    const spec = new RequestSpec(fullUrl);
+    spec.setMethod(method);
+
+    // Add headers (skip Host header as it's already in the URL)
+    for (const headerLine of headerLines) {
+      const colonIndex = headerLine.indexOf(":");
       if (colonIndex > 0) {
         const name = headerLine.substring(0, colonIndex).trim();
         const value = headerLine.substring(colonIndex + 1).trim();
-        console.log("Adding header:", name, "=", value);
-        spec.setHeader(name, value);
+
+        // Skip Host header as it's already included in the URL
+        if (name.toLowerCase() !== "host") {
+          spec.setHeader(name, value);
+          sdk.console.log(`Added header: ${name} = ${value}`);
+        }
       }
     }
-    
+
     // Add body
     if (bodyLines.length > 0) {
-      const body = bodyLines.join('\n');
-      console.log("Setting body:", body.substring(0, 50) + "...");
+      const body = bodyLines.join("\n");
       spec.setBody(body);
+      sdk.console.log(`Added body: ${body.substring(0, 50)}...`);
     }
 
     // Send the updated request to create a new request/response pair
@@ -193,12 +255,9 @@ export const updateTemplateRequestRaw = async (
 
     return updatedTemplate;
   } catch (error) {
-    console.error("Failed to update template request from raw:", error);
-    console.error("Error details:", error.message);
-    console.error("Request raw data:", requestRaw);
-    
-    // Re-throw the error with more context for the frontend
-    throw new Error(`Failed to parse request: ${error.message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    sdk.console.log(`Failed to update template request from raw: ${message}`);
+    return undefined;
   }
 };
 
@@ -466,6 +525,7 @@ type Schema = {
   required?: string[];
   enum?: string[];
   example?: unknown;
+  default?: unknown;
   $ref?: string;
   additionalProperties?: Schema;
   xml?: Record<string, unknown>;
@@ -859,8 +919,10 @@ export const importTemplatesFromOpenApi = async (
         operation,
         spec.definitions,
       );
+      // Apply substitutions to the resolved path
+      const substitutedPath = applySubstitutions(resolvedPath);
       const queryString = buildQueryString(operation, spec.definitions);
-      const fullUrl = `${isTls ? "https" : "http"}://${host}:${port}${resolvedPath}${queryString}`;
+      const fullUrl = `${isTls ? "https" : "http"}://${host}:${port}${substitutedPath}${queryString}`;
 
       // Try to create a real base request in Caido so the UI can load it later
       let createdTemplate: TemplateDTO | undefined = undefined;
@@ -916,7 +978,7 @@ export const importTemplatesFromOpenApi = async (
           getHost: () => host,
           getPort: () => port,
           getTls: () => isTls,
-          getPath: () => resolvedPath,
+          getPath: () => substitutedPath,
         } as unknown as Request;
 
         const pseudoResponse = {
@@ -937,10 +999,7 @@ export const importTemplatesFromOpenApi = async (
       }
 
       if (createdTemplate !== undefined) {
-        const templateId = generateTemplateId(
-          createdTemplate.requestId as unknown as Request,
-        );
-        if (store.templateExists(templateId)) continue;
+        if (store.templateExists(createdTemplate.id)) continue;
 
         store.addTemplate(createdTemplate);
 
@@ -956,7 +1015,7 @@ export const importTemplatesFromOpenApi = async (
 
   sdk.console.log(`Import completed. Created ${created} templates.`);
   return created;
-};
+};""
 
 const generateTemplateId = (
   request: Request,
@@ -970,7 +1029,8 @@ const generateTemplateId = (
     const bodyHash = sha256Hash(body);
     let dedupe = `${request.getMethod()}~${request.getUrl()}~${bodyHash}`;
     dedupeHeaders.forEach((h) => {
-      dedupe += `~${request.getHeader(h)?.join("~")}`;
+      const values = request.getHeader(h);
+      dedupe += `~${Array.isArray(values) ? values.join("~") : ""}`;
     });
     return sha256Hash(dedupe);
   } catch (error) {

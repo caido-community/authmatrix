@@ -172,9 +172,16 @@ export const useTemplateRepository = () => {
         templateId,
         requestSpec,
       );
+      if (updatedTemplate !== undefined) {
+        return {
+          type: "Ok" as const,
+          template: updatedTemplate,
+        };
+      }
+
       return {
-        type: "Ok" as const,
-        template: updatedTemplate,
+        type: "Err" as const,
+        error: "Template update returned no response",
       };
     } catch {
       return {
@@ -193,22 +200,21 @@ export const useTemplateRepository = () => {
         templateId,
         requestRaw,
       );
-      
-      if (updatedTemplate) {
+      if (updatedTemplate !== undefined) {
         return {
           type: "Ok" as const,
           template: updatedTemplate,
         };
       }
-      
+
       return {
         type: "Err" as const,
-        error: "Failed to update template request - invalid request format",
+        error: "Template update returned no response",
       };
-    } catch (error) {
+    } catch {
       return {
         type: "Err" as const,
-        error: `Failed to update template request: ${error.message || "Unknown error"}`,
+        error: "Failed to update template request",
       };
     }
   };

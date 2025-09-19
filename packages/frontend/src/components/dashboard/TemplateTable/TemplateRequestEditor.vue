@@ -78,47 +78,47 @@ const initializeEditor = async () => {
 
     // Create a simple textarea editor instead of using the problematic Caido editor
     console.log("Creating custom textarea editor...");
-    
-    const textarea = document.createElement('textarea');
+
+    const textarea = document.createElement("textarea");
     textarea.value = requestData.raw;
-    textarea.style.width = '100%';
-    textarea.style.height = '100%';
+    textarea.style.width = "100%";
+    textarea.style.height = "100%";
     textarea.style.fontFamily = 'Monaco, Menlo, "Ubuntu Mono", monospace';
-    textarea.style.fontSize = '14px';
-    textarea.style.lineHeight = '1.5';
-    textarea.style.padding = '1rem';
-    textarea.style.border = 'none';
-    textarea.style.outline = 'none';
-    textarea.style.resize = 'none';
-    textarea.style.backgroundColor = 'transparent';
-    textarea.style.color = 'inherit';
-    textarea.style.boxSizing = 'border-box';
-    
+    textarea.style.fontSize = "14px";
+    textarea.style.lineHeight = "1.5";
+    textarea.style.padding = "1rem";
+    textarea.style.border = "none";
+    textarea.style.outline = "none";
+    textarea.style.resize = "none";
+    textarea.style.backgroundColor = "transparent";
+    textarea.style.color = "inherit";
+    textarea.style.boxSizing = "border-box";
+
     // Make it fully editable
     textarea.readOnly = false;
     textarea.disabled = false;
-    textarea.setAttribute('contenteditable', 'true');
-    
+    textarea.setAttribute("contenteditable", "true");
+
     // Store reference to the textarea
     requestEditor = {
       getElement: () => textarea,
       getEditorView: () => ({
         dispatch: () => {},
-        state: { doc: { length: textarea.value.length } }
+        state: { doc: { length: textarea.value.length } },
       }),
       onChange: (callback) => {
-        textarea.addEventListener('input', () => {
+        textarea.addEventListener("input", () => {
           callback(textarea.value);
         });
       },
       dispose: () => {
         textarea.remove();
-      }
+      },
     };
-    
+
     requestEditorRef.value.appendChild(textarea);
     console.log("Custom textarea editor created and mounted");
-    
+
     // Focus the textarea
     setTimeout(() => {
       textarea.focus();
