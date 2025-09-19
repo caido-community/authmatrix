@@ -3,6 +3,7 @@ import type { ID, Request, Response } from "caido:utils";
 import { RequestSpec } from "caido:utils";
 import type { TemplateDTO } from "shared";
 
+import { getDb } from "../db/client";
 import { withProject } from "../db/utils";
 import {
   clearAllTemplates,
@@ -13,6 +14,7 @@ import {
   upsertTemplateRule,
 } from "../repositories/templates";
 import { SettingsStore } from "../stores/settings";
+import { SubstitutionStore } from "../stores/substitutions";
 import { TemplateStore } from "../stores/templates";
 import type { BackendEvents } from "../types";
 import { generateID, sha256Hash } from "../utils";
@@ -944,6 +946,121 @@ const buildHeaders = (operation: Operation): Record<string, string[]> => {
   return headers;
 };
 
+const createAutoSubstitutions = async (
+  sdk: SDK<never, BackendEvents>,
+  spec: OpenApiSpec,
+) => {
+  const substitutionStore = SubstitutionStore.get();
+  const existingSubstitutions = substitutionStore.getSubstitutions();
+
+  // Extract all unique placeholders from paths
+  const placeholders = new Set<string>();
+
+  if (spec.paths) {
+    for (const pathKey of Object.keys(spec.paths)) {
+      const fullPath = `${spec.basePath ?? ""}${pathKey}`;
+      const matches = fullPath.match(/\{[^}]+\}/g);
+      if (matches) {
+        matches.forEach((match) => placeholders.add(match));
+      }
+    }
+  }
+
+  console.log(
+    `Found ${placeholders.size} unique placeholders: ${Array.from(placeholders).join(", ")}`,
+  );
+
+  // Create substitution rules for placeholders that don't already exist
+  let createdCount = 0;
+  for (const placeholder of placeholders) {
+    // Check if a substitution rule already exists for this placeholder
+    const exists = existingSubstitutions.some(
+      (sub) => sub.pattern === placeholder,
+    );
+
+    if (!exists) {
+      // Create a default substitution rule
+      const defaultValue = generateDefaultValueForPlaceholder(placeholder);
+      const newSubstitution = {
+        id: generateID(),
+        pattern: placeholder,
+        replacement: defaultValue,
+      };
+
+      substitutionStore.addSubstitution(newSubstitution);
+
+      // Save to database
+      await withProject(sdk, async (projectId) => {
+        const db = await getDb(sdk);
+        const stmt = await db.prepare(`
+          INSERT INTO substitutions (id, project_id, pattern, replacement)
+          VALUES (?, ?, ?, ?)
+        `);
+        await stmt.run(
+          newSubstitution.id,
+          projectId,
+          newSubstitution.pattern,
+          newSubstitution.replacement,
+        );
+      });
+
+      sdk.api.send("substitutions:created", newSubstitution);
+      createdCount++;
+
+      console.log(
+        `Created auto-substitution: "${placeholder}" -> "${defaultValue}"`,
+      );
+    }
+  }
+
+  if (createdCount > 0) {
+    sdk.console.log(`Created ${createdCount} automatic substitution rules`);
+  }
+};
+
+const generateDefaultValueForPlaceholder = (placeholder: string): string => {
+  // Remove the curly braces to get the parameter name
+  const paramName = placeholder.slice(1, -1).toLowerCase();
+
+  // Generate sensible defaults based on common parameter names
+  if (paramName.includes("id")) {
+    return "1";
+  }
+  if (paramName.includes("user")) {
+    return "user";
+  }
+  if (paramName.includes("name")) {
+    return "name";
+  }
+  if (paramName.includes("email")) {
+    return "user@example.com";
+  }
+  if (paramName.includes("token")) {
+    return "token";
+  }
+  if (paramName.includes("key")) {
+    return "key";
+  }
+  if (paramName.includes("uuid")) {
+    return "123e4567-e89b-12d3-a456-426614174000";
+  }
+  if (paramName.includes("slug")) {
+    return "example-slug";
+  }
+  if (paramName.includes("version")) {
+    return "v1";
+  }
+  if (paramName.includes("type")) {
+    return "type";
+  }
+  if (paramName.includes("status")) {
+    return "active";
+  }
+
+  // Default fallback
+  return "value";
+};
+
 export const importTemplatesFromOpenApi = async (
   sdk: SDK<never, BackendEvents>,
   rawJson: string,
@@ -973,6 +1090,9 @@ export const importTemplatesFromOpenApi = async (
   sdk.console.log(`Found ${Object.keys(spec.paths).length} paths in spec`);
 
   const { host, port, isTls, basePath } = inferHostPortTls(spec);
+
+  // Extract unique placeholders from all paths and create substitution rules
+  await createAutoSubstitutions(sdk, spec);
 
   const store = TemplateStore.get();
   let created = 0;
