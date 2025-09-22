@@ -120,16 +120,12 @@ const runAnalysis = () => {
 };
 
 const fileInput = ref<HTMLInputElement | undefined>(undefined);
-const importConfigInput = ref<HTMLInputElement | undefined>(undefined);
 const overrideHost = ref<string>("");
 
 const onClickImport = () => {
   fileInput.value?.click();
 };
 
-const onClickImportConfig = () => {
-  importConfigInput.value?.click();
-};
 
 const onFileSelected = async (e: Event) => {
   const target = e.target as HTMLInputElement | undefined;
@@ -143,19 +139,7 @@ const onFileSelected = async (e: Event) => {
   overrideHost.value = "";
 };
 
-const onConfigFileSelected = async (e: Event) => {
-  const target = e.target as HTMLInputElement | undefined;
-  const files = target?.files ?? undefined;
-  if (!files || files.length === 0) return;
-  const file = files[0];
-  if (!file) return;
-  await service.importConfiguration(file);
-  if (importConfigInput.value) importConfigInput.value.value = "";
-};
-
-const onExportConfig = async () => {
-  await service.exportConfiguration();
-};
+// Export/Import controls moved to App MenuBar end section
 
 const editTemplate = (template: TemplateDTO) => {
   editingTemplate.value = template;
@@ -174,7 +158,7 @@ const handleKeyDown = async (event: KeyboardEvent) => {
     // Only handle if the DataTable is focused or if no other component has handled it
     const target = event.target as HTMLElement;
     const isInRequestPreview = target.closest('.cm-editor') || target.closest('[data-request-preview]');
-    
+
     if (!isInRequestPreview) {
       event.preventDefault();
       if (selection.value) {
@@ -186,27 +170,27 @@ const handleKeyDown = async (event: KeyboardEvent) => {
 
 const handleContextMenu = async (event: MouseEvent) => {
   event.preventDefault();
-  
+
   // Create a simple context menu
   const contextMenu = document.createElement('div');
   contextMenu.className = 'fixed bg-surface-700 border border-surface-600 rounded shadow-lg z-50';
   contextMenu.style.left = `${event.clientX}px`;
   contextMenu.style.top = `${event.clientY}px`;
-  
+
   const sendToReplayItem = document.createElement('div');
   sendToReplayItem.className = 'px-4 py-2 hover:bg-surface-600 cursor-pointer text-sm';
   sendToReplayItem.innerHTML = '<i class="fas fa-play mr-2"></i>Send to Replay';
-  
+
   sendToReplayItem.addEventListener('click', async () => {
     if (selection.value) {
       await sendToReplay(selection.value);
     }
     document.body.removeChild(contextMenu);
   });
-  
+
   contextMenu.appendChild(sendToReplayItem);
   document.body.appendChild(contextMenu);
-  
+
   // Remove context menu when clicking elsewhere
   const removeMenu = () => {
     if (document.body.contains(contextMenu)) {
@@ -214,7 +198,7 @@ const handleContextMenu = async (event: MouseEvent) => {
     }
     document.removeEventListener('click', removeMenu);
   };
-  
+
   setTimeout(() => {
     document.addEventListener('click', removeMenu);
   }, 100);
@@ -373,25 +357,6 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
               accept="application/json,.json"
               class="hidden"
               @change="onFileSelected"
-            />
-            <Button
-              v-tooltip="'Export all AuthMatrix configuration to a file.'"
-              label="Export Config"
-              icon="fas fa-download"
-              @click="onExportConfig"
-            />
-            <Button
-              v-tooltip="'Import AuthMatrix configuration from a file.'"
-              label="Import Config"
-              icon="fas fa-upload"
-              @click="onClickImportConfig"
-            />
-            <input
-              ref="importConfigInput"
-              type="file"
-              accept="application/json,.json"
-              class="hidden"
-              @change="onConfigFileSelected"
             />
             <Button
               v-tooltip="'Clear all template entries.'"

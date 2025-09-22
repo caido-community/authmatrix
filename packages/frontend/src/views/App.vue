@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import MenuBar from "primevue/menubar";
+import Button from "primevue/button";
 import { computed, onMounted, ref } from "vue";
 
 import Dashboard from "./Dashboard.vue";
@@ -48,6 +49,23 @@ const substitutionService = useSubstitutionService();
 const analysisService = useAnalysisService();
 const sdk = useSDK();
 
+const importConfigInput = ref<HTMLInputElement | undefined>(undefined);
+const onClickImportConfig = () => {
+  importConfigInput.value?.click();
+};
+const onConfigFileSelected = async (e: Event) => {
+  const target = e.target as HTMLInputElement | undefined;
+  const files = target?.files ?? undefined;
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  if (!file) return;
+  await templateService.importConfiguration(file);
+  if (importConfigInput.value) importConfigInput.value.value = "";
+};
+const onExportConfig = async () => {
+  await templateService.exportConfiguration();
+};
+
 onMounted(() => {
   const setup = () => {
     roleService.initialize();
@@ -81,6 +99,31 @@ onMounted(() => {
             >
               {{ item.label }}
             </div>
+          </div>
+        </template>
+        <template #end>
+          <div class="flex items-center gap-2">
+            <Button
+              size="small"
+              v-tooltip="'Export all AuthMatrix configuration to a file.'"
+              label="Export"
+              icon="fas fa-download"
+              @click="onExportConfig"
+            />
+            <Button
+              size="small"
+              v-tooltip="'Import AuthMatrix configuration from a file.'"
+              label="Import"
+              icon="fas fa-upload"
+              @click="onClickImportConfig"
+            />
+            <input
+              ref="importConfigInput"
+              type="file"
+              accept="application/json,.json"
+              class="hidden"
+              @change="onConfigFileSelected"
+            />
           </div>
         </template>
       </MenuBar>

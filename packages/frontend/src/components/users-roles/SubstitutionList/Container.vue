@@ -9,39 +9,39 @@ import { ref } from "vue";
 
 import { useSubstitutionService } from "@/services/substitutions";
 import { type SubstitutionState } from "@/types";
+import { useSDK } from "@/plugins/sdk";
 
-const props = defineProps<{
+defineProps<{
   state: SubstitutionState & { type: "Success" };
 }>();
 
 const service = useSubstitutionService();
+const sdk = useSDK();
 
 const newPattern = ref("");
 const newReplacement = ref("");
 
 const addSubstitution = () => {
-  if (newPattern.value.trim() !== "" && newReplacement.value.trim() !== "") {
-    service.addSubstitution(
-      newPattern.value.trim(),
-      newReplacement.value.trim(),
-    );
-    newPattern.value = "";
-    newReplacement.value = "";
+  if (newPattern.value.trim() === "" || newReplacement.value.trim() === "") {
+    sdk.window.showToast("Please enter a pattern and replacement", {
+      variant: "error",
+    });
+    return;
   }
+
+  service.addSubstitution(newPattern.value.trim(), newReplacement.value.trim());
+  newPattern.value = "";
+  newReplacement.value = "";
 };
 
 const deleteSubstitution = (substitution: SubstitutionDTO) => {
   service.deleteSubstitution(substitution.id);
 };
 
-const clearSubstitutions = () => {
-  service.clearSubstitutions();
-};
-
 const onSubstitutionUpdate = (
   substitution: SubstitutionDTO,
   field: string,
-  newValue: unknown,
+  newValue: unknown
 ) => {
   service.updateSubstitution(substitution.id, {
     ...substitution,
@@ -72,22 +72,21 @@ const onSubstitutionUpdate = (
             <div class="flex gap-2">
               <InputText
                 v-model="newPattern"
-                placeholder="Pattern (e.g., {petId})"
-                class="w-32"
+                placeholder="Pattern (e.g. {petId})"
+                class="w-52"
               />
               <InputText
                 v-model="newReplacement"
-                placeholder="Replacement (e.g., 123)"
-                class="w-32"
+                placeholder="Replacement (e.g. 123)"
+                class="w-52"
               />
-              <Button label="Add" icon="fas fa-plus" @click="addSubstitution" />
+              <Button
+                size="small"
+                icon="fas fa-plus"
+                label="Add Substitution"
+                @click="addSubstitution"
+              />
             </div>
-            <Button
-              v-tooltip="'Clear all substitutions.'"
-              label="Clear All"
-              severity="danger"
-              @click="clearSubstitutions"
-            />
           </div>
         </div>
       </template>

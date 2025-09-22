@@ -29,7 +29,7 @@ export const useSubstitutionService = defineStore(
 
     const updateSubstitution = async (
       id: string,
-      fields: Omit<SubstitutionDTO, "id">,
+      fields: Omit<SubstitutionDTO, "id">
     ) => {
       const result = await repository.updateSubstitution(id, fields);
 
@@ -50,18 +50,6 @@ export const useSubstitutionService = defineStore(
 
       if (result.type === "Ok") {
         store.send({ type: "DeleteSubstitution", id });
-      } else {
-        sdk.window.showToast(result.error, {
-          variant: "error",
-        });
-      }
-    };
-
-    const clearSubstitutions = async () => {
-      const result = await repository.clearSubstitutions();
-
-      if (result.type === "Ok") {
-        store.send({ type: "ClearSubstitutions" });
       } else {
         sdk.window.showToast(result.error, {
           variant: "error",
@@ -110,7 +98,6 @@ export const useSubstitutionService = defineStore(
       addSubstitution,
       updateSubstitution,
       deleteSubstitution,
-      clearSubstitutions,
     };
-  },
+  }
 );
