@@ -109,6 +109,12 @@ export const hydrateStoresFromDb = async (sdk: SDK) => {
 
   const projectID = current.getId();
 
+  // Clear all stores first to ensure clean state
+  roleStore.clear();
+  templateStore.clearTemplates();
+  userStore.clear();
+  substitutionStore.clear();
+
   const rolesStmt = await db.prepare(
     "SELECT id, name, description FROM roles WHERE project_id = ?",
   );

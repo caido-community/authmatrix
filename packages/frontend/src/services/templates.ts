@@ -97,6 +97,56 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
+  const exportConfiguration = async () => {
+    const result = await repository.exportConfiguration();
+
+    if (result.kind === "Ok") {
+      // Create and download the file
+      const blob = new Blob([result.value], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `authmatrix-config-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      sdk.window.showToast("Configuration exported successfully", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const importConfiguration = async (file: File) => {
+    try {
+      const text = await file.text();
+      const result = await repository.importConfiguration(text);
+
+      if (result.kind === "Ok") {
+        const { imported } = result.value;
+        sdk.window.showToast(
+          `Configuration imported successfully: ${imported.templates} templates, ${imported.users} users, ${imported.roles} roles, ${imported.substitutions} substitutions`,
+          {
+            variant: "success",
+          },
+        );
+      } else {
+        sdk.window.showToast(result.error, {
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      sdk.window.showToast("Failed to read import file", {
+        variant: "error",
+      });
+    }
+  };
+
   const analysisStore = useAnalysisStore();
   const deleteTemplate = async (id: string) => {
     const result = await repository.deleteTemplate(id);
@@ -187,6 +237,11 @@ export const useTemplateService = defineStore("services.templates", () => {
     sdk.backend.onEvent("cursor:clear", () => {
       store.send({ type: "ClearMarkings" });
     });
+
+    sdk.backend.onEvent("config:imported", async () => {
+      // Reinitialize all services when configuration is imported
+      await initialize();
+    });
   };
 
   const updateTemplateRequest = async (
@@ -253,5 +308,7 @@ export const useTemplateService = defineStore("services.templates", () => {
     clearTemplates,
     importFromSwagger,
     sendToReplay,
+    exportConfiguration,
+    importConfiguration,
   };
 });

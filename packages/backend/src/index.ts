@@ -22,7 +22,9 @@ import {
   checkAllTemplatesForUser,
   clearTemplates,
   deleteTemplate,
+  exportConfiguration,
   getTemplates,
+  importConfiguration,
   importTemplatesFromOpenApi,
   registerTemplateEvents,
   sendTemplateToReplay,
@@ -70,6 +72,8 @@ export type API = DefineAPI<{
   addTemplateFromContext: typeof addTemplateFromContext;
   importTemplatesFromOpenApi: typeof importTemplatesFromOpenApi;
   sendTemplateToReplay: typeof sendTemplateToReplay;
+  exportConfiguration: typeof exportConfiguration;
+  importConfiguration: typeof importConfiguration;
 
   // Settings endpoints
   getSettings: typeof getSettings;
@@ -124,6 +128,8 @@ export async function init(sdk: SDK<API, BackendEvents>) {
   sdk.api.register("addTemplateFromContext", addTemplateFromContext);
   sdk.api.register("importTemplatesFromOpenApi", importTemplatesFromOpenApi);
   sdk.api.register("sendTemplateToReplay", sendTemplateToReplay);
+  sdk.api.register("exportConfiguration", exportConfiguration);
+  sdk.api.register("importConfiguration", importConfiguration);
 
   // Settings endpoints
   sdk.api.register("getSettings", getSettings);

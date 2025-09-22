@@ -95,6 +95,11 @@ export const useSubstitutionService = defineStore(
       sdk.backend.onEvent("substitutions:cleared", () => {
         store.send({ type: "ClearSubstitutions" });
       });
+
+      sdk.backend.onEvent("config:imported", async () => {
+        // Reinitialize when configuration is imported
+        await initialize();
+      });
     };
 
     const getState = () => store.getState();

@@ -3,7 +3,10 @@ import type { ID, Request, Response } from "caido:utils";
 import { RequestSpec } from "caido:utils";
 import type { TemplateDTO, Result } from "shared";
 
+import type { BackendEvents } from "../types";
+
 import { getDb } from "../db/client";
+import { hydrateStoresFromDb } from "../db/db";
 import { withProject } from "../db/utils";
 import {
   clearAllTemplates,
@@ -16,7 +19,6 @@ import {
 import { SettingsStore } from "../stores/settings";
 import { SubstitutionStore } from "../stores/substitutions";
 import { TemplateStore } from "../stores/templates";
-import type { BackendEvents } from "../types";
 import { generateID, sha256Hash } from "../utils";
 
 import { applySubstitutions, runAnalysis } from "./analysis";
@@ -1308,6 +1310,262 @@ export const sendTemplateToReplay = async (
   } catch (error) {
     sdk.console.log(`Error sending template to Replay: ${error}`);
     return { kind: "Error", error: `Failed to send template to Replay: ${error}` };
+  }
+};
+
+export const exportConfiguration = async (
+  sdk: SDK<never, BackendEvents>,
+): Promise<Result<string>> => {
+  try {
+    const project = await sdk.projects.getCurrent();
+    if (!project) {
+      return { kind: "Error", error: "No current project found" };
+    }
+
+    const projectId = project.getId();
+    const db = await getDb(sdk);
+
+    // Gather all data from the database
+    const templatesStmt = await db.prepare(`
+      SELECT * FROM templates WHERE project_id = ?
+    `);
+    const templates = await templatesStmt.all(projectId);
+
+    const templateRulesStmt = await db.prepare(`
+      SELECT * FROM template_rules WHERE project_id = ?
+    `);
+    const templateRules = await templateRulesStmt.all(projectId);
+
+    const usersStmt = await db.prepare(`
+      SELECT * FROM users WHERE project_id = ?
+    `);
+    const users = await usersStmt.all(projectId);
+
+    const userAttributesStmt = await db.prepare(`
+      SELECT * FROM user_attributes WHERE project_id = ?
+    `);
+    const userAttributes = await userAttributesStmt.all(projectId);
+
+    const userRolesStmt = await db.prepare(`
+      SELECT * FROM user_roles WHERE project_id = ?
+    `);
+    const userRoles = await userRolesStmt.all(projectId);
+
+    const rolesStmt = await db.prepare(`
+      SELECT * FROM roles WHERE project_id = ?
+    `);
+    const roles = await rolesStmt.all(projectId);
+
+    const substitutionsStmt = await db.prepare(`
+      SELECT * FROM substitutions WHERE project_id = ?
+    `);
+    const substitutions = await substitutionsStmt.all(projectId);
+
+    // Note: No settings table exists in the current schema
+
+    // Create the export data structure
+    const exportData = {
+      version: "1.0",
+      exportedAt: new Date().toISOString(),
+      projectId: projectId.toString(),
+      data: {
+        templates,
+        templateRules,
+        users,
+        userAttributes,
+        userRoles,
+        roles,
+        substitutions,
+      },
+    };
+
+    const jsonString = JSON.stringify(exportData, null, 2);
+    sdk.console.log(`Exported configuration with ${templates.length} templates, ${users.length} users, ${roles.length} roles, ${substitutions.length} substitutions`);
+    
+    return { kind: "Ok", value: jsonString };
+  } catch (error) {
+    sdk.console.log(`Error exporting configuration: ${error}`);
+    return { kind: "Error", error: `Failed to export configuration: ${error}` };
+  }
+};
+
+export const importConfiguration = async (
+  sdk: SDK<never, BackendEvents>,
+  jsonData: string,
+): Promise<Result<{ imported: { templates: number; users: number; roles: number; substitutions: number } }>> => {
+  try {
+    const project = await sdk.projects.getCurrent();
+    if (!project) {
+      return { kind: "Error", error: "No current project found" };
+    }
+
+    const projectId = project.getId();
+    const db = await getDb(sdk);
+
+    // Parse the import data
+    let importData;
+    try {
+      importData = JSON.parse(jsonData);
+    } catch (error) {
+      return { kind: "Error", error: "Invalid JSON format" };
+    }
+
+    // Validate the import data structure
+    if (!importData.data || typeof importData.data !== 'object') {
+      return { kind: "Error", error: "Invalid import data structure" };
+    }
+
+    const { data } = importData;
+    const imported = {
+      templates: 0,
+      users: 0,
+      roles: 0,
+      substitutions: 0,
+    };
+
+    // Import in the correct order to respect foreign key constraints
+    // 1. Import roles first
+    if (Array.isArray(data.roles)) {
+      const rolesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO roles (id, project_id, name, description)
+        VALUES (?, ?, ?, ?)
+      `);
+      for (const role of data.roles) {
+        try {
+          await rolesStmt.run(role.id, projectId, role.name, role.description);
+          imported.roles++;
+        } catch (error) {
+          sdk.console.log(`Failed to import role ${role.id}: ${error}`);
+        }
+      }
+    }
+
+    // 2. Import users
+    if (Array.isArray(data.users)) {
+      const usersStmt = await db.prepare(`
+        INSERT OR REPLACE INTO users (id, project_id, name)
+        VALUES (?, ?, ?)
+      `);
+      for (const user of data.users) {
+        try {
+          await usersStmt.run(user.id, projectId, user.name);
+          imported.users++;
+        } catch (error) {
+          sdk.console.log(`Failed to import user ${user.id}: ${error}`);
+        }
+      }
+    }
+
+    // 3. Import user attributes
+    if (Array.isArray(data.userAttributes)) {
+      const userAttributesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO user_attributes (id, project_id, user_id, name, value, kind)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      for (const attribute of data.userAttributes) {
+        try {
+          await userAttributesStmt.run(attribute.id, projectId, attribute.user_id, attribute.name, attribute.value, attribute.kind);
+        } catch (error) {
+          sdk.console.log(`Failed to import user attribute ${attribute.id}: ${error}`);
+        }
+      }
+    }
+
+    // 4. Import user roles
+    if (Array.isArray(data.userRoles)) {
+      const userRolesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO user_roles (user_id, role_id, project_id)
+        VALUES (?, ?, ?)
+      `);
+      for (const userRole of data.userRoles) {
+        try {
+          await userRolesStmt.run(userRole.user_id, userRole.role_id, projectId);
+        } catch (error) {
+          sdk.console.log(`Failed to import user role ${userRole.user_id}-${userRole.role_id}: ${error}`);
+        }
+      }
+    }
+
+    // 5. Import templates
+    if (Array.isArray(data.templates)) {
+      const templatesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO templates (
+          id, project_id, request_id, auth_success_regex,
+          meta_host, meta_port, meta_path, meta_is_tls, meta_method
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      for (const template of data.templates) {
+        try {
+          await templatesStmt.run(
+            template.id, 
+            projectId, 
+            template.request_id, 
+            template.auth_success_regex,
+            template.meta_host,
+            template.meta_port,
+            template.meta_path,
+            template.meta_is_tls,
+            template.meta_method
+          );
+          imported.templates++;
+        } catch (error) {
+          sdk.console.log(`Failed to import template ${template.id}: ${error}`);
+        }
+      }
+    }
+
+    // 6. Import template rules
+    if (Array.isArray(data.templateRules)) {
+      const templateRulesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO template_rules (template_id, project_id, subject_type, subject_id, has_access, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      for (const rule of data.templateRules) {
+        try {
+          await templateRulesStmt.run(
+            rule.template_id, 
+            projectId, 
+            rule.subject_type, 
+            rule.subject_id, 
+            rule.has_access, 
+            rule.status
+          );
+        } catch (error) {
+          sdk.console.log(`Failed to import template rule ${rule.template_id}: ${error}`);
+        }
+      }
+    }
+
+    // 7. Import substitutions
+    if (Array.isArray(data.substitutions)) {
+      const substitutionsStmt = await db.prepare(`
+        INSERT OR REPLACE INTO substitutions (id, project_id, pattern, replacement)
+        VALUES (?, ?, ?, ?)
+      `);
+      for (const substitution of data.substitutions) {
+        try {
+          await substitutionsStmt.run(substitution.id, projectId, substitution.pattern, substitution.replacement);
+          imported.substitutions++;
+        } catch (error) {
+          sdk.console.log(`Failed to import substitution ${substitution.id}: ${error}`);
+        }
+      }
+    }
+
+    // Note: No settings table exists in the current schema
+
+    // Refresh all stores with the imported data
+    await hydrateStoresFromDb(sdk);
+
+    // Send event to notify frontend that configuration was imported
+    sdk.api.send("config:imported", null);
+
+    sdk.console.log(`Imported configuration: ${imported.templates} templates, ${imported.users} users, ${imported.roles} roles, ${imported.substitutions} substitutions`);
+    
+    return { kind: "Ok", value: { imported } };
+  } catch (error) {
+    sdk.console.log(`Error importing configuration: ${error}`);
+    return { kind: "Error", error: `Failed to import configuration: ${error}` };
   }
 };
 

@@ -120,10 +120,15 @@ const runAnalysis = () => {
 };
 
 const fileInput = ref<HTMLInputElement | undefined>(undefined);
+const importConfigInput = ref<HTMLInputElement | undefined>(undefined);
 const overrideHost = ref<string>("");
 
 const onClickImport = () => {
   fileInput.value?.click();
+};
+
+const onClickImportConfig = () => {
+  importConfigInput.value?.click();
 };
 
 const onFileSelected = async (e: Event) => {
@@ -136,6 +141,20 @@ const onFileSelected = async (e: Event) => {
   await service.importFromSwagger(text, overrideHost.value.trim() || undefined);
   if (fileInput.value) fileInput.value.value = "";
   overrideHost.value = "";
+};
+
+const onConfigFileSelected = async (e: Event) => {
+  const target = e.target as HTMLInputElement | undefined;
+  const files = target?.files ?? undefined;
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  if (!file) return;
+  await service.importConfiguration(file);
+  if (importConfigInput.value) importConfigInput.value.value = "";
+};
+
+const onExportConfig = async () => {
+  await service.exportConfiguration();
 };
 
 const editTemplate = (template: TemplateDTO) => {
@@ -354,6 +373,25 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
               accept="application/json,.json"
               class="hidden"
               @change="onFileSelected"
+            />
+            <Button
+              v-tooltip="'Export all AuthMatrix configuration to a file.'"
+              label="Export Config"
+              icon="fas fa-download"
+              @click="onExportConfig"
+            />
+            <Button
+              v-tooltip="'Import AuthMatrix configuration from a file.'"
+              label="Import Config"
+              icon="fas fa-upload"
+              @click="onClickImportConfig"
+            />
+            <input
+              ref="importConfigInput"
+              type="file"
+              accept="application/json,.json"
+              class="hidden"
+              @change="onConfigFileSelected"
             />
             <Button
               v-tooltip="'Clear all template entries.'"

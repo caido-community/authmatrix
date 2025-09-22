@@ -23,6 +23,12 @@ export const useUserService = defineStore("services.users", () => {
     }
   };
 
+  // Set up event listeners
+  sdk.backend.onEvent("config:imported", async () => {
+    // Reinitialize when configuration is imported
+    await initialize();
+  });
+
   const getState = () => store.getState();
 
   const addUser = async (name: string): Promise<UserDTO | undefined> => {

@@ -122,6 +122,30 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const exportConfiguration = async () => {
+    try {
+      const result = await sdk.backend.exportConfiguration();
+      return result;
+    } catch {
+      return {
+        kind: "Error" as const,
+        error: "Failed to export configuration",
+      };
+    }
+  };
+
+  const importConfiguration = async (jsonData: string) => {
+    try {
+      const result = await sdk.backend.importConfiguration(jsonData);
+      return result;
+    } catch {
+      return {
+        kind: "Error" as const,
+        error: "Failed to import configuration",
+      };
+    }
+  };
+
   const deleteTemplate = async (id: string) => {
     try {
       await sdk.backend.deleteTemplate(id);
@@ -299,5 +323,7 @@ export const useTemplateRepository = () => {
     checkAllTemplatesForUser,
     importFromSwagger,
     sendToReplay,
+    exportConfiguration,
+    importConfiguration,
   };
 };
