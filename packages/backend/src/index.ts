@@ -9,19 +9,35 @@ import {
 import { addRole, deleteRole, getRoles, updateRole } from "./services/roles";
 import { getSettings, updateSettings } from "./services/settings";
 import {
+  addSubstitution,
+  clearSubstitutions,
+  deleteSubstitution,
+  getSubstitutions,
+  updateSubstitutionFields,
+} from "./services/substitutions";
+import {
   addTemplate,
   addTemplateFromContext,
+  checkAllTemplatesForRole,
+  checkAllTemplatesForUser,
   clearTemplates,
   deleteTemplate,
+  exportConfiguration,
   getTemplates,
+  importConfiguration,
+  importTemplatesFromOpenApi,
   registerTemplateEvents,
+  sendTemplateToReplay,
   toggleTemplateRole,
   toggleTemplateUser,
   updateTemplate,
+  updateTemplateRequest,
+  updateTemplateRequestRaw,
 } from "./services/templates";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
 import { deleteProjectData, getActiveProject } from "./services/utils";
 import { RoleStore } from "./stores/roles";
+import { SubstitutionStore } from "./stores/substitutions";
 import { TemplateStore } from "./stores/templates";
 import { UserStore } from "./stores/users";
 import { type BackendEvents } from "./types";
@@ -45,11 +61,19 @@ export type API = DefineAPI<{
   getTemplates: typeof getTemplates;
   addTemplate: typeof addTemplate;
   updateTemplate: typeof updateTemplate;
+  updateTemplateRequest: typeof updateTemplateRequest;
+  updateTemplateRequestRaw: typeof updateTemplateRequestRaw;
   deleteTemplate: typeof deleteTemplate;
   clearTemplates: typeof clearTemplates;
   toggleTemplateRole: typeof toggleTemplateRole;
   toggleTemplateUser: typeof toggleTemplateUser;
+  checkAllTemplatesForRole: typeof checkAllTemplatesForRole;
+  checkAllTemplatesForUser: typeof checkAllTemplatesForUser;
   addTemplateFromContext: typeof addTemplateFromContext;
+  importTemplatesFromOpenApi: typeof importTemplatesFromOpenApi;
+  sendTemplateToReplay: typeof sendTemplateToReplay;
+  exportConfiguration: typeof exportConfiguration;
+  importConfiguration: typeof importConfiguration;
 
   // Settings endpoints
   getSettings: typeof getSettings;
@@ -59,6 +83,13 @@ export type API = DefineAPI<{
   runAnalysis: typeof runAnalysis;
   getResults: typeof getResults;
   getRequestResponse: typeof getRequestResponse;
+
+  // Substitution endpoints
+  getSubstitutions: typeof getSubstitutions;
+  addSubstitution: typeof addSubstitution;
+  updateSubstitutionFields: typeof updateSubstitutionFields;
+  deleteSubstitution: typeof deleteSubstitution;
+  clearSubstitutions: typeof clearSubstitutions;
 
   // Utils endpoints
   getActiveProject: typeof getActiveProject;
@@ -86,11 +117,19 @@ export async function init(sdk: SDK<API, BackendEvents>) {
   sdk.api.register("getTemplates", getTemplates);
   sdk.api.register("addTemplate", addTemplate);
   sdk.api.register("updateTemplate", updateTemplate);
+  sdk.api.register("updateTemplateRequest", updateTemplateRequest);
+  sdk.api.register("updateTemplateRequestRaw", updateTemplateRequestRaw);
   sdk.api.register("deleteTemplate", deleteTemplate);
   sdk.api.register("toggleTemplateRole", toggleTemplateRole);
   sdk.api.register("toggleTemplateUser", toggleTemplateUser);
+  sdk.api.register("checkAllTemplatesForRole", checkAllTemplatesForRole);
+  sdk.api.register("checkAllTemplatesForUser", checkAllTemplatesForUser);
   sdk.api.register("clearTemplates", clearTemplates);
   sdk.api.register("addTemplateFromContext", addTemplateFromContext);
+  sdk.api.register("importTemplatesFromOpenApi", importTemplatesFromOpenApi);
+  sdk.api.register("sendTemplateToReplay", sendTemplateToReplay);
+  sdk.api.register("exportConfiguration", exportConfiguration);
+  sdk.api.register("importConfiguration", importConfiguration);
 
   // Settings endpoints
   sdk.api.register("getSettings", getSettings);
@@ -100,6 +139,13 @@ export async function init(sdk: SDK<API, BackendEvents>) {
   sdk.api.register("runAnalysis", runAnalysis);
   sdk.api.register("getResults", getResults);
   sdk.api.register("getRequestResponse", getRequestResponse);
+
+  // Substitution endpoints
+  sdk.api.register("getSubstitutions", getSubstitutions);
+  sdk.api.register("addSubstitution", addSubstitution);
+  sdk.api.register("updateSubstitutionFields", updateSubstitutionFields);
+  sdk.api.register("deleteSubstitution", deleteSubstitution);
+  sdk.api.register("clearSubstitutions", clearSubstitutions);
 
   // Utils endpoints
   sdk.api.register("getActiveProject", getActiveProject);
@@ -113,10 +159,12 @@ export async function init(sdk: SDK<API, BackendEvents>) {
     const roleStore = RoleStore.get();
     const templateStore = TemplateStore.get();
     const userStore = UserStore.get();
+    const substitutionStore = SubstitutionStore.get();
 
     roleStore.clear();
     templateStore.clearTemplates();
     userStore.clear();
+    substitutionStore.clear();
 
     await hydrateStoresFromDb(sdk);
 

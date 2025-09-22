@@ -1,3 +1,4 @@
+import type { RequestSpec } from "caido:utils";
 import type { TemplateDTO } from "shared";
 
 import { useSDK } from "@/plugins/sdk";
@@ -94,6 +95,57 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const importFromSwagger = async (json: string, overrideHost?: string) => {
+    try {
+      const created = await sdk.backend.importTemplatesFromOpenApi({ rawJson: json, overrideHost });
+      return {
+        type: "Ok" as const,
+        created,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to import Swagger/OpenAPI spec",
+      };
+    }
+  };
+
+  const sendToReplay = async (templateId: string) => {
+    try {
+      const result = await sdk.backend.sendTemplateToReplay(templateId);
+      return result;
+    } catch {
+      return {
+        kind: "Error" as const,
+        error: "Failed to send template to Replay",
+      };
+    }
+  };
+
+  const exportConfiguration = async () => {
+    try {
+      const result = await sdk.backend.exportConfiguration();
+      return result;
+    } catch {
+      return {
+        kind: "Error" as const,
+        error: "Failed to export configuration",
+      };
+    }
+  };
+
+  const importConfiguration = async (jsonData: string) => {
+    try {
+      const result = await sdk.backend.importConfiguration(jsonData);
+      return result;
+    } catch {
+      return {
+        kind: "Error" as const,
+        error: "Failed to import configuration",
+      };
+    }
+  };
+
   const deleteTemplate = async (id: string) => {
     try {
       await sdk.backend.deleteTemplate(id);
@@ -147,13 +199,131 @@ export const useTemplateRepository = () => {
     }
   };
 
+  const checkAllTemplatesForRole = async (roleId: string) => {
+    try {
+      const count = await sdk.backend.checkAllTemplatesForRole(roleId);
+      return {
+        type: "Ok" as const,
+        count,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to check all templates for role",
+      };
+    }
+  };
+
+  const checkAllTemplatesForUser = async (userId: string) => {
+    try {
+      const count = await sdk.backend.checkAllTemplatesForUser(userId);
+      return {
+        type: "Ok" as const,
+        count,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to check all templates for user",
+      };
+    }
+  };
+
+  const updateTemplateRequest = async (
+    templateId: string,
+    requestSpec: RequestSpec,
+  ) => {
+    try {
+      const updatedTemplate = await sdk.backend.updateTemplateRequest(
+        templateId,
+        requestSpec,
+      );
+      if (updatedTemplate !== undefined) {
+        return {
+          type: "Ok" as const,
+          template: updatedTemplate,
+        };
+      }
+
+      return {
+        type: "Err" as const,
+        error: "Template update returned no response",
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to update template request",
+      };
+    }
+  };
+
+  const updateTemplateRequestRaw = async (
+    templateId: string,
+    requestRaw: string,
+  ) => {
+    try {
+      const updatedTemplate = await sdk.backend.updateTemplateRequestRaw(
+        templateId,
+        requestRaw,
+      );
+      if (updatedTemplate !== undefined) {
+        return {
+          type: "Ok" as const,
+          template: updatedTemplate,
+        };
+      }
+
+      return {
+        type: "Err" as const,
+        error: "Template update returned no response",
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to update template request",
+      };
+    }
+  };
+
+  const getRequestResponse = async (requestId: string) => {
+    try {
+      const result = await sdk.backend.getRequestResponse(requestId);
+      if (result.type === "Ok") {
+        return {
+          type: "Ok" as const,
+          request: result.request,
+          response: result.response,
+        };
+      }
+
+      return {
+        type: "Err" as const,
+        error: result.message,
+      };
+    } catch {
+      return {
+        type: "Err" as const,
+        error: "Failed to get request & response",
+      };
+    }
+  };
+
   return {
     getTemplates,
     toggleTemplateRole,
     toggleTemplateUser,
     addTemplate,
     updateTemplate,
+    updateTemplateRequest,
+    updateTemplateRequestRaw,
+    getRequestResponse,
     deleteTemplate,
     clearTemplates,
+    checkAllTemplatesForRole,
+    checkAllTemplatesForUser,
+    importFromSwagger,
+    sendToReplay,
+    exportConfiguration,
+    importConfiguration,
   };
 };

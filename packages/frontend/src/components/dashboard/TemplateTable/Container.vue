@@ -11,6 +11,7 @@ import type { RoleDTO, RuleStatusDTO, TemplateDTO, UserDTO } from "shared";
 import { computed, ref } from "vue";
 
 import RuleStatus from "./RuleStatus.vue";
+import TemplateRequestEditor from "./TemplateRequestEditor.vue";
 
 import { useAnalysisService } from "@/services/analysis";
 import { useSettingsService } from "@/services/settings";
@@ -30,6 +31,7 @@ const props = defineProps<{
 }>();
 
 const selectedStatusFilter = ref<RuleStatusDTO | "All">("All");
+const editingTemplate = ref<TemplateDTO | undefined>(undefined);
 
 const filteredTemplates = computed(() => {
   if (selectedStatusFilter.value === "All") return props.state.templates;
@@ -80,6 +82,14 @@ const toggleUser = (template: TemplateDTO, user: UserDTO) => {
   service.toggleTemplateUser(template.id, user.id);
 };
 
+const checkAllTemplatesForRole = (role: RoleDTO) => {
+  service.checkAllTemplatesForRole(role.id);
+};
+
+const checkAllTemplatesForUser = (user: UserDTO) => {
+  service.checkAllTemplatesForUser(user.id);
+};
+
 const deleteTemplate = (template: TemplateDTO) => {
   service.deleteTemplate(template.id);
 };
@@ -107,6 +117,96 @@ const getAutoCaptureRequestLabel = (value: "off" | "all" | "inScope") => {
 const analysisService = useAnalysisService();
 const runAnalysis = () => {
   analysisService.runAnalysis();
+};
+
+const fileInput = ref<HTMLInputElement | undefined>(undefined);
+const overrideHost = ref<string>("");
+
+const onClickImport = () => {
+  fileInput.value?.click();
+};
+
+
+const onFileSelected = async (e: Event) => {
+  const target = e.target as HTMLInputElement | undefined;
+  const files = target?.files ?? undefined;
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  if (!file) return;
+  const text = await file.text();
+  await service.importFromSwagger(text, overrideHost.value.trim() || undefined);
+  if (fileInput.value) fileInput.value.value = "";
+  overrideHost.value = "";
+};
+
+// Export/Import controls moved to App MenuBar end section
+
+const editTemplate = (template: TemplateDTO) => {
+  editingTemplate.value = template;
+};
+
+const closeEditor = () => {
+  editingTemplate.value = undefined;
+};
+
+const sendToReplay = async (template: TemplateDTO) => {
+  await service.sendToReplay(template.id);
+};
+
+const handleKeyDown = async (event: KeyboardEvent) => {
+  if (event.ctrlKey && event.key === 'r') {
+    // Only handle if the DataTable is focused or if no other component has handled it
+    const target = event.target as HTMLElement;
+    const isInRequestPreview = target.closest('.cm-editor') || target.closest('[data-request-preview]');
+
+    if (!isInRequestPreview) {
+      event.preventDefault();
+      if (selection.value) {
+        await sendToReplay(selection.value);
+      }
+    }
+  }
+};
+
+const handleContextMenu = async (event: MouseEvent) => {
+  event.preventDefault();
+
+  // Create a simple context menu
+  const contextMenu = document.createElement('div');
+  contextMenu.className = 'fixed bg-surface-700 border border-surface-600 rounded shadow-lg z-50';
+  contextMenu.style.left = `${event.clientX}px`;
+  contextMenu.style.top = `${event.clientY}px`;
+
+  const sendToReplayItem = document.createElement('div');
+  sendToReplayItem.className = 'px-4 py-2 hover:bg-surface-600 cursor-pointer text-sm';
+  sendToReplayItem.innerHTML = '<i class="fas fa-play mr-2"></i>Send to Replay';
+
+  sendToReplayItem.addEventListener('click', async () => {
+    if (selection.value) {
+      await sendToReplay(selection.value);
+    }
+    document.body.removeChild(contextMenu);
+  });
+
+  contextMenu.appendChild(sendToReplayItem);
+  document.body.appendChild(contextMenu);
+
+  // Remove context menu when clicking elsewhere
+  const removeMenu = () => {
+    if (document.body.contains(contextMenu)) {
+      document.body.removeChild(contextMenu);
+    }
+    document.removeEventListener('click', removeMenu);
+  };
+
+  setTimeout(() => {
+    document.addEventListener('click', removeMenu);
+  }, 100);
+};
+
+const onTemplateSaved = (template: TemplateDTO) => {
+  // The template service already updates the store, so we just close the editor
+  closeEditor();
 };
 
 const selection = computed({
@@ -237,6 +337,27 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
                 @update:model-value="handleStatusFilterChange"
               />
             </div>
+            <div class="flex flex-col gap-2">
+              <label class="text-sm text-gray-400">Override Host (optional)</label>
+              <InputText
+                v-model="overrideHost"
+                placeholder="e.g., api.example.com"
+                v-tooltip="'Override the host from the Swagger file. Leave empty to use the host from the file.'"
+              />
+            </div>
+            <Button
+              v-tooltip="'Import Swagger/OpenAPI JSON to create templates.'"
+              label="Import Swagger"
+              icon="fas fa-file-import"
+              @click="onClickImport"
+            />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="application/json,.json"
+              class="hidden"
+              @change="onFileSelected"
+            />
             <Button
               v-tooltip="'Clear all template entries.'"
               label="Clear All"
@@ -267,10 +388,14 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
           size="small"
           edit-mode="cell"
           selection-mode="single"
+          v-tooltip="'Right-click or press Ctrl+R to send to Replay'"
           @cell-edit-complete="
             ({ data, field, newValue }) =>
               onTemplateUpdate(data, field, newValue)
           "
+          @contextmenu="handleContextMenu"
+          @keydown="handleKeyDown"
+          tabindex="0"
         >
           <Column field="method" header="Method" class="w-[85px]">
             <template #body="{ data }">
@@ -300,7 +425,20 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
             </template>
           </Column>
 
-          <Column v-for="role in roleState.roles" key="id" :header="role.name">
+          <Column v-for="role in roleState.roles" :key="role.id">
+            <template #header>
+              <div class="flex items-center gap-2">
+                <span>{{ role.name }}</span>
+                <Button
+                  v-tooltip="`Check all templates for ${role.name}`"
+                  icon="fas fa-check-square"
+                  text
+                  severity="success"
+                  size="small"
+                  @click="() => checkAllTemplatesForRole(role)"
+                />
+              </div>
+            </template>
             <template #body="{ data }">
               <div class="flex items-center gap-4">
                 <Checkbox
@@ -316,11 +454,20 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
             </template>
           </Column>
 
-          <Column
-            v-for="user of userState.users"
-            :key="user.id"
-            :header="user.name"
-          >
+          <Column v-for="user of userState.users" :key="user.id">
+            <template #header>
+              <div class="flex items-center gap-2">
+                <span>{{ user.name }}</span>
+                <Button
+                  v-tooltip="`Check all templates for ${user.name}`"
+                  icon="fas fa-check-square"
+                  text
+                  severity="success"
+                  size="small"
+                  @click="() => checkAllTemplatesForUser(user)"
+                />
+              </div>
+            </template>
             <template #body="{ data }">
               <div class="flex items-center gap-4">
                 <Checkbox
@@ -338,7 +485,14 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
 
           <Column header="">
             <template #body="{ data }">
-              <div class="flex justify-end">
+              <div class="flex justify-end gap-2">
+                <Button
+                  icon="fas fa-edit"
+                  text
+                  severity="info"
+                  size="small"
+                  @click="() => editTemplate(data)"
+                />
                 <Button
                   icon="fas fa-trash"
                   text
@@ -352,6 +506,24 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
         </DataTable>
       </template>
     </Card>
+
+    <!-- Template Request Editor Modal -->
+    <div
+      v-if="editingTemplate"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      @click="closeEditor"
+    >
+      <div
+        class="w-full max-w-6xl h-5/6 bg-surface-700 rounded-lg shadow-lg"
+        @click.stop
+      >
+        <TemplateRequestEditor
+          :template="editingTemplate"
+          @close="closeEditor"
+          @saved="onTemplateSaved"
+        />
+      </div>
+    </div>
   </div>
 </template>
 

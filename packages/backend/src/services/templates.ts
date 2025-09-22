@@ -1,7 +1,12 @@
 import type { SDK } from "caido:plugin";
 import type { ID, Request, Response } from "caido:utils";
-import type { TemplateDTO } from "shared";
+import { RequestSpec } from "caido:utils";
+import type { TemplateDTO, Result } from "shared";
 
+import type { BackendEvents } from "../types";
+
+import { getDb } from "../db/client";
+import { hydrateStoresFromDb } from "../db/db";
 import { withProject } from "../db/utils";
 import {
   clearAllTemplates,
@@ -12,15 +17,252 @@ import {
   upsertTemplateRule,
 } from "../repositories/templates";
 import { SettingsStore } from "../stores/settings";
+import { SubstitutionStore } from "../stores/substitutions";
 import { TemplateStore } from "../stores/templates";
-import type { BackendEvents } from "../types";
 import { generateID, sha256Hash } from "../utils";
 
-import { runAnalysis } from "./analysis";
+import { applySubstitutions, runAnalysis } from "./analysis";
 
 export const getTemplates = (_sdk: SDK): TemplateDTO[] => {
   const store = TemplateStore.get();
   return store.getTemplates();
+};
+
+export const updateTemplateRequest = async (
+  sdk: SDK<never, BackendEvents>,
+  templateId: string,
+  requestSpec: RequestSpec,
+): Promise<TemplateDTO | undefined> => {
+  const store = TemplateStore.get();
+  const template = store.getTemplates().find((t) => t.id === templateId);
+
+  if (template === undefined) {
+    return undefined;
+  }
+
+  try {
+    // Send the updated request to create a new request/response pair
+    const result = await sdk.requests.send(requestSpec);
+
+    if (result.response === undefined) {
+      return undefined;
+    }
+
+    // Update the template with the new request ID and metadata
+    const updatedTemplate: TemplateDTO = {
+      ...template,
+      requestId: result.request.getId().toString(),
+      meta: {
+        host: result.request.getHost(),
+        port: result.request.getPort(),
+        method: result.request.getMethod(),
+        isTls: result.request.getTls(),
+        path: result.request.getPath(),
+      },
+    };
+
+    store.updateTemplate(templateId, updatedTemplate);
+
+    // Save to database
+    await withProject(sdk, async (projectId) => {
+      const { id, ...fields } = updatedTemplate;
+      await updateTemplateFields(sdk, projectId, templateId, fields);
+    });
+
+    return updatedTemplate;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    sdk.console.log(`Failed to update template request: ${message}`);
+    return undefined;
+  }
+};
+
+export const updateTemplateRequestRaw = async (
+  sdk: SDK<never, BackendEvents>,
+  templateId: string,
+  requestRaw: string,
+): Promise<TemplateDTO | undefined> => {
+  const store = TemplateStore.get();
+  const template = store.getTemplates().find((t) => t.id === templateId);
+
+  if (template === undefined) {
+    return undefined;
+  }
+
+  try {
+    const preview = requestRaw.substring(0, 100);
+    sdk.console.log(`Parsing raw request: ${preview}...`);
+
+    // Parse the raw request and create a RequestSpec
+    // Handle both \r\n and \n line endings
+    const lines = requestRaw.split(/\r?\n/);
+    sdk.console.log(`Split into lines: ${lines.length}`);
+
+    const requestLine = lines[0];
+    sdk.console.log(`Request line: ${requestLine}`);
+
+    if (requestLine === undefined) {
+      throw new Error("Invalid request format - no request line");
+    }
+
+    const parts = requestLine.split(" ");
+    const method = parts[0];
+    const path = parts[1];
+
+    sdk.console.log(`Parsed method: ${method} Path: ${path}`);
+
+    if (method === undefined || path === undefined) {
+      throw new Error(`Invalid request line format: "${requestLine}"`);
+    }
+
+    // Find the end of headers (empty line)
+    let headerEndIndex = 1;
+    while (
+      headerEndIndex < lines.length &&
+      lines[headerEndIndex]?.trim() !== ""
+    ) {
+      headerEndIndex++;
+    }
+
+    sdk.console.log(`Header end index: ${headerEndIndex}`);
+
+    // Extract headers
+    const headerLines = lines.slice(1, headerEndIndex);
+    const bodyLines = lines.slice(headerEndIndex + 1);
+
+    sdk.console.log(`Header lines: ${headerLines.length}`);
+    sdk.console.log(`Body lines: ${bodyLines.length}`);
+
+    // Extract host from headers to build full URL
+    let host = "";
+    let port: number | undefined = undefined;
+    let isTls = false;
+    let xForwardedProto: string | undefined = undefined;
+    let xForwardedPort: string | undefined = undefined;
+    let forwarded: string | undefined = undefined;
+
+    for (const headerLine of headerLines) {
+      const colonIndex = headerLine.indexOf(":");
+      if (colonIndex > 0) {
+        const name = headerLine.substring(0, colonIndex).trim().toLowerCase();
+        const value = headerLine.substring(colonIndex + 1).trim();
+
+        if (name === "host") {
+          host = value;
+          // Check if port is specified
+          if (host.includes(":")) {
+            const partsHost = host.split(":");
+            const hostname = partsHost[0] ?? host;
+            const portStr = partsHost[1];
+            host = hostname;
+            if (portStr !== undefined) {
+              const p = parseInt(portStr, 10);
+              if (!Number.isNaN(p)) port = p;
+            }
+          }
+          sdk.console.log(`Extracted host: ${host} port: ${port}`);
+        }
+        if (name === "x-forwarded-proto") {
+          xForwardedProto = value.toLowerCase();
+        }
+        if (name === "x-forwarded-port") {
+          xForwardedPort = value;
+        }
+        if (name === "forwarded") {
+          forwarded = value;
+        }
+      }
+    }
+
+    if (!host) {
+      throw new Error("No Host header found in request");
+    }
+
+    // Infer TLS/port from headers when possible
+    if (xForwardedProto === "https") {
+      isTls = true;
+    }
+    if (forwarded !== undefined && /proto=https/i.test(forwarded)) {
+      isTls = true;
+    }
+    if (xForwardedPort !== undefined) {
+      const p = parseInt(xForwardedPort, 10);
+      if (!Number.isNaN(p)) {
+        port = p;
+      }
+    }
+    if (port === 443) {
+      isTls = true;
+    }
+    if (port === undefined) {
+      port = isTls ? 443 : 80;
+    }
+
+    // Build full URL
+    const protocol = isTls ? "https" : "http";
+    const fullUrl = `${protocol}://${host}:${port}${path}`;
+    sdk.console.log(`Built full URL: ${fullUrl}`);
+
+    // Create RequestSpec with full URL
+    const spec = new RequestSpec(fullUrl);
+    spec.setMethod(method);
+
+    // Add headers (skip Host header as it's already in the URL)
+    for (const headerLine of headerLines) {
+      const colonIndex = headerLine.indexOf(":");
+      if (colonIndex > 0) {
+        const name = headerLine.substring(0, colonIndex).trim();
+        const value = headerLine.substring(colonIndex + 1).trim();
+
+        // Skip Host header as it's already included in the URL
+        if (name.toLowerCase() !== "host") {
+          spec.setHeader(name, value);
+          sdk.console.log(`Added header: ${name} = ${value}`);
+        }
+      }
+    }
+
+    // Add body
+    if (bodyLines.length > 0) {
+      const body = bodyLines.join("\n");
+      spec.setBody(body);
+      sdk.console.log(`Added body: ${body.substring(0, 50)}...`);
+    }
+
+    // Send the updated request to create a new request/response pair
+    const result = await sdk.requests.send(spec);
+
+    if (result.response === undefined) {
+      return undefined;
+    }
+
+    // Update the template with the new request ID and metadata
+    const updatedTemplate: TemplateDTO = {
+      ...template,
+      requestId: result.request.getId().toString(),
+      meta: {
+        host: result.request.getHost(),
+        port: result.request.getPort(),
+        method: result.request.getMethod(),
+        isTls: result.request.getTls(),
+        path: result.request.getPath(),
+      },
+    };
+
+    store.updateTemplate(templateId, updatedTemplate);
+
+    // Save to database
+    await withProject(sdk, async (projectId) => {
+      const { id, ...fields } = updatedTemplate;
+      await updateTemplateFields(sdk, projectId, templateId, fields);
+    });
+
+    return updatedTemplate;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    sdk.console.log(`Failed to update template request from raw: ${message}`);
+    return undefined;
+  }
 };
 
 export const addTemplate = async (sdk: SDK<never, BackendEvents>) => {
@@ -134,6 +376,82 @@ export const clearTemplates = async (sdk: SDK<never, BackendEvents>) => {
   });
 };
 
+export const checkAllTemplatesForRole = async (
+  sdk: SDK<never, BackendEvents>,
+  roleId: string,
+) => {
+  const store = TemplateStore.get();
+  const templates = store.getTemplates();
+  const updatedTemplates: TemplateDTO[] = [];
+
+  for (const template of templates) {
+    const rule = template.rules.find(
+      (r) => r.type === "RoleRule" && r.roleId === roleId,
+    );
+
+    // Only update if the rule doesn't exist or doesn't have access
+    if (!rule || !rule.hasAccess) {
+      const updatedTemplate = store.toggleTemplateRole(template.id, roleId);
+      if (updatedTemplate) {
+        updatedTemplates.push(updatedTemplate);
+        sdk.api.send("templates:updated", updatedTemplate);
+      }
+    }
+  }
+
+  // Save all changes to database
+  await withProject(sdk, async (projectId) => {
+    for (const template of updatedTemplates) {
+      const rule = template.rules.find(
+        (r) => r.type === "RoleRule" && r.roleId === roleId,
+      );
+      if (rule) {
+        await upsertTemplateRule(sdk, projectId, template.id, rule);
+      }
+    }
+  });
+
+  return updatedTemplates.length;
+};
+
+export const checkAllTemplatesForUser = async (
+  sdk: SDK<never, BackendEvents>,
+  userId: string,
+) => {
+  const store = TemplateStore.get();
+  const templates = store.getTemplates();
+  const updatedTemplates: TemplateDTO[] = [];
+
+  for (const template of templates) {
+    const rule = template.rules.find(
+      (r) => r.type === "UserRule" && r.userId === userId,
+    );
+
+    // Only update if the rule doesn't exist or doesn't have access
+    if (!rule || !rule.hasAccess) {
+      const updatedTemplate = store.toggleTemplateUser(template.id, userId);
+      if (updatedTemplate) {
+        updatedTemplates.push(updatedTemplate);
+        sdk.api.send("templates:updated", updatedTemplate);
+      }
+    }
+  }
+
+  // Save all changes to database
+  await withProject(sdk, async (projectId) => {
+    for (const template of updatedTemplates) {
+      const rule = template.rules.find(
+        (r) => r.type === "UserRule" && r.userId === userId,
+      );
+      if (rule) {
+        await upsertTemplateRule(sdk, projectId, template.id, rule);
+      }
+    }
+  });
+
+  return updatedTemplates.length;
+};
+
 export const onInterceptResponse = async (
   sdk: SDK<never, BackendEvents>,
   request: Request,
@@ -227,20 +545,710 @@ export const registerTemplateEvents = (sdk: SDK) => {
   sdk.events.onInterceptResponse(onInterceptResponse);
 };
 
+// Enhanced OpenAPI (Swagger) types for detailed parsing
+type OpenApiSpec = {
+  openapi?: string;
+  swagger?: string;
+  servers?: Array<{ url: string }>;
+  schemes?: Array<"http" | "https">;
+  host?: string;
+  basePath?: string;
+  paths?: Record<string, Record<string, Operation>>;
+  definitions?: Record<string, Schema>;
+};
+
+type Operation = {
+  tags?: string[];
+  summary?: string;
+  description?: string;
+  operationId?: string;
+  consumes?: string[];
+  produces?: string[];
+  parameters?: Parameter[];
+  responses?: Record<string, OpenApiResponse>;
+  security?: Array<Record<string, string[]>>;
+  deprecated?: boolean;
+};
+
+type Parameter = {
+  name: string;
+  in: "query" | "header" | "path" | "formData" | "body";
+  description?: string;
+  required?: boolean;
+  type?: string;
+  format?: string;
+  schema?: Schema;
+  items?: Schema;
+  enum?: string[];
+  default?: unknown;
+  example?: unknown;
+  collectionFormat?: string;
+};
+
+type OpenApiResponse = {
+  description: string;
+  schema?: Schema;
+  headers?: Record<string, Header>;
+};
+
+type Header = {
+  type: string;
+  format?: string;
+  description?: string;
+};
+
+type Schema = {
+  type?: string;
+  format?: string;
+  properties?: Record<string, Schema>;
+  items?: Schema;
+  required?: string[];
+  enum?: string[];
+  example?: unknown;
+  default?: unknown;
+  $ref?: string;
+  additionalProperties?: Schema;
+  xml?: Record<string, unknown>;
+};
+
+const inferHostPortTls = (
+  spec: OpenApiSpec,
+  overrideHost?: string,
+): { host: string; port: number; isTls: boolean; basePath: string } => {
+  // OpenAPI v3 preferred
+  if (Array.isArray(spec.servers) && spec.servers.length > 0) {
+    const first = spec.servers[0];
+    const url = first && typeof first.url === "string" ? first.url : undefined;
+    if (url !== undefined) {
+      const m = url.match(/^(https?):\/\/([^/:]+)(?::(\d+))?([^?#]*)/);
+      if (m) {
+        const scheme = m[1];
+        const host: string = overrideHost ?? m[2] ?? "localhost";
+        const portStr = m[3];
+        const path = m[4] ?? "";
+        const isTls = scheme === "https";
+        const port = portStr !== undefined ? Number(portStr) : isTls ? 443 : 80;
+        return {
+          host,
+          port,
+          isTls,
+          basePath: path === "/" ? "" : path,
+        };
+      }
+    }
+  }
+
+  // Swagger v2 fallback
+  const scheme =
+    Array.isArray(spec.schemes) && spec.schemes.includes("https")
+      ? "https"
+      : "http";
+  const isTls = scheme === "https";
+  const host = overrideHost ?? spec.host ?? "localhost";
+  const basePath = spec.basePath ?? "";
+  const port = isTls ? 443 : 80;
+  return { host, port, isTls, basePath };
+};
+
+const generateExampleFromSchema = (
+  schema: Schema,
+  definitions?: Record<string, Schema>,
+): unknown => {
+  // Handle explicit examples first
+  if (schema.example !== undefined) {
+    return schema.example;
+  }
+
+  // Resolve $ref references
+  if (schema.$ref !== undefined) {
+    const refName = schema.$ref.replace("#/definitions/", "");
+    const refSchema = definitions?.[refName];
+    return refSchema ? generateExampleFromSchema(refSchema, definitions) : {};
+  }
+
+  // Generate examples based on type
+  switch (schema.type) {
+    case "string":
+      return schema.enum?.[0] ?? schema.default ?? "string";
+    case "integer":
+    case "number":
+      return schema.default ?? 0;
+    case "boolean":
+      return schema.default ?? true;
+    case "array":
+      return schema.items
+        ? [generateExampleFromSchema(schema.items, definitions)]
+        : [];
+    case "object":
+      return generateObjectExample(schema, definitions);
+    default:
+      return {};
+  }
+};
+
+const generateObjectExample = (
+  schema: Schema,
+  definitions?: Record<string, Schema>,
+): Record<string, unknown> => {
+  if (!schema.properties) return {};
+
+  const obj: Record<string, unknown> = {};
+  const requiredFields = schema.required || [];
+
+  // Include required fields
+  for (const field of requiredFields) {
+    if (schema.properties[field]) {
+      obj[field] = generateExampleFromSchema(
+        schema.properties[field],
+        definitions,
+      );
+    }
+  }
+
+  // Include fields with examples or defaults
+  for (const [key, propSchema] of Object.entries(schema.properties)) {
+    if (propSchema.example !== undefined || propSchema.default !== undefined) {
+      obj[key] = generateExampleFromSchema(propSchema, definitions);
+    }
+  }
+
+  // If no fields were included (no required fields and no examples/defaults),
+  // include ALL available properties to create a complete example
+  if (Object.keys(obj).length === 0) {
+    for (const [key, propSchema] of Object.entries(schema.properties)) {
+      obj[key] = generateExampleFromSchema(propSchema, definitions);
+    }
+  }
+
+  return obj;
+};
+
+const buildRequestBody = (
+  operation: Operation,
+  definitions?: Record<string, Schema>,
+): string | undefined => {
+  if (!operation.parameters) return undefined;
+
+  const contentType =
+    operation.consumes && operation.consumes.length > 0
+      ? operation.consumes[0]
+      : "application/json";
+
+  // Handle body parameters (JSON/XML)
+  const bodyParam = operation.parameters.find((p) => p.in === "body");
+  if (bodyParam && bodyParam.schema) {
+    const example = generateExampleFromSchema(bodyParam.schema, definitions);
+
+    switch (contentType) {
+      case "application/json":
+        return JSON.stringify(example, null, 2);
+      case "application/xml":
+        // For XML, we'll return JSON for now (could be enhanced later)
+        return JSON.stringify(example, null, 2);
+      default:
+        return JSON.stringify(example, null, 2);
+    }
+  }
+
+  // Handle formData parameters (form-encoded data)
+  const formDataParams = operation.parameters.filter(
+    (p) => p.in === "formData",
+  );
+  if (formDataParams.length > 0) {
+    const params = new URLSearchParams();
+
+    for (const param of formDataParams) {
+      // Include all formData parameters to create a complete example
+      let value = "";
+
+      // Priority: example > default > type-based
+      if (param.example !== undefined) {
+        value = safeStringify(param.example);
+      } else if (param.default !== undefined) {
+        value = safeStringify(param.default);
+      } else {
+        // Type-based fallbacks
+        switch (param.type) {
+          case "integer":
+          case "number":
+            value = "0";
+            break;
+          case "boolean":
+            value = "true";
+            break;
+          case "string":
+            value = "string";
+            break;
+          default:
+            value = "string";
+        }
+      }
+
+      if (value) {
+        params.append(param.name, value);
+      }
+    }
+
+    const formData = params.toString();
+    return formData ? formData : undefined;
+  }
+
+  return undefined;
+};
+
+const safeStringify = (value: unknown): string => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean")
+    return String(value);
+  return JSON.stringify(value);
+};
+
+const buildQueryString = (
+  operation: Operation,
+  definitions?: Record<string, Schema>,
+): string => {
+  if (!operation.parameters) return "";
+
+  const queryParams = operation.parameters.filter((p) => p.in === "query");
+  if (queryParams.length === 0) return "";
+
+  const params = new URLSearchParams();
+  for (const param of queryParams) {
+    // Include required parameters and parameters with examples/defaults
+    if (
+      param.required !== false ||
+      param.example !== undefined ||
+      param.default !== undefined
+    ) {
+      const value = getQueryParameterValue(param, definitions);
+      if (value) {
+        params.append(param.name, value);
+      }
+    }
+  }
+
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : "";
+};
+
+const getQueryParameterValue = (
+  param: Parameter,
+  definitions?: Record<string, Schema>,
+): string => {
+  // Priority: example > default > enum > array items enum > schema resolution > type-based
+  if (param.example !== undefined) return safeStringify(param.example);
+  if (param.default !== undefined) return safeStringify(param.default);
+  if (param.enum && param.enum.length > 0) return param.enum[0] ?? "example";
+  if (param.items?.enum && param.items.enum.length > 0)
+    return param.items.enum[0] ?? "example";
+
+  // Resolve schema references if available
+  if (param.schema && definitions) {
+    const resolvedValue = generateExampleFromSchema(param.schema, definitions);
+    return safeStringify(resolvedValue);
+  }
+
+  // Type-based fallbacks
+  switch (param.type) {
+    case "integer":
+    case "number":
+      return "0";
+    case "boolean":
+      return "true";
+    case "array":
+      return "string";
+    default:
+      return "string";
+  }
+};
+
+const replacePathParameters = (
+  path: string,
+  operation: Operation,
+  definitions?: Record<string, Schema>,
+): string => {
+  if (!operation.parameters) {
+    return path.replace(/\{[^}]+\}/g, "1");
+  }
+
+  const pathParams = operation.parameters.filter((p) => p.in === "path");
+  let result = path;
+
+  for (const param of pathParams) {
+    const placeholder = `{${param.name}}`;
+    const value = getParameterValue(param, definitions);
+    result = result.replace(placeholder, value);
+  }
+
+  // Replace any remaining placeholders with default values
+  return result.replace(/\{[^}]+\}/g, "1");
+};
+
+const getParameterValue = (
+  param: Parameter,
+  definitions?: Record<string, Schema>,
+): string => {
+  // Priority: example > default > enum > schema resolution > type-based
+  if (param.example !== undefined) return safeStringify(param.example);
+  if (param.default !== undefined) return safeStringify(param.default);
+  if (param.enum && param.enum.length > 0) return param.enum[0] ?? "1";
+
+  // Resolve schema references if available
+  if (param.schema && definitions) {
+    const resolvedValue = generateExampleFromSchema(param.schema, definitions);
+    return safeStringify(resolvedValue);
+  }
+
+  // Type-based fallbacks
+  switch (param.type) {
+    case "integer":
+    case "number":
+      return "0";
+    case "boolean":
+      return "true";
+    case "string": {
+      const name = param.name.toLowerCase();
+      if (name.includes("id") || name.includes("key")) return "1";
+      if (name.includes("name") || name.includes("user")) return "string";
+      if (name.includes("email")) return "string";
+      if (name.includes("token")) return "string";
+      return "string";
+    }
+    default:
+      return "string";
+  }
+};
+
+const buildHeaders = (operation: Operation): Record<string, string[]> => {
+  const headers: Record<string, string[]> = {};
+
+  if (operation.parameters) {
+    for (const param of operation.parameters) {
+      if (param.in === "header") {
+        let value = "";
+        if (param.example !== undefined) {
+          value = safeStringify(param.example);
+        } else if (param.default !== undefined) {
+          value = safeStringify(param.default);
+        } else {
+          value = "example";
+        }
+        if (value !== undefined) {
+          headers[param.name] = [value];
+        }
+      }
+    }
+  }
+
+  // Add content-type header for requests with body
+  if (operation.consumes && operation.consumes.length > 0) {
+    headers["Content-Type"] = [operation.consumes[0] ?? "application/json"];
+  }
+
+  return headers;
+};
+
+const createAutoSubstitutions = async (
+  sdk: SDK<never, BackendEvents>,
+  spec: OpenApiSpec,
+) => {
+  const substitutionStore = SubstitutionStore.get();
+  const existingSubstitutions = substitutionStore.getSubstitutions();
+
+  // Extract all unique placeholders from paths
+  const placeholders = new Set<string>();
+
+  if (spec.paths) {
+    for (const pathKey of Object.keys(spec.paths)) {
+      const fullPath = `${spec.basePath ?? ""}${pathKey}`;
+      const matches = fullPath.match(/\{[^}]+\}/g);
+      if (matches) {
+        matches.forEach((match) => placeholders.add(match));
+      }
+    }
+  }
+
+  console.log(
+    `Found ${placeholders.size} unique placeholders: ${Array.from(placeholders).join(", ")}`,
+  );
+
+  // Create substitution rules for placeholders that don't already exist
+  let createdCount = 0;
+  for (const placeholder of placeholders) {
+    // Check if a substitution rule already exists for this placeholder
+    const exists = existingSubstitutions.some(
+      (sub) => sub.pattern === placeholder,
+    );
+
+    if (!exists) {
+      // Create a default substitution rule
+      const defaultValue = generateDefaultValueForPlaceholder(placeholder);
+      const newSubstitution = {
+        id: generateID(),
+        pattern: placeholder,
+        replacement: defaultValue,
+      };
+
+      substitutionStore.addSubstitution(newSubstitution);
+
+      // Save to database
+      await withProject(sdk, async (projectId) => {
+        const db = await getDb(sdk);
+        const stmt = await db.prepare(`
+          INSERT INTO substitutions (id, project_id, pattern, replacement)
+          VALUES (?, ?, ?, ?)
+        `);
+        await stmt.run(
+          newSubstitution.id,
+          projectId,
+          newSubstitution.pattern,
+          newSubstitution.replacement,
+        );
+      });
+
+      sdk.api.send("substitutions:created", newSubstitution);
+      createdCount++;
+
+      console.log(
+        `Created auto-substitution: "${placeholder}" -> "${defaultValue}"`,
+      );
+    }
+  }
+
+  if (createdCount > 0) {
+    sdk.console.log(`Created ${createdCount} automatic substitution rules`);
+  }
+};
+
+const generateDefaultValueForPlaceholder = (placeholder: string): string => {
+  // Remove the curly braces to get the parameter name
+  const paramName = placeholder.slice(1, -1).toLowerCase();
+
+  // Generate sensible defaults based on common parameter names
+  if (paramName.includes("id")) {
+    return "1";
+  }
+  if (paramName.includes("user")) {
+    return "user";
+  }
+  if (paramName.includes("name")) {
+    return "name";
+  }
+  if (paramName.includes("email")) {
+    return "user@example.com";
+  }
+  if (paramName.includes("token")) {
+    return "token";
+  }
+  if (paramName.includes("key")) {
+    return "key";
+  }
+  if (paramName.includes("uuid")) {
+    return "123e4567-e89b-12d3-a456-426614174000";
+  }
+  if (paramName.includes("slug")) {
+    return "example-slug";
+  }
+  if (paramName.includes("version")) {
+    return "v1";
+  }
+  if (paramName.includes("type")) {
+    return "type";
+  }
+  if (paramName.includes("status")) {
+    return "active";
+  }
+
+  // Default fallback
+  return "value";
+};
+
+export const importTemplatesFromOpenApi = async (
+  sdk: SDK<never, BackendEvents>,
+  params: { rawJson: string; overrideHost?: string },
+): Promise<number> => {
+  const { rawJson, overrideHost } = params;
+  sdk.console.log("Starting OpenAPI import...");
+
+  const project = await sdk.projects.getCurrent();
+  if (!project) {
+    sdk.console.log("No current project found");
+    return 0;
+  }
+
+  let spec: OpenApiSpec;
+  try {
+    spec = JSON.parse(rawJson) as OpenApiSpec;
+    sdk.console.log("JSON parsed successfully");
+  } catch (error) {
+    sdk.console.log(`JSON parsing failed: ${error}`);
+    return 0;
+  }
+
+  if (!spec.paths) {
+    sdk.console.log("No paths found in spec");
+    return 0;
+  }
+
+  sdk.console.log(`Found ${Object.keys(spec.paths).length} paths in spec`);
+
+  const { host, port, isTls, basePath } = inferHostPortTls(spec, overrideHost);
+
+  // Extract unique placeholders from all paths and create substitution rules
+  await createAutoSubstitutions(sdk, spec);
+
+  const store = TemplateStore.get();
+  let created = 0;
+
+  for (const [pathKey, methods] of Object.entries(spec.paths)) {
+    for (const [methodKey, operation] of Object.entries(methods)) {
+      const method = methodKey.toUpperCase();
+      // Only standard HTTP methods
+      if (
+        !["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"].includes(
+          method,
+        )
+      )
+        continue;
+
+      const fullPath = `${basePath || ""}${pathKey}`;
+      console.log(`Original Swagger path: "${fullPath}"`);
+      // First apply substitutions to the original path with placeholders
+      const substitutedPath = applySubstitutions(fullPath);
+      console.log(`After substitutions: "${substitutedPath}"`);
+      // Then replace remaining placeholder path params with realistic values
+      const resolvedPath = replacePathParameters(
+        substitutedPath,
+        operation,
+        spec.definitions,
+      );
+      console.log(`After parameter replacement: "${resolvedPath}"`);
+      const queryString = buildQueryString(operation, spec.definitions);
+      const fullUrl = `${isTls ? "https" : "http"}://${host}:${port}${resolvedPath}${queryString}`;
+
+      // Try to create a real base request in Caido so the UI can load it later
+      let createdTemplate: TemplateDTO | undefined = undefined;
+      try {
+        const requestSpec = new RequestSpec(fullUrl);
+        requestSpec.setMethod(method);
+
+        // Add headers
+        const headers = buildHeaders(operation);
+        for (const [headerName, headerValues] of Object.entries(headers)) {
+          requestSpec.setHeader(headerName, headerValues.join(", "));
+        }
+
+        // Add request body if present
+        const body = buildRequestBody(operation, spec.definitions);
+        if (body !== undefined) {
+          requestSpec.setBody(body);
+        }
+
+        const sent = await sdk.requests.send(requestSpec);
+        const realRequest = sent.request;
+        const realResponse =
+          sent.response ?? ({ getCode: () => 200 } as unknown as Response);
+
+        // Generate template ID manually to avoid issues with the request object
+        const templateId = generateTemplateId(realRequest);
+        const temp = toTemplate(realRequest, realResponse, templateId);
+        // Store the substituted path in template meta
+        // Substitutions are applied during import, so store the final path
+        console.log(
+          `Storing substituted path in template (success case): "${resolvedPath}"`,
+        );
+        temp.meta.path = resolvedPath;
+        createdTemplate = temp;
+      } catch (error) {
+        sdk.console.log(
+          `Failed to send request for ${method} ${fullPath}: ${error}`,
+        );
+        // Fallback to synthetic template if sending failed
+        const pseudoRequest: Pick<
+          Request,
+          | "getMethod"
+          | "getUrl"
+          | "getBody"
+          | "getHeader"
+          | "getId"
+          | "getHost"
+          | "getPort"
+          | "getTls"
+          | "getPath"
+        > = {
+          getId: () => generateID(),
+          getMethod: () => method,
+          getUrl: () => fullUrl,
+          getBody: () => undefined,
+          getHeader: () => undefined,
+          getHost: () => host,
+          getPort: () => port,
+          getTls: () => isTls,
+          getPath: () => substitutedPath,
+        } as unknown as Request;
+
+        const pseudoResponse = {
+          getCode: () => 200,
+        } as unknown as Response;
+
+        const templateId = generateTemplateId(pseudoRequest as Request);
+        if (store.templateExists(templateId)) continue;
+
+        const temp = toTemplate(
+          pseudoRequest as Request,
+          pseudoResponse,
+          templateId,
+        );
+        // Store the substituted path in template meta
+        // Substitutions are applied during import, so store the final path
+        console.log(
+          `Storing substituted path in template (fallback case): "${resolvedPath}"`,
+        );
+        temp.meta.path = resolvedPath;
+        createdTemplate = temp;
+      }
+
+      if (createdTemplate !== undefined) {
+        if (store.templateExists(createdTemplate.id)) continue;
+
+        store.addTemplate(createdTemplate);
+
+        await withProject(sdk, async (projectId) => {
+          await createTemplate(sdk, projectId, createdTemplate);
+          sdk.api.send("templates:created", createdTemplate);
+        });
+      }
+
+      created += 1;
+    }
+  }
+
+  sdk.console.log(`Import completed. Created ${created} templates.`);
+  return created;
+};
+("");
+
 const generateTemplateId = (
   request: Request,
   dedupeHeaders: string[] = [],
 ): string => {
-  let body = request.getBody()?.toText();
-  if (body === undefined) {
-    body = "";
+  try {
+    let body = request.getBody()?.toText();
+    if (body === undefined) {
+      body = "";
+    }
+    const bodyHash = sha256Hash(body);
+    let dedupe = `${request.getMethod()}~${request.getUrl()}~${bodyHash}`;
+    dedupeHeaders.forEach((h) => {
+      const values = request.getHeader(h);
+      dedupe += `~${Array.isArray(values) ? values.join("~") : ""}`;
+    });
+    return sha256Hash(dedupe);
+  } catch (error) {
+    // Fallback to a simple hash if the request object is malformed
+    return sha256Hash(`${Date.now()}-${Math.random()}`);
   }
-  const bodyHash = sha256Hash(body);
-  let dedupe = `${request.getMethod()}~${request.getUrl()}~${bodyHash}`;
-  dedupeHeaders.forEach((h) => {
-    dedupe += `~${request.getHeader(h)?.join("~")}`;
-  });
-  return sha256Hash(dedupe);
 };
 
 const toTemplate = (
@@ -262,3 +1270,302 @@ const toTemplate = (
     },
   };
 };
+
+export const sendTemplateToReplay = async (
+  sdk: SDK<never, BackendEvents>,
+  templateId: string,
+): Promise<Result<void>> => {
+  try {
+    const store = TemplateStore.get();
+    const template = store.getTemplate(templateId);
+    
+    if (!template) {
+      return { kind: "Error", error: "Template not found" };
+    }
+
+    // Create RequestSpec from template
+    const scheme = template.meta.isTls ? "https" : "http";
+    const needsPort = !(
+      (template.meta.isTls && template.meta.port === 443) ||
+      (!template.meta.isTls && template.meta.port === 80)
+    );
+    const portPart = needsPort ? `:${template.meta.port}` : "";
+    const url = `${scheme}://${template.meta.host}${portPart}${template.meta.path}`;
+
+    sdk.console.log(`Sending template to Replay: ${template.meta.method} ${url}`);
+
+    const spec = new RequestSpec(url);
+    spec.setMethod(template.meta.method);
+
+    // Add some basic headers that are commonly needed
+    spec.setHeader("User-Agent", "AuthMatrix/1.0");
+    spec.setHeader("Accept", "*/*");
+    spec.setHeader("Content-Type", "application/json");
+
+    // Create a new Replay session with the RequestSpec
+    const replaySession = await sdk.replay.createSession(spec);
+
+    sdk.console.log(`Template sent to Replay successfully. Session ID: ${replaySession.getId()}`);
+    return { kind: "Ok", value: undefined };
+  } catch (error) {
+    sdk.console.log(`Error sending template to Replay: ${error}`);
+    return { kind: "Error", error: `Failed to send template to Replay: ${error}` };
+  }
+};
+
+export const exportConfiguration = async (
+  sdk: SDK<never, BackendEvents>,
+): Promise<Result<string>> => {
+  try {
+    const project = await sdk.projects.getCurrent();
+    if (!project) {
+      return { kind: "Error", error: "No current project found" };
+    }
+
+    const projectId = project.getId();
+    const db = await getDb(sdk);
+
+    // Gather all data from the database
+    const templatesStmt = await db.prepare(`
+      SELECT * FROM templates WHERE project_id = ?
+    `);
+    const templates = await templatesStmt.all(projectId);
+
+    const templateRulesStmt = await db.prepare(`
+      SELECT * FROM template_rules WHERE project_id = ?
+    `);
+    const templateRules = await templateRulesStmt.all(projectId);
+
+    const usersStmt = await db.prepare(`
+      SELECT * FROM users WHERE project_id = ?
+    `);
+    const users = await usersStmt.all(projectId);
+
+    const userAttributesStmt = await db.prepare(`
+      SELECT * FROM user_attributes WHERE project_id = ?
+    `);
+    const userAttributes = await userAttributesStmt.all(projectId);
+
+    const userRolesStmt = await db.prepare(`
+      SELECT * FROM user_roles WHERE project_id = ?
+    `);
+    const userRoles = await userRolesStmt.all(projectId);
+
+    const rolesStmt = await db.prepare(`
+      SELECT * FROM roles WHERE project_id = ?
+    `);
+    const roles = await rolesStmt.all(projectId);
+
+    const substitutionsStmt = await db.prepare(`
+      SELECT * FROM substitutions WHERE project_id = ?
+    `);
+    const substitutions = await substitutionsStmt.all(projectId);
+
+    // Note: No settings table exists in the current schema
+
+    // Create the export data structure
+    const exportData = {
+      version: "1.0",
+      exportedAt: new Date().toISOString(),
+      projectId: projectId.toString(),
+      data: {
+        templates,
+        templateRules,
+        users,
+        userAttributes,
+        userRoles,
+        roles,
+        substitutions,
+      },
+    };
+
+    const jsonString = JSON.stringify(exportData, null, 2);
+    sdk.console.log(`Exported configuration with ${templates.length} templates, ${users.length} users, ${roles.length} roles, ${substitutions.length} substitutions`);
+    
+    return { kind: "Ok", value: jsonString };
+  } catch (error) {
+    sdk.console.log(`Error exporting configuration: ${error}`);
+    return { kind: "Error", error: `Failed to export configuration: ${error}` };
+  }
+};
+
+export const importConfiguration = async (
+  sdk: SDK<never, BackendEvents>,
+  jsonData: string,
+): Promise<Result<{ imported: { templates: number; users: number; roles: number; substitutions: number } }>> => {
+  try {
+    const project = await sdk.projects.getCurrent();
+    if (!project) {
+      return { kind: "Error", error: "No current project found" };
+    }
+
+    const projectId = project.getId();
+    const db = await getDb(sdk);
+
+    // Parse the import data
+    let importData;
+    try {
+      importData = JSON.parse(jsonData);
+    } catch (error) {
+      return { kind: "Error", error: "Invalid JSON format" };
+    }
+
+    // Validate the import data structure
+    if (!importData.data || typeof importData.data !== 'object') {
+      return { kind: "Error", error: "Invalid import data structure" };
+    }
+
+    const { data } = importData;
+    const imported = {
+      templates: 0,
+      users: 0,
+      roles: 0,
+      substitutions: 0,
+    };
+
+    // Import in the correct order to respect foreign key constraints
+    // 1. Import roles first
+    if (Array.isArray(data.roles)) {
+      const rolesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO roles (id, project_id, name, description)
+        VALUES (?, ?, ?, ?)
+      `);
+      for (const role of data.roles) {
+        try {
+          await rolesStmt.run(role.id, projectId, role.name, role.description);
+          imported.roles++;
+        } catch (error) {
+          sdk.console.log(`Failed to import role ${role.id}: ${error}`);
+        }
+      }
+    }
+
+    // 2. Import users
+    if (Array.isArray(data.users)) {
+      const usersStmt = await db.prepare(`
+        INSERT OR REPLACE INTO users (id, project_id, name)
+        VALUES (?, ?, ?)
+      `);
+      for (const user of data.users) {
+        try {
+          await usersStmt.run(user.id, projectId, user.name);
+          imported.users++;
+        } catch (error) {
+          sdk.console.log(`Failed to import user ${user.id}: ${error}`);
+        }
+      }
+    }
+
+    // 3. Import user attributes
+    if (Array.isArray(data.userAttributes)) {
+      const userAttributesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO user_attributes (id, project_id, user_id, name, value, kind)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      for (const attribute of data.userAttributes) {
+        try {
+          await userAttributesStmt.run(attribute.id, projectId, attribute.user_id, attribute.name, attribute.value, attribute.kind);
+        } catch (error) {
+          sdk.console.log(`Failed to import user attribute ${attribute.id}: ${error}`);
+        }
+      }
+    }
+
+    // 4. Import user roles
+    if (Array.isArray(data.userRoles)) {
+      const userRolesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO user_roles (user_id, role_id, project_id)
+        VALUES (?, ?, ?)
+      `);
+      for (const userRole of data.userRoles) {
+        try {
+          await userRolesStmt.run(userRole.user_id, userRole.role_id, projectId);
+        } catch (error) {
+          sdk.console.log(`Failed to import user role ${userRole.user_id}-${userRole.role_id}: ${error}`);
+        }
+      }
+    }
+
+    // 5. Import templates
+    if (Array.isArray(data.templates)) {
+      const templatesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO templates (
+          id, project_id, request_id, auth_success_regex,
+          meta_host, meta_port, meta_path, meta_is_tls, meta_method
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      for (const template of data.templates) {
+        try {
+          await templatesStmt.run(
+            template.id, 
+            projectId, 
+            template.request_id, 
+            template.auth_success_regex,
+            template.meta_host,
+            template.meta_port,
+            template.meta_path,
+            template.meta_is_tls,
+            template.meta_method
+          );
+          imported.templates++;
+        } catch (error) {
+          sdk.console.log(`Failed to import template ${template.id}: ${error}`);
+        }
+      }
+    }
+
+    // 6. Import template rules
+    if (Array.isArray(data.templateRules)) {
+      const templateRulesStmt = await db.prepare(`
+        INSERT OR REPLACE INTO template_rules (template_id, project_id, subject_type, subject_id, has_access, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      for (const rule of data.templateRules) {
+        try {
+          await templateRulesStmt.run(
+            rule.template_id, 
+            projectId, 
+            rule.subject_type, 
+            rule.subject_id, 
+            rule.has_access, 
+            rule.status
+          );
+        } catch (error) {
+          sdk.console.log(`Failed to import template rule ${rule.template_id}: ${error}`);
+        }
+      }
+    }
+
+    // 7. Import substitutions
+    if (Array.isArray(data.substitutions)) {
+      const substitutionsStmt = await db.prepare(`
+        INSERT OR REPLACE INTO substitutions (id, project_id, pattern, replacement)
+        VALUES (?, ?, ?, ?)
+      `);
+      for (const substitution of data.substitutions) {
+        try {
+          await substitutionsStmt.run(substitution.id, projectId, substitution.pattern, substitution.replacement);
+          imported.substitutions++;
+        } catch (error) {
+          sdk.console.log(`Failed to import substitution ${substitution.id}: ${error}`);
+        }
+      }
+    }
+
+    // Note: No settings table exists in the current schema
+
+    // Refresh all stores with the imported data
+    await hydrateStoresFromDb(sdk);
+
+    // Send event to notify frontend that configuration was imported
+    sdk.api.send("config:imported", null);
+
+    sdk.console.log(`Imported configuration: ${imported.templates} templates, ${imported.users} users, ${imported.roles} roles, ${imported.substitutions} substitutions`);
+    
+    return { kind: "Ok", value: { imported } };
+  } catch (error) {
+    sdk.console.log(`Error importing configuration: ${error}`);
+    return { kind: "Error", error: `Failed to import configuration: ${error}` };
+  }
+};
+

@@ -34,7 +34,7 @@ const onAddRole = () => {
         <div class="min-w-max">
           <Button
             icon="fas fa-plus"
-            label="Add role"
+            label="Add Role"
             size="small"
             @click="onAddRole"
           />

@@ -1,3 +1,4 @@
+import type { RequestSpec } from "caido:utils";
 import { defineStore } from "pinia";
 import type { TemplateDTO } from "shared";
 
@@ -62,6 +63,90 @@ export const useTemplateService = defineStore("services.templates", () => {
     }
   };
 
+  const importFromSwagger = async (json: string, overrideHost?: string) => {
+    const result = await repository.importFromSwagger(json, overrideHost);
+
+    if (result.type === "Ok") {
+      if (result.created > 0) {
+        sdk.window.showToast(`Imported ${result.created} templates`, {
+          variant: "success",
+        });
+      } else {
+        sdk.window.showToast("No templates found in spec", {
+          variant: "info",
+        });
+      }
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const sendToReplay = async (templateId: string) => {
+    const result = await repository.sendToReplay(templateId);
+
+    if (result.kind === "Ok") {
+      sdk.window.showToast("Template sent to Replay successfully. A new Replay session has been created.", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const exportConfiguration = async () => {
+    const result = await repository.exportConfiguration();
+
+    if (result.kind === "Ok") {
+      // Create and download the file
+      const blob = new Blob([result.value], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `authmatrix-config-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      sdk.window.showToast("Configuration exported successfully", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const importConfiguration = async (file: File) => {
+    try {
+      const text = await file.text();
+      const result = await repository.importConfiguration(text);
+
+      if (result.kind === "Ok") {
+        const { imported } = result.value;
+        sdk.window.showToast(
+          `Configuration imported successfully: ${imported.templates} templates, ${imported.users} users, ${imported.roles} roles, ${imported.substitutions} substitutions`,
+          {
+            variant: "success",
+          },
+        );
+      } else {
+        sdk.window.showToast(result.error, {
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      sdk.window.showToast("Failed to read import file", {
+        variant: "error",
+      });
+    }
+  };
+
   const analysisStore = useAnalysisStore();
   const deleteTemplate = async (id: string) => {
     const result = await repository.deleteTemplate(id);
@@ -86,6 +171,34 @@ export const useTemplateService = defineStore("services.templates", () => {
     if (result.type === "Ok") {
       store.send({ type: "ClearTemplates" });
       analysisStore.selectionState.send({ type: "Reset" });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const checkAllTemplatesForRole = async (roleId: string) => {
+    const result = await repository.checkAllTemplatesForRole(roleId);
+
+    if (result.type === "Ok") {
+      sdk.window.showToast(`Checked ${result.count} templates for role`, {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const checkAllTemplatesForUser = async (userId: string) => {
+    const result = await repository.checkAllTemplatesForUser(userId);
+
+    if (result.type === "Ok") {
+      sdk.window.showToast(`Checked ${result.count} templates for user`, {
+        variant: "success",
+      });
     } else {
       sdk.window.showToast(result.error, {
         variant: "error",
@@ -124,6 +237,57 @@ export const useTemplateService = defineStore("services.templates", () => {
     sdk.backend.onEvent("cursor:clear", () => {
       store.send({ type: "ClearMarkings" });
     });
+
+    sdk.backend.onEvent("config:imported", async () => {
+      // Reinitialize all services when configuration is imported
+      await initialize();
+    });
+  };
+
+  const updateTemplateRequest = async (
+    templateId: string,
+    requestSpec: RequestSpec,
+  ) => {
+    const result = await repository.updateTemplateRequest(
+      templateId,
+      requestSpec,
+    );
+
+    if (result.type === "Ok" && result.template) {
+      store.send({ type: "UpdateTemplate", template: result.template });
+      sdk.window.showToast("Template request updated successfully", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const updateTemplateRequestRaw = async (
+    templateId: string,
+    requestRaw: string,
+  ) => {
+    const result = await repository.updateTemplateRequestRaw(
+      templateId,
+      requestRaw,
+    );
+
+    if (result.type === "Ok" && result.template) {
+      store.send({ type: "UpdateTemplate", template: result.template });
+      sdk.window.showToast("Template request updated successfully", {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, {
+        variant: "error",
+      });
+    }
+  };
+
+  const getRequestResponse = async (requestId: string) => {
+    return await repository.getRequestResponse(requestId);
   };
 
   const getState = () => store.getState();
@@ -133,9 +297,18 @@ export const useTemplateService = defineStore("services.templates", () => {
     initialize,
     toggleTemplateRole,
     toggleTemplateUser,
+    checkAllTemplatesForRole,
+    checkAllTemplatesForUser,
     addTemplate,
     updateTemplate,
+    updateTemplateRequest,
+    updateTemplateRequestRaw,
+    getRequestResponse,
     deleteTemplate,
     clearTemplates,
+    importFromSwagger,
+    sendToReplay,
+    exportConfiguration,
+    importConfiguration,
   };
 });

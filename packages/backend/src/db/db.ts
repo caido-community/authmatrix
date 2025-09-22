@@ -1,7 +1,8 @@
 import type { SDK } from "caido:plugin";
-import type { RoleDTO, UserAttributeDTO } from "shared";
+import type { RoleDTO, SubstitutionDTO, UserAttributeDTO } from "shared";
 
 import { RoleStore } from "../stores/roles";
+import { SubstitutionStore } from "../stores/substitutions";
 import { TemplateStore } from "../stores/templates";
 import { UserStore } from "../stores/users";
 
@@ -83,6 +84,16 @@ export const initDatabase = async (sdk: SDK) => {
     );
   `);
 
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS substitutions (
+      id TEXT NOT NULL,
+      project_id TEXT NOT NULL,
+      pattern TEXT NOT NULL,
+      replacement TEXT NOT NULL,
+      PRIMARY KEY (id, project_id)
+    );
+  `);
+
   return db;
 };
 
@@ -91,11 +102,18 @@ export const hydrateStoresFromDb = async (sdk: SDK) => {
   const roleStore = RoleStore.get();
   const templateStore = TemplateStore.get();
   const userStore = UserStore.get();
+  const substitutionStore = SubstitutionStore.get();
 
   const current = await sdk.projects.getCurrent();
   if (!current) return;
 
   const projectID = current.getId();
+
+  // Clear all stores first to ensure clean state
+  roleStore.clear();
+  templateStore.clearTemplates();
+  userStore.clear();
+  substitutionStore.clear();
 
   const rolesStmt = await db.prepare(
     "SELECT id, name, description FROM roles WHERE project_id = ?",
@@ -181,5 +199,14 @@ export const hydrateStoresFromDb = async (sdk: SDK) => {
     const dto = toTemplateDTO(t);
     dto.rules = rules;
     templateStore.addTemplate(dto);
+  }
+
+  const substitutionsStmt = await db.prepare(
+    "SELECT id, pattern, replacement FROM substitutions WHERE project_id = ?",
+  );
+  const substitutionRows: SubstitutionDTO[] =
+    await substitutionsStmt.all(projectID);
+  for (const substitution of substitutionRows) {
+    substitutionStore.addSubstitution(substitution);
   }
 };
