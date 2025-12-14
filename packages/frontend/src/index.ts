@@ -1,5 +1,6 @@
 import { defineApp } from "./app";
 import type { CaidoSDK } from "./types";
+import { getSelectedRequestIdFromDOM } from "./utils/dom";
 
 export const init = (sdk: CaidoSDK) => {
   const app = defineApp(sdk);
@@ -36,6 +37,17 @@ export const init = (sdk: CaidoSDK) => {
           .map((request) => addTemplate(request.id)).length;
       } else if (context.type === "RequestContext" && context.request.id) {
         addedCount = addTemplate(context.request.id) ? 1 : 0;
+      } else if (context.type === "BaseContext") {
+        const requestId = getSelectedRequestIdFromDOM();
+        if (requestId !== undefined) {
+          addedCount = addTemplate(requestId) ? 1 : 0;
+        } else {
+          sdk.window.showToast(
+            "No request selected or visible in HTTP History",
+            { variant: "warning" },
+          );
+          return;
+        }
       }
 
       if (addedCount > 0) {
@@ -60,6 +72,8 @@ export const init = (sdk: CaidoSDK) => {
     commandId: "send-to-authmatrix",
     leadingIcon: "fas fa-user-shield",
   });
+
+  sdk.shortcuts.register("send-to-authmatrix", ["Control", "Shift", "A"]);
 
   const subscription = sdk.graphql.deletedProject();
   (async () => {
