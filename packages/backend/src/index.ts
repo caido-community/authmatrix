@@ -20,7 +20,11 @@ import {
   updateTemplate,
 } from "./services/templates";
 import { addUser, deleteUser, getUsers, updateUser } from "./services/users";
-import { deleteProjectData, getActiveProject } from "./services/utils";
+import {
+  deleteProjectData,
+  getActiveProject,
+  sendToReplay,
+} from "./services/utils";
 import { RoleStore } from "./stores/roles";
 import { TemplateStore } from "./stores/templates";
 import { UserStore } from "./stores/users";
@@ -63,6 +67,7 @@ export type API = DefineAPI<{
   // Utils endpoints
   getActiveProject: typeof getActiveProject;
   deleteProjectData: typeof deleteProjectData;
+  sendToReplay: typeof sendToReplay;
 }>;
 
 export async function init(sdk: SDK<API, BackendEvents>) {
@@ -104,6 +109,7 @@ export async function init(sdk: SDK<API, BackendEvents>) {
   // Utils endpoints
   sdk.api.register("getActiveProject", getActiveProject);
   sdk.api.register("deleteProjectData", deleteProjectData);
+  sdk.api.register("sendToReplay", sendToReplay);
 
   // Events
   registerTemplateEvents(sdk);

@@ -13,6 +13,7 @@ const sdk = useSDK();
 const root = ref();
 const contextMenu = ref();
 
+// Send to Replay - calls backend RPC
 const sendToReplay = async () => {
   const requestId = props.selectionState.request.id;
   if (requestId === undefined) {
@@ -21,23 +22,18 @@ const sendToReplay = async () => {
   }
 
   try {
-    const collections = sdk.replay.getCollections();
-    let collection = collections.find((c) => c.name === "AuthMatrix");
-    if (collection === undefined) {
-      collection = await sdk.replay.createCollection("AuthMatrix");
+    const result = await sdk.backend.sendToReplay(requestId);
+    if (result.type === "Ok") {
+      sdk.window.showToast("Request sent to Replay", { variant: "success" });
+    } else {
+      sdk.window.showToast(result.message, { variant: "error" });
     }
-
-    await sdk.replay.createSession(
-      { type: "ID", id: requestId },
-      collection.id,
-    );
-
-    sdk.window.showToast("Request sent to Replay", { variant: "success" });
   } catch {
     sdk.window.showToast("Failed to send to Replay", { variant: "error" });
   }
 };
 
+// Context menu items
 const menuItems = computed(() => [
   {
     label: "Send to Replay",
@@ -50,6 +46,7 @@ const onContextMenu = (event: MouseEvent) => {
   contextMenu.value?.show(event);
 };
 
+// Keyboard shortcut handler
 const handleKeyDown = (event: KeyboardEvent) => {
   if ((event.metaKey || event.ctrlKey) && event.key === "r") {
     event.preventDefault();

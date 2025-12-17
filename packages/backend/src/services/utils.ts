@@ -61,3 +61,22 @@ export const deleteProjectData = async (sdk: SDK, projectId: string) => {
   templateStore.clearTemplates();
   userStore.clear();
 };
+
+export const sendToReplay = async (sdk: SDK, requestId: string) => {
+  try {
+    const collections = await sdk.replay.getCollections();
+    const collection = collections.find((c) => c.getName() === "AuthMatrix");
+
+    const session = await sdk.replay.createSession(requestId, collection);
+
+    return {
+      type: "Ok" as const,
+      sessionId: session.getId(),
+    };
+  } catch {
+    return {
+      type: "Err" as const,
+      message: "Failed to send to Replay",
+    };
+  }
+};
