@@ -148,14 +148,17 @@ const sendRequest = async (sdk: SDK, template: TemplateDTO, user: UserDTO) => {
   setCookies(spec, user.attributes);
   setHeaders(spec, user.attributes);
 
-  const { request } = await sdk.requests.send(spec);
+  const { request, response } = await sdk.requests.send(spec);
 
   const requestId = request.getId();
+  const responseLength = response?.getRaw()?.toText()?.length ?? 0;
+
   const analysisRequest: AnalysisRequestDTO = {
     id: `${template.id}-${user.id}-${requestId}`,
     templateId: template.id,
     userId: user.id,
     requestId,
+    responseLength,
   };
 
   return analysisRequest;

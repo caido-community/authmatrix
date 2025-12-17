@@ -15,6 +15,7 @@ export class SettingsStore {
       autoRunAnalysis: true,
       deDuplicateHeaders: [],
       defaultFilterHTTPQL: `(${noStylingFilter} AND ${noImagesFilter} AND ${noJSFilter})`,
+      lengthThreshold: 10,
     };
   }
 

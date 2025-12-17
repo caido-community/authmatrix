@@ -61,6 +61,7 @@ export const initDatabase = async (sdk: SDK) => {
       project_id TEXT NOT NULL,
       request_id TEXT NOT NULL,
       auth_success_regex TEXT NOT NULL,
+      original_response_length INTEGER NOT NULL DEFAULT 0,
       meta_host TEXT NOT NULL,
       meta_port INTEGER NOT NULL,
       meta_path TEXT NOT NULL,
@@ -82,6 +83,15 @@ export const initDatabase = async (sdk: SDK) => {
       FOREIGN KEY (template_id, project_id) REFERENCES templates(id, project_id) ON DELETE CASCADE
     );
   `);
+
+  // Migration: Add original_response_length column if it doesn't exist
+  try {
+    await db.exec(`
+      ALTER TABLE templates ADD COLUMN original_response_length INTEGER NOT NULL DEFAULT 0;
+    `);
+  } catch {
+    // Column already exists, ignore error
+  }
 
   return db;
 };
@@ -140,6 +150,7 @@ export const hydrateStoresFromDb = async (sdk: SDK) => {
 
   const templatesStmt = await db.prepare(`
     SELECT id, request_id as requestId, auth_success_regex as authSuccessRegex,
+           original_response_length as originalResponseLength,
            meta_host as host, meta_port as port, meta_path as path,
            meta_is_tls as isTls, meta_method as method
     FROM templates WHERE project_id = ?
@@ -154,6 +165,7 @@ export const hydrateStoresFromDb = async (sdk: SDK) => {
     id: string;
     requestId: string;
     authSuccessRegex: string;
+    originalResponseLength: number;
     host: string;
     port: number;
     path: string;

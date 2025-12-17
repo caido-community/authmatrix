@@ -17,6 +17,7 @@ export const toTemplateDTO = (row: {
   id: string;
   requestId: string;
   authSuccessRegex: string;
+  originalResponseLength: number;
   host: string;
   port: number;
   path: string;
@@ -27,6 +28,7 @@ export const toTemplateDTO = (row: {
     id: row.id,
     requestId: row.requestId,
     authSuccessRegex: row.authSuccessRegex,
+    originalResponseLength: row.originalResponseLength ?? 0,
     rules: [],
     meta: {
       host: row.host,

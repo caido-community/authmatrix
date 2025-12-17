@@ -161,6 +161,24 @@ const getRowClass = (data: TemplateDTO) => {
 };
 
 const isSmallScreen = useMediaQuery("(max-width: 1150px)");
+
+const formatLength = (length: number | undefined): string => {
+  if (length === undefined || length === 0) return "-";
+  return length.toString();
+};
+
+const getModifiedLength = (template: TemplateDTO): string => {
+  const results = analysisService.resultState;
+  if (results.type !== "Success") return "-";
+  const templateResults = results.results.filter(
+    (r) => r.templateId === template.id,
+  );
+  if (templateResults.length === 0) return "-";
+  const avgLength =
+    templateResults.reduce((sum, r) => sum + r.responseLength, 0) /
+    templateResults.length;
+  return formatLength(Math.round(avgLength));
+};
 </script>
 <template>
   <div class="h-full">
@@ -297,6 +315,18 @@ const isSmallScreen = useMediaQuery("(max-width: 1150px)");
           >
             <template #editor="{ data }">
               <InputText v-model="data.authSuccessRegex" />
+            </template>
+          </Column>
+
+          <Column header="Orig Len" class="w-[90px]">
+            <template #body="{ data }">
+              {{ formatLength(data.originalResponseLength) }}
+            </template>
+          </Column>
+
+          <Column header="Mod Len" class="w-[90px]">
+            <template #body="{ data }">
+              {{ getModifiedLength(data) }}
             </template>
           </Column>
 

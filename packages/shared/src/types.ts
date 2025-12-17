@@ -18,6 +18,7 @@ export type TemplateDTO = {
   authSuccessRegex: string;
   rules: (RoleRuleDTO | UserRuleDTO)[];
   requestId: string;
+  originalResponseLength: number;
   meta: {
     host: string;
     port: number;
@@ -32,6 +33,7 @@ export type AnalysisRequestDTO = {
   userId: string;
   requestId: string;
   templateId: string;
+  responseLength: number;
 };
 
 export type RoleDTO = {
@@ -45,6 +47,7 @@ export type SettingsDTO = {
   autoRunAnalysis: boolean;
   deDuplicateHeaders: string[];
   defaultFilterHTTPQL: string;
+  lengthThreshold: number;
 };
 
 export type UserAttributeDTO = {
