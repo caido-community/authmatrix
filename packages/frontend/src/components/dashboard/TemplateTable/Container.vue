@@ -3,12 +3,12 @@ import { useMediaQuery } from "@vueuse/core";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Checkbox from "primevue/checkbox";
-import Column from "primevue/column";
-import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import SelectButton from "primevue/selectbutton";
 import type { RoleDTO, RuleStatusDTO, TemplateDTO, UserDTO } from "shared";
 import { computed, ref } from "vue";
+import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 import RuleStatus from "./RuleStatus.vue";
 
@@ -109,7 +109,7 @@ const runAnalysis = () => {
   analysisService.runAnalysis();
 };
 
-const selection = computed({
+const selectedTemplate = computed({
   get: () => {
     const selectionState = analysisService.selectionState;
     if (selectionState.type === "None") return undefined;
@@ -144,20 +144,48 @@ const getPathColumnValue = (template: TemplateDTO) =>
     ? template.meta.path.slice(0, 64) + "..."
     : template.meta.path;
 
-const onTemplateUpdate = (
-  template: TemplateDTO,
-  field: string,
-  newValue: unknown,
-) => {
-  service.updateTemplate(template.id, { ...template, [field]: newValue });
+const editingTemplateId = ref<string | undefined>(undefined);
+const editingField = ref<string | undefined>(undefined);
+const editingValue = ref<string>("");
+
+const startEditing = (template: TemplateDTO, field: string) => {
+  editingTemplateId.value = template.id;
+  editingField.value = field;
+  editingValue.value =
+    ((template as Record<string, unknown>)[field] as string) ?? "";
+};
+
+const finishEditing = (template: TemplateDTO) => {
+  if (
+    editingField.value !== undefined &&
+    editingTemplateId.value === template.id
+  ) {
+    service.updateTemplate(template.id, {
+      ...template,
+      [editingField.value]: editingValue.value,
+    });
+  }
+  editingTemplateId.value = undefined;
+  editingField.value = undefined;
+};
+
+const isEditing = (template: TemplateDTO, field: string) => {
+  return (
+    editingTemplateId.value === template.id && editingField.value === field
+  );
 };
 
 const isTemplateScanning = (template: TemplateDTO) => {
   return props.state.scanningTemplateIds.has(template.id);
 };
 
-const getRowClass = (data: TemplateDTO) => {
-  return isTemplateScanning(data) ? "scanning-row" : "";
+const onRowClick = (event: MouseEvent, template: TemplateDTO) => {
+  if (event.button !== 0) return;
+  if (selectedTemplate.value?.id === template.id) {
+    selectedTemplate.value = undefined;
+  } else {
+    selectedTemplate.value = template;
+  }
 };
 
 const isSmallScreen = useMediaQuery("(max-width: 1150px)");
@@ -179,12 +207,27 @@ const getModifiedLength = (template: TemplateDTO): string => {
     templateResults.length;
   return formatLength(Math.round(avgLength));
 };
+
+const columnWidths = {
+  method: "85px",
+  host: "200px",
+  path: "400px",
+  regex: "180px",
+  origLen: "80px",
+  modLen: "80px",
+  roleUser: "120px",
+  actions: "60px",
+};
 </script>
+
 <template>
   <div class="h-full">
     <Card
       class="h-full"
-      :pt="{ body: { class: 'flex-1 min-h-0' }, content: { class: 'h-full' } }"
+      :pt="{
+        body: { class: 'flex-1 min-h-0' },
+        content: { class: 'h-full flex flex-col' },
+      }"
     >
       <template #header>
         <div
@@ -275,111 +318,209 @@ const getModifiedLength = (template: TemplateDTO): string => {
       </template>
 
       <template #content>
-        <DataTable
-          v-model:selection="selection"
-          :value="filteredTemplates"
-          :row-class="getRowClass"
-          striped-rows
-          scrollable
-          scroll-height="flex"
-          size="small"
-          edit-mode="cell"
-          selection-mode="single"
-          @cell-edit-complete="
-            ({ data, field, newValue }) =>
-              onTemplateUpdate(data, field, newValue)
-          "
-        >
-          <Column field="method" header="Method" class="w-[85px]">
-            <template #body="{ data }">
-              {{ data.meta.method }}
-            </template>
-          </Column>
+        <div class="flex flex-col grow min-h-0 overflow-hidden">
+          <!-- Header Table -->
+          <div class="pr-[12px] flex-shrink-0">
+            <table class="w-full border-spacing-0 border-separate table-fixed">
+              <thead class="bg-surface-900">
+                <tr class="bg-surface-800/50 text-surface-0/50">
+                  <th
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.method }"
+                  >
+                    Method
+                  </th>
+                  <th
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.host }"
+                  >
+                    Host
+                  </th>
+                  <th
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.path }"
+                  >
+                    Path
+                  </th>
+                  <th
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.regex }"
+                  >
+                    Auth Success Regex
+                  </th>
+                  <th
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.origLen }"
+                  >
+                    Orig Len
+                  </th>
+                  <th
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.modLen }"
+                  >
+                    Mod Len
+                  </th>
+                  <th
+                    v-for="role in roleState.roles"
+                    :key="role.id"
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.roleUser }"
+                  >
+                    {{ role.name }}
+                  </th>
+                  <th
+                    v-for="user in userState.users"
+                    :key="user.id"
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.roleUser }"
+                  >
+                    {{ user.name }}
+                  </th>
+                  <th
+                    class="font-semibold text-left text-xs border-y border-surface-700 py-2 px-2"
+                    :style="{ width: columnWidths.actions }"
+                  ></th>
+                </tr>
+              </thead>
+            </table>
+          </div>
 
-          <Column header="Host" class="w-[230px] overflow-hidden">
-            <template #body="{ data }">
-              {{ getHostColumnValue(data) }}
-            </template>
-          </Column>
-
-          <Column header="Path" class="w-[500px] whitespace-nowrap">
-            <template #body="{ data }">
-              {{ getPathColumnValue(data) }}
-            </template>
-          </Column>
-
-          <Column
-            field="authSuccessRegex"
-            header="Auth Success Regex"
-            class="w-[200px] min-w-[200px]"
+          <!-- Virtualized Body -->
+          <DynamicScroller
+            class="flex-1 overflow-auto bg-surface-800"
+            :items="filteredTemplates"
+            :min-item-size="36"
+            key-field="id"
           >
-            <template #editor="{ data }">
-              <InputText v-model="data.authSuccessRegex" />
+            <template #default="{ item, index, active }">
+              <DynamicScrollerItem
+                :item="item"
+                :active="active"
+                :size-dependencies="[item.authSuccessRegex]"
+                :data-index="index"
+              >
+                <table
+                  class="w-full border-spacing-0 border-separate table-fixed"
+                >
+                  <tbody>
+                    <tr
+                      :class="[
+                        'cursor-pointer text-white/80 text-sm',
+                        {
+                          'bg-highlight': selectedTemplate?.id === item.id,
+                          'bg-surface-800':
+                            index % 2 === 0 && selectedTemplate?.id !== item.id,
+                          'bg-surface-900':
+                            index % 2 === 1 && selectedTemplate?.id !== item.id,
+                          'hover:bg-surface-700/50':
+                            selectedTemplate?.id !== item.id,
+                          'scanning-row': isTemplateScanning(item),
+                        },
+                      ]"
+                      @mousedown="onRowClick($event, item)"
+                    >
+                      <td
+                        class="py-2 px-2 overflow-hidden text-ellipsis whitespace-nowrap"
+                        :style="{ width: columnWidths.method }"
+                      >
+                        {{ item.meta.method }}
+                      </td>
+                      <td
+                        class="py-2 px-2 overflow-hidden text-ellipsis whitespace-nowrap"
+                        :style="{ width: columnWidths.host }"
+                      >
+                        {{ getHostColumnValue(item) }}
+                      </td>
+                      <td
+                        class="py-2 px-2 overflow-hidden text-ellipsis whitespace-nowrap"
+                        :style="{ width: columnWidths.path }"
+                      >
+                        {{ getPathColumnValue(item) }}
+                      </td>
+                      <td
+                        class="py-2 px-2"
+                        :style="{ width: columnWidths.regex }"
+                        @dblclick="startEditing(item, 'authSuccessRegex')"
+                      >
+                        <InputText
+                          v-if="isEditing(item, 'authSuccessRegex')"
+                          v-model="editingValue"
+                          class="w-full"
+                          size="small"
+                          autofocus
+                          @blur="finishEditing(item)"
+                          @keyup.enter="finishEditing(item)"
+                        />
+                        <span
+                          v-else
+                          class="block overflow-hidden text-ellipsis whitespace-nowrap"
+                        >
+                          {{ item.authSuccessRegex }}
+                        </span>
+                      </td>
+                      <td
+                        class="py-2 px-2 overflow-hidden text-ellipsis whitespace-nowrap"
+                        :style="{ width: columnWidths.origLen }"
+                      >
+                        {{ formatLength(item.originalResponseLength) }}
+                      </td>
+                      <td
+                        class="py-2 px-2 overflow-hidden text-ellipsis whitespace-nowrap"
+                        :style="{ width: columnWidths.modLen }"
+                      >
+                        {{ getModifiedLength(item) }}
+                      </td>
+                      <td
+                        v-for="role in roleState.roles"
+                        :key="role.id"
+                        class="py-2 px-2"
+                        :style="{ width: columnWidths.roleUser }"
+                      >
+                        <div class="flex items-center gap-2">
+                          <Checkbox
+                            v-tooltip="'Check if this role should have access.'"
+                            :model-value="getRoleValue(item, role)"
+                            binary
+                            @change="() => toggleRole(item, role)"
+                          />
+                          <RuleStatus :status="getRoleStatus(item, role)" />
+                        </div>
+                      </td>
+                      <td
+                        v-for="user in userState.users"
+                        :key="user.id"
+                        class="py-2 px-2"
+                        :style="{ width: columnWidths.roleUser }"
+                      >
+                        <div class="flex items-center gap-2">
+                          <Checkbox
+                            v-tooltip="'Check if this user should have access.'"
+                            :model-value="getUserValue(item, user)"
+                            binary
+                            @change="() => toggleUser(item, user)"
+                          />
+                          <RuleStatus :status="getUserStatus(item, user)" />
+                        </div>
+                      </td>
+                      <td
+                        class="py-2 px-2"
+                        :style="{ width: columnWidths.actions }"
+                      >
+                        <Button
+                          icon="fas fa-trash"
+                          text
+                          severity="danger"
+                          size="small"
+                          @click.stop="() => deleteTemplate(item)"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </DynamicScrollerItem>
             </template>
-          </Column>
-
-          <Column header="Orig Len" class="w-[90px]">
-            <template #body="{ data }">
-              {{ formatLength(data.originalResponseLength) }}
-            </template>
-          </Column>
-
-          <Column header="Mod Len" class="w-[90px]">
-            <template #body="{ data }">
-              {{ getModifiedLength(data) }}
-            </template>
-          </Column>
-
-          <Column v-for="role in roleState.roles" key="id" :header="role.name">
-            <template #body="{ data }">
-              <div class="flex items-center gap-4">
-                <Checkbox
-                  v-tooltip="
-                    'Check this box if this role should have access to this resource.'
-                  "
-                  :model-value="getRoleValue(data, role)"
-                  binary
-                  @change="() => toggleRole(data, role)"
-                />
-                <RuleStatus :status="getRoleStatus(data, role)" />
-              </div>
-            </template>
-          </Column>
-
-          <Column
-            v-for="user of userState.users"
-            :key="user.id"
-            :header="user.name"
-          >
-            <template #body="{ data }">
-              <div class="flex items-center gap-4">
-                <Checkbox
-                  v-tooltip="
-                    'Check this box if this user should have access to this resource.'
-                  "
-                  :model-value="getUserValue(data, user)"
-                  binary
-                  @change="() => toggleUser(data, user)"
-                />
-                <RuleStatus :status="getUserStatus(data, user)" />
-              </div>
-            </template>
-          </Column>
-
-          <Column header="">
-            <template #body="{ data }">
-              <div class="flex justify-end">
-                <Button
-                  icon="fas fa-trash"
-                  text
-                  severity="danger"
-                  size="small"
-                  @click="() => deleteTemplate(data)"
-                />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
+          </DynamicScroller>
+        </div>
       </template>
     </Card>
   </div>
