@@ -31,6 +31,7 @@ export const addTemplate = async (sdk: SDK<never, BackendEvents>) => {
     id: generateID(),
     requestId: generateID(),
     authSuccessRegex: "HTTP/1[.]1 200",
+    originalResponseLength: 0,
     rules: [],
     meta: {
       host: "localhost",
@@ -248,10 +249,14 @@ const toTemplate = (
   response: Response,
   templateId: string = generateTemplateId(request),
 ): TemplateDTO => {
+  const rawText = response.getRaw().toText();
+  const originalResponseLength = rawText.length;
+
   return {
     id: templateId,
     requestId: request.getId(),
     authSuccessRegex: `HTTP/1[.]1 ${response.getCode()}`,
+    originalResponseLength,
     rules: [],
     meta: {
       host: request.getHost(),

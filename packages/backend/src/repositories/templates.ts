@@ -12,9 +12,9 @@ export const createTemplate = async (
   const db = await getDb(sdk);
   const stmt = await db.prepare(`
     INSERT INTO templates (
-      id, project_id, request_id, auth_success_regex,
+      id, project_id, request_id, auth_success_regex, original_response_length,
       meta_host, meta_port, meta_path, meta_is_tls, meta_method
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   await stmt.run(
@@ -22,6 +22,7 @@ export const createTemplate = async (
     projectId,
     template.requestId,
     template.authSuccessRegex,
+    template.originalResponseLength,
     template.meta.host,
     template.meta.port,
     template.meta.path,
@@ -41,6 +42,7 @@ export const updateTemplateFields = async (
     UPDATE templates SET
       request_id = ?,
       auth_success_regex = ?,
+      original_response_length = ?,
       meta_host = ?,
       meta_port = ?,
       meta_path = ?,
@@ -51,6 +53,7 @@ export const updateTemplateFields = async (
   await stmt.run(
     fields.requestId,
     fields.authSuccessRegex,
+    fields.originalResponseLength,
     fields.meta.host,
     fields.meta.port,
     fields.meta.path,
